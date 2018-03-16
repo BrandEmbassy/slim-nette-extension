@@ -24,7 +24,7 @@ final class Request implements RequestInterface
     private $decodedJsonFromBody;
 
     /**
-     * @var SlimRequest
+     * @var ServerRequestInterface
      */
     private $request;
 

@@ -104,6 +104,7 @@ final class SlimApplicationFactory
     private function getServiceProvider($serviceName)
     {
         return function () use ($serviceName) {
+            /** @var object|null $service */
             $service = $this->container->getByType($serviceName, false);
             if ($service === null) {
                 $service = $this->container->getService($serviceName);
@@ -180,7 +181,7 @@ final class SlimApplicationFactory
      * @deprecated Do not use Controllers, use Invokable Action classes (use MiddleWareInterface)
      *
      * @param SlimApp $app
-     * @param $urlPattern
+     * @param string $urlPattern
      * @param array $routeData
      */
     private function registerControllerRoute(SlimApp $app, $urlPattern, array $routeData)

@@ -25,6 +25,7 @@ final class SlimApplicationFactoryTest extends PHPUnit_Framework_TestCase
     {
         $request = $this->createRequest('POST', '/non-existing/path');
 
+        /** @var ResponseInterface $response */
         $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
 
         $this->assertEquals(404, $response->getStatusCode());
@@ -35,7 +36,7 @@ final class SlimApplicationFactoryTest extends PHPUnit_Framework_TestCase
     {
         $request = $this->createRequest('PATCH', '/new-api/2.0/channels');
 
-
+        /** @var ResponseInterface $response */
         $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
 
         $this->assertEquals(405, $response->getStatusCode());
@@ -46,6 +47,7 @@ final class SlimApplicationFactoryTest extends PHPUnit_Framework_TestCase
     {
         $request = $this->createRequest('POST', '/new-api/2.0/error');
 
+        /** @var ResponseInterface $response */
         $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
 
         $this->assertEquals(500, $response->getStatusCode());
@@ -56,6 +58,7 @@ final class SlimApplicationFactoryTest extends PHPUnit_Framework_TestCase
     {
         $request = $this->createRequest('POST', '/new-api/2.0/channels');
 
+        /** @var ResponseInterface $response */
         $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
 
         $this->assertEquals(401, $response->getStatusCode());
@@ -70,6 +73,7 @@ final class SlimApplicationFactoryTest extends PHPUnit_Framework_TestCase
             ['goldenKey' => 'uber-secret-token-made-of-pure-gold']
         );
 
+        /** @var ResponseInterface $response */
         $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
 
         $this->assertEquals(201, $response->getStatusCode());
