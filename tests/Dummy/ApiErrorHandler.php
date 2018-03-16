@@ -6,9 +6,8 @@ use BrandEmbassy\Slim\ErrorHandler;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use Exception;
-use LogicException;
 
-class ApiErrorHandler implements ErrorHandler
+final class ApiErrorHandler implements ErrorHandler
 {
 
     /**
@@ -16,11 +15,9 @@ class ApiErrorHandler implements ErrorHandler
      */
     public function __invoke(RequestInterface $request, ResponseInterface $response, Exception $e = null)
     {
-        if ($e !== null) {
-            throw $e;
-        }
+        $error = $e !== null ? $e->getMessage() : 'Unknown error.';
 
-        throw new LogicException('Dummy ApiErrorHandler here!');
+        return $response->withJson(['error' => $error], 500);
     }
 
 }

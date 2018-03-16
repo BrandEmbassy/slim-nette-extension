@@ -11,7 +11,7 @@ use Mockery\MockInterface;
 use PHPUnit_Framework_TestCase;
 use Slim\Http\Request as SlimRequest;
 
-class RequestTest extends PHPUnit_Framework_TestCase
+final class RequestTest extends PHPUnit_Framework_TestCase
 {
 
     const PARAM_NAME = 'dateFrom';

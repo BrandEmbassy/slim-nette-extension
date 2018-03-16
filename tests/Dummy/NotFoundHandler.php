@@ -6,9 +6,8 @@ use BrandEmbassy\Slim\ErrorHandler;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use Exception;
-use LogicException;
 
-class NotFoundHandler implements ErrorHandler
+final class NotFoundHandler implements ErrorHandler
 {
 
     /**
@@ -16,7 +15,7 @@ class NotFoundHandler implements ErrorHandler
      */
     public function __invoke(RequestInterface $request, ResponseInterface $response, Exception $e = null)
     {
-        throw new LogicException('Dummy NotFoundHandler here!');
+        return $response->withJson(['error' => 'Dummy NotFoundHandler here!'], 404);
     }
 
 }

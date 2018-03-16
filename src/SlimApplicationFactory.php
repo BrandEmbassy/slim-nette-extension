@@ -9,7 +9,7 @@ use Nette\DI\Container;
 use Slim\App;
 use Slim\Collection;
 
-class SlimApplicationFactory
+final class SlimApplicationFactory
 {
 
     /**

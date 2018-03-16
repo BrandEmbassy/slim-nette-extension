@@ -5,7 +5,7 @@ namespace BrandEmbassy\Slim\Response;
 use Psr\Http\Message\StreamInterface;
 use Slim\Http\Response as SlimResponse;
 
-class Response implements ResponseInterface
+final class Response implements ResponseInterface
 {
 
     /**

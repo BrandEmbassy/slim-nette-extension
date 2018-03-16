@@ -18,30 +18,41 @@ use Slim\Http\Headers;
 use Slim\Http\Request as SlimRequest;
 use Slim\Http\Uri;
 
-class SlimApplicationFactoryTest extends PHPUnit_Framework_TestCase
+final class SlimApplicationFactoryTest extends PHPUnit_Framework_TestCase
 {
 
-    public function testShouldBeHandledByNotFoundErrorHandlerRouting()
+    public function testShouldBeHandledByNotFoundErrorHandler()
     {
         $request = $this->createRequest('POST', '/non-existing/path');
 
-        $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('Dummy NotFoundHandler here!');
+        $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
 
-        $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
+        $this->assertEquals(404, $response->getStatusCode());
+        $this->assertEquals('{"error":"Dummy NotFoundHandler here!"}', $this->getContents($response));
     }
 
-    public function testShouldBeHandledNotAllowedHandlerRouting()
+    public function testShouldBeHandledByNotAllowedHandler()
     {
         $request = $this->createRequest('PATCH', '/new-api/2.0/channels');
 
-        $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('Dummy API NotAllowedHandler here!');
 
-        $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
+        $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
+
+        $this->assertEquals(405, $response->getStatusCode());
+        $this->assertEquals('{"error":"Dummy NotAllowedHandler here!"}', $this->getContents($response));
     }
 
-    public function testShouldDenyAccessByMiddleware()
+    public function testShouldBeHandledByApiErrorHandler()
+    {
+        $request = $this->createRequest('POST', '/new-api/2.0/error');
+
+        $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
+
+        $this->assertEquals(500, $response->getStatusCode());
+        $this->assertEquals('{"error":"Error or not to error, that\'s the question!"}', $this->getContents($response));
+    }
+
+    public function testShouldDenyRequestByAccessMiddleware()
     {
         $request = $this->createRequest('POST', '/new-api/2.0/channels');
 
@@ -51,7 +62,7 @@ class SlimApplicationFactoryTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('{"error":"YOU SHALL NOT PASS!"}', $this->getContents($response));
     }
 
-    public function testShouldAllowAccessByMiddleware()
+    public function testShouldAllowRequestByAccessMiddleware()
     {
         $request = $this->createRequest(
             'POST',
