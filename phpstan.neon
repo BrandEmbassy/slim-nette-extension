@@ -1,0 +1,6 @@
+parameters:
+    excludes_analyse:
+        - %rootDir%/../../../tests/temp/*
+
+    ignoreErrors:
+        - '#Call to an undefined method Mockery\\ExpectationInterface|Mockery\\HigherOrderMessage::andReturn().#'

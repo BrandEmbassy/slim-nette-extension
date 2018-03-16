@@ -66,10 +66,11 @@ final class RequestTest extends PHPUnit_Framework_TestCase
 
     /**
      * @param array $arguments
-     * @return MockInterface|SlimRequest
+     * @return MockInterface&SlimRequest
      */
     private function createMockSlimRequest(array $arguments)
     {
+        /** @var MockInterface&SlimRequest $mock */
         $mock = Mockery::mock(SlimRequest::class);
         $mock->shouldReceive('getQueryParams')->andReturn($arguments);
 
