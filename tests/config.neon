@@ -1,0 +1,41 @@
+extensions:
+    slimApi: \BrandEmbassy\Slim\DI\SlimApiExtension
+
+
+services:
+    - BrandEmbassyTest\Slim\Dummy\NotFoundHandler
+    - BrandEmbassyTest\Slim\Dummy\NotAllowedHandler
+    - BrandEmbassyTest\Slim\Dummy\ApiErrorHandler
+    - BrandEmbassyTest\Slim\Dummy\GoldenKeyAuthMiddleware
+    - BrandEmbassyTest\Slim\Dummy\CreateChannelAction
+
+parameters:
+    api:
+        handlers:
+            notFound: BrandEmbassyTest\Slim\Dummy\NotFoundHandler
+            notAllowed: BrandEmbassyTest\Slim\Dummy\NotAllowedHandler
+            error: BrandEmbassyTest\Slim\Dummy\ApiErrorHandler
+
+        routes:
+            new-api:
+                "2.0":
+                    '/channels':
+                        post:
+                            service: BrandEmbassyTest\Slim\Dummy\CreateChannelAction
+                            middleware:
+                                - BrandEmbassyTest\Slim\Dummy\GoldenKeyAuthMiddleware
+
+            old-deprecated-api:
+                "2.0":
+                    '/brands/{hash}':
+                        type: controller
+                        service: chatApiV2BrandsController
+                        methods:
+                            get: getBrand
+
+slimApi:
+    slimConfiguration:
+        settings:
+            removeDefaultHandlers: true
+
+    apiDefinitionKey: "api"
