@@ -8,6 +8,7 @@ services:
     - BrandEmbassyTest\Slim\Dummy\ApiErrorHandler
     - BrandEmbassyTest\Slim\Dummy\GoldenKeyAuthMiddleware
     - BrandEmbassyTest\Slim\Dummy\CreateChannelAction
+    - BrandEmbassyTest\Slim\Dummy\ErroringAction
 
 parameters:
     api:
@@ -24,6 +25,10 @@ parameters:
                             service: BrandEmbassyTest\Slim\Dummy\CreateChannelAction
                             middleware:
                                 - BrandEmbassyTest\Slim\Dummy\GoldenKeyAuthMiddleware
+
+                    '/error':
+                        post:
+                            service: BrandEmbassyTest\Slim\Dummy\ErroringAction
 
             old-deprecated-api:
                 "2.0":

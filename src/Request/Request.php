@@ -15,7 +15,7 @@ use Slim\Http\Request as SlimRequest;
 use Slim\Route;
 use stdClass;
 
-class Request implements RequestInterface
+final class Request implements RequestInterface
 {
 
     /**

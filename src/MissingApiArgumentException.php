@@ -4,7 +4,7 @@ namespace BrandEmbassy\Slim;
 
 use Exception;
 
-class MissingApiArgumentException extends Exception
+final class MissingApiArgumentException extends Exception
 {
 
 }
