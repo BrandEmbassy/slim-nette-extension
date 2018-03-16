@@ -6,7 +6,6 @@ use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use Closure;
 use Nette\DI\Container;
-use Slim\App;
 use Slim\Collection;
 
 final class SlimApplicationFactory
@@ -33,11 +32,11 @@ final class SlimApplicationFactory
     }
 
     /**
-     * @return App
+     * @return SlimApp
      */
     public function create()
     {
-        $app = new App($this->configuration);
+        $app = new SlimApp($this->configuration);
 
         $configuration = $this->getConfiguration($this->configuration['apiDefinitionKey']);
 
@@ -115,9 +114,9 @@ final class SlimApplicationFactory
     }
 
     /**
-     * @param App $app
+     * @param SlimApp $app
      */
-    private function removeDefaultSlimErrorHandlers(App $app)
+    private function removeDefaultSlimErrorHandlers(SlimApp $app)
     {
         $app->getContainer()['phpErrorHandler'] = function () {
             return function (RequestInterface $request, ResponseInterface $response, \Exception $e) {
@@ -127,10 +126,10 @@ final class SlimApplicationFactory
     }
 
     /**
-     * @param App $app
+     * @param SlimApp $app
      * @param array $handlers
      */
-    private function registerHandlers(App $app, array $handlers)
+    private function registerHandlers(SlimApp $app, array $handlers)
     {
         foreach ($handlers as $handlerName => $handlerClass) {
             $app->getContainer()[$handlerName . 'Handler'] = $this->getServiceProvider($handlerClass);
@@ -138,20 +137,20 @@ final class SlimApplicationFactory
     }
 
     /**
-     * @param App $app
+     * @param SlimApp $app
      * @param string $serviceName
      */
-    private function registerServiceIntoContainer(App $app, $serviceName)
+    private function registerServiceIntoContainer(SlimApp $app, $serviceName)
     {
         $app->getContainer()[$serviceName] = $this->getServiceProvider($serviceName);
     }
 
     /**
-     * @param App $app
+     * @param SlimApp $app
      * @param array $api
      * @param string $apiName
      */
-    private function registerApis(App $app, array $api, $apiName)
+    private function registerApis(SlimApp $app, array $api, $apiName)
     {
         foreach ($api as $version => $routes) {
             $this->registerApi($app, $apiName, $version, $routes);
@@ -159,12 +158,12 @@ final class SlimApplicationFactory
     }
 
     /**
-     * @param App $app
+     * @param SlimApp $app
      * @param string $apiName
      * @param string $version
      * @param array $routes
      */
-    private function registerApi(App $app, $apiName, $version, array $routes)
+    private function registerApi(SlimApp $app, $apiName, $version, array $routes)
     {
         foreach ($routes as $routeName => $routeData) {
             $urlPattern = $this->createUrlPattern($apiName, $version, $routeName);
@@ -180,11 +179,11 @@ final class SlimApplicationFactory
     /**
      * @deprecated Do not use Controllers, use Invokable Action classes (use MiddleWareInterface)
      *
-     * @param App $app
+     * @param SlimApp $app
      * @param $urlPattern
      * @param array $routeData
      */
-    private function registerControllerRoute(App $app, $urlPattern, array $routeData)
+    private function registerControllerRoute(SlimApp $app, $urlPattern, array $routeData)
     {
         $this->registerServiceIntoContainer($app, $routeData['service']);
 
@@ -195,11 +194,11 @@ final class SlimApplicationFactory
     }
 
     /**
-     * @param App $app
+     * @param SlimApp $app
      * @param array $routeData
      * @param string $urlPattern
      */
-    private function registerInvokableActionRoutes(App $app, array $routeData, $urlPattern)
+    private function registerInvokableActionRoutes(SlimApp $app, array $routeData, $urlPattern)
     {
         foreach ($routeData as $method => $config) {
             $service = $config['service'];
