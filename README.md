@@ -6,11 +6,26 @@ This extension brings power of [Slim](https://www.slimframework.com/) for applic
 
 General idea is discussed in this [article](https://petrhejna.org/blog/api-chain-of-responsibility-approach). (Czech language) 
 
-Let's start!
+## Philosophy
+
+### Single Responsibility
+The main idea is to strictly separate responsibilities by using middlewares.
+* One middleware for authentication.
+* One middleware for validation.
+* Last one does business logic.
+
+How middlewares in Slim work is described [here](https://www.slimframework.com/docs/v3/concepts/middleware.html).
+
+### Easy configuration
+Empowered by Nette DI and it's `neon` configuration syntax this package provides powerful and easy way how to define your API.
+
+## Usage
+So let's start!
 ```
 composer require brandembassy/api-slim-nette-extension
 ```
 
+### Extension
 Now register new extension by adding this code into your `config.neon`:
 ```yaml
 extensions:
@@ -25,11 +40,13 @@ slimApi: # Configure it
     apiDefinitionKey: api # Your API definition will be under this key in "parameters" section. 
 ```
 
+
+### First API enpoint
 Now let's say you want create REST endpoint to creation Channels, `[POST] /new-api/2.0/channels`
 
 You need define in `parameters.api` section in `config.neon`.
 
-* Both services and middlewares must be registered services in DI Container.
+> **Both services and middlewares must be registered services in DI Container.**
 
 ```yaml
 parameters:
@@ -55,4 +72,14 @@ parameters:
                                 
 ```
 
+You can also reference the named service by it's name.
+
 See `tests/SlimApplicationFactoryTest.php` and `tests/config.neon` for more examples.
+
+### Execution
+Now you can simply get `SlimApplicationFactory` class from your DI Container (or better autowire it).
+
+```php
+$factory = $container->getByType(SlimApplicationFactory::class);
+$factory->create()->run();
+```
