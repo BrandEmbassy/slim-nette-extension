@@ -30,14 +30,6 @@ parameters:
                         post:
                             service: BrandEmbassyTest\Slim\Dummy\ErroringAction
 
-            old-deprecated-api:
-                "2.0":
-                    '/brands/{hash}':
-                        type: controller
-                        service: chatApiV2BrandsController
-                        methods:
-                            get: getBrand
-
 slimApi:
     slimConfiguration:
         settings:
