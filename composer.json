@@ -1,5 +1,5 @@
 {
-    "name": "brandembassy/api-slim-nette-extension",
+    "name": "brandembassy/slim-nette-extension",
     "license": "proprietary",
     "autoload": {
         "psr-4": {
