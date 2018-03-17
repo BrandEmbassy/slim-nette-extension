@@ -2,7 +2,9 @@
 
 namespace BrandEmbassy\Slim;
 
-final class MissingApiArgumentException extends RequestException
+use Exception;
+
+final class MissingApiArgumentException extends Exception implements RequestException
 {
 
 }
