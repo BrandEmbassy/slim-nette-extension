@@ -52,8 +52,8 @@ You need define in `parameters.api` section in `config.neon`.
 parameters:
     api:
         handlers:
-            notFound: App\NotFoundHandler # Called when no route is matched by URL
-            notAllowed: App\NotAllowedHandler # Called when route is not matched by method
+            notFound: App\NotFoundHandler # Called when not route is not matched by URL
+            notAllowed: App\NotAllowedHandler # Called when not route is not matched by method
             error: App\ApiErrorHandler # Called when unhandled exception bubbles out
 
         routes:
@@ -64,7 +64,7 @@ parameters:
                             # This is service will be invoked to handle the request
                             service: App\CreateChannelAction
                             
-                            # Here middleware stack is defined. It evaluate from bottom to top 
+                            # Here middleware stack is defined. It's evaluated from bottom to top. 
                             middleware:
                                 - App\SomeOtherMiddleware # last in row
                                 - App\UsuallyRequestDataValidationMiddleware # second in row
@@ -77,7 +77,7 @@ You can also reference the named service by it's name.
 See `tests/SlimApplicationFactoryTest.php` and `tests/config.neon` for more examples.
 
 ### Execution
-Now you can simply get `SlimApplicationFactory` class from your DI Container (or better autowire it).
+Now you can simply get `SlimApplicationFactory` class from your DI Container (or better autowire it), create app and run it.
 
 ```php
 $factory = $container->getByType(SlimApplicationFactory::class);
