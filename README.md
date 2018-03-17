@@ -4,9 +4,9 @@
 
 # Nette Extension for integration of SLIM for API
 
-This extension brings power of [Slim](https://www.slimframework.com/) for applications using [Nette DI](https://github.com/nette/di). It enables you to easily work with Slim middleware stack and develop your API easily.
+This extension brings the power of [Slim](https://www.slimframework.com/) for applications using [Nette DI](https://github.com/nette/di). It enables you to easily work with Slim middleware stack and develop your API easily.
 
-General idea is discussed in this [article](https://petrhejna.org/blog/api-chain-of-responsibility-approach). (Czech language) 
+The general idea has been discussed in this [article](https://petrhejna.org/blog/api-chain-of-responsibility-approach). (Czech language) 
 
 ## Philosophy
 
@@ -19,7 +19,7 @@ The main idea is to delegate responsibilities of the code handling requests to s
 How middlewares in Slim work is described [here](https://www.slimframework.com/docs/v3/concepts/middleware.html).
 
 ### Easy configuration
-Empowered by Nette DI and it's `neon` configuration syntax this package provides powerful and easy way how to define your API.
+Empowered by Nette DI and it's `neon` configuration syntax this package provides powerful and easy way to define your API.
 
 ## Usage
 So let's start!
@@ -44,9 +44,9 @@ slimApi: # Configure it
 
 
 ### First API enpoint
-Now let's say you want create REST endpoint to creation Channels, `[POST] /new-api/2.0/channels`
+Now let's say you want to make a REST endpoint creating channels, `[POST] /new-api/2.0/channels`
 
-You need define in `parameters.api` section in `config.neon`.
+You need to define in `parameters.api` section in `config.neon`.
 
 > **Both services and middlewares must be registered services in DI Container.**
 
@@ -54,8 +54,8 @@ You need define in `parameters.api` section in `config.neon`.
 parameters:
     api:
         handlers:
-            notFound: App\NotFoundHandler # Called when not route is not matched by URL
-            notAllowed: App\NotAllowedHandler # Called when not route is not matched by method
+            notFound: App\NotFoundHandler # Called when not route isn't matched by URL
+            notAllowed: App\NotAllowedHandler # Called when route isn't matched by method
             error: App\ApiErrorHandler # Called when unhandled exception bubbles out
 
         routes:
