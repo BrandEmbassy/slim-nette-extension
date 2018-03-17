@@ -11,10 +11,10 @@ General idea is discussed in this [article](https://petrhejna.org/blog/api-chain
 ## Philosophy
 
 ### Single Responsibility
-The main idea is to strictly separate responsibilities by using middlewares.
-* One middleware for authentication.
-* One middleware for validation.
-* Last one does business logic.
+The main idea is to delegate responsibilities of the code handling requests to separated middlewares. For example:
+* authentication
+* validation
+* business logic
 
 How middlewares in Slim work is described [here](https://www.slimframework.com/docs/v3/concepts/middleware.html).
 
