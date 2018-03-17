@@ -9,6 +9,7 @@ services:
     - BrandEmbassyTest\Slim\Dummy\GoldenKeyAuthMiddleware
     - BrandEmbassyTest\Slim\Dummy\CreateChannelAction
     - BrandEmbassyTest\Slim\Dummy\ErroringAction
+    - BrandEmbassyTest\Slim\Dummy\GlobalMiddleware
 
 parameters:
     api:
@@ -21,7 +22,7 @@ parameters:
             new-api:
                 "2.0":
                     '/channels':
-                        post:
+                        post|put:
                             service: BrandEmbassyTest\Slim\Dummy\CreateChannelAction
                             middleware:
                                 - BrandEmbassyTest\Slim\Dummy\GoldenKeyAuthMiddleware
@@ -29,6 +30,9 @@ parameters:
                     '/error':
                         post:
                             service: BrandEmbassyTest\Slim\Dummy\ErroringAction
+
+        globalMiddlewares:
+            - BrandEmbassyTest\Slim\Dummy\GlobalMiddleware
 
 slimApi:
     slimConfiguration:

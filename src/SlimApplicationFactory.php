@@ -54,6 +54,12 @@ final class SlimApplicationFactory
             $this->registerHandlers($app, $configuration['handlers']);
         }
 
+        if (isset($configuration['globalMiddlewares']) && count($configuration['globalMiddlewares']) > 0) {
+            foreach ($configuration['globalMiddlewares'] as $globalMiddleware) {
+                $this->registerGlobalMiddleware($app, $globalMiddleware);
+            }
+        }
+
         return $app;
 
     }
@@ -203,9 +209,10 @@ final class SlimApplicationFactory
     {
         foreach ($routeData as $method => $config) {
             $service = $config['service'];
+            $methods = explode('|', $method);
 
             $this->registerServiceIntoContainer($app, $service);
-            $routeToAdd = $app->map([$method], $urlPattern, $service);
+            $routeToAdd = $app->map($methods, $urlPattern, $service);
 
             if (isset($config['middleware']) && count($config['middleware']) > 0) {
                 foreach ($config['middleware'] as $middleware) {
@@ -232,4 +239,18 @@ final class SlimApplicationFactory
         return sprintf('/%s/%s%s', $apiName, $version, $routeName);
     }
 
+    /**
+     * @param SlimApp $app
+     * @param string $middleware
+     */
+    private function registerGlobalMiddleware(SlimApp $app, $middleware)
+    {
+        $container = $app->getContainer();
+
+        if (!$container->has($middleware)) {
+            $this->registerServiceIntoContainer($app, $middleware);
+        }
+
+        $app->add($middleware);
+    }
 }
