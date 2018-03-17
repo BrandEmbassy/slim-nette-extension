@@ -1,6 +1,6 @@
 {
     "name": "brandembassy/slim-nette-extension",
-    "license": "proprietary",
+    "license": "MIT",
     "autoload": {
         "psr-4": {
             "BrandEmbassy\\Slim\\": "src"
