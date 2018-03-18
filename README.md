@@ -43,7 +43,7 @@ slimApi: # Configure it
 ```
 
 
-### First API enpoint
+### First API endpoint
 Now let's say you want to make a REST endpoint creating channels, `[POST] /new-api/2.0/channels`
 
 You need to define in `parameters.api` section in `config.neon`.
