@@ -261,7 +261,7 @@ final class SlimApplicationFactory
 
     /**
      * @param SlimApp $app
-     * @param $configuration
+     * @param array $configuration
      */
     private function registerGlobalMiddlewares(SlimApp $app, $configuration)
     {
