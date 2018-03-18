@@ -6,7 +6,7 @@ use BrandEmbassy\Slim\Middleware;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 
-class GlobalMiddleware implements Middleware
+class AllRouteMiddleware implements Middleware
 {
 
     /**
@@ -17,7 +17,7 @@ class GlobalMiddleware implements Middleware
      */
     public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next)
     {
-        $response = $response->withAddedHeader('processed-by-global-middleware', 'correct');
+        $response = $response->withAddedHeader('processed-by-all-route-middleware', 'correct');
 
         return $next($request, $response);
     }

@@ -79,19 +79,6 @@ final class SlimApplicationFactoryTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('{"channelId":"fb_1234"}', $this->getContents($response));
     }
 
-    public function testShouldAllowRequestWithMultipleMethods()
-    {$request = $this->createRequest(
-        'PUT',
-        '/new-api/2.0/channels',
-        ['goldenKey' => 'uber-secret-token-made-of-pure-gold']
-    );
-
-        /** @var ResponseInterface $response */
-        $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
-
-        $this->assertEquals(201, $response->getStatusCode());
-    }
-
     public function testShouldHaveHeaderByGlobalMiddleware()
     {
         $request = $this->createRequest('POST', '/new-api/2.0/channels');
@@ -99,7 +86,18 @@ final class SlimApplicationFactoryTest extends PHPUnit_Framework_TestCase
         /** @var ResponseInterface $response */
         $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
 
-        $this->assertEquals(['correct'], $response->getHeader('processed-by-global-middleware'));
+        $this->assertEquals(['correct'], $response->getHeader('processed-by-all-route-middleware'));
+        $this->assertEquals(['correct'], $response->getHeader('processed-by-app-middleware'));
+    }
+
+    public function testShouldProcessedByAppMiddleware()
+    {
+        $request = $this->createRequest('POST', '/non-existing/path');
+
+        /** @var ResponseInterface $response */
+        $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
+
+        $this->assertEquals(['correct'], $response->getHeader('processed-by-app-middleware'));
     }
 
     /**

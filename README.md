@@ -71,7 +71,12 @@ parameters:
                                 - App\SomeOtherMiddleware # last in row
                                 - App\UsuallyRequestDataValidationMiddleware # second in row
                                 - App\SomeAuthMiddleware # this one is called first 
-                                
+        
+        globalMiddlewares:
+        	- App\SomeGlobalMiddleware # this is called for each route, before route middlewares
+        	
+      	appMiddlewares:
+      		- App\SomeAppMiddleware # this is called for each request
 ```
 
 You can also reference the named service by it's name.
