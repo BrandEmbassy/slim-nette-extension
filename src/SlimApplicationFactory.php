@@ -22,7 +22,7 @@ final class SlimApplicationFactory
     private $container;
 
     /**
-     * @var array
+     * @var Middleware[]
      */
     private $globalMiddlewares;
 
@@ -62,7 +62,7 @@ final class SlimApplicationFactory
             $this->registerHandlers($app, $configuration['handlers']);
         }
 
-        if (isset($configuration['appMiddlewares']) && count($configuration['appMiddlewares']) > 0) {
+        if (isset($configuration['appMiddlewares'])) {
             foreach ($configuration['appMiddlewares'] as $globalMiddleware) {
                 $this->registerAppMiddleware($app, $globalMiddleware);
             }
