@@ -14,7 +14,7 @@
     "require": {
         "php": ">=5.6",
         "nette/neon": "^2.4",
-        "slim/slim": "3.7.0",
+        "slim/slim": "^3.9",
         "nette/utils": "^2.5",
         "nette/di": "^2.4"
     },
