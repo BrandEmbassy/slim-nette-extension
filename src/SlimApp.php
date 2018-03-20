@@ -18,6 +18,13 @@ class SlimApp extends App
         $response = new Response($this->getContainer()->get('response'));
         $response = $this->process($request, $response);
 
+        $contentTypes = $response->getHeader('Content-Type');
+        $contentType = reset($contentTypes);
+
+        if ($contentType === 'text/html; charset=UTF-8' && $response->getBody()->getSize() === 0) {
+            $response = $response->withHeader('Content-Type', 'text/plain; charset=UTF-8');
+        }
+
         if (!$silent) {
             $this->respond($response);
         }
