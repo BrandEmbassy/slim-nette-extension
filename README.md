@@ -1,5 +1,5 @@
 [![CircleCI](https://circleci.com/gh/BrandEmbassy/slim-nette-extension.svg?style=svg)](https://circleci.com/gh/BrandEmbassy/slim-nette-extension)
-[![Downloads this Month](https://img.shields.io/packagist/dm/brandembassy/slim-nette-extension.svg)](https://packagist.org/packages/brandembassy/slim-nette-extension)
+[![Downloads this Month](https://img.shields.io/packagist/dm/BrandEmbassy/slim-nette-extension.svg)](https://packagist.org/packages/brandembassy/slim-nette-extension)
 [![Latest Stable Version](https://poser.pugx.org/BrandEmbassy/slim-nette-extension/v/stable)](https://github.com/BrandEmbassy/slim-nette-extension/releases)
 
 # Nette Extension for integration of SLIM for API
