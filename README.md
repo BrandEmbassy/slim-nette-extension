@@ -43,7 +43,7 @@ slimApi: # Configure it
 ```
 
 
-### First API enpoint
+### First API endpoint
 Now let's say you want to make a REST endpoint creating channels, `[POST] /new-api/2.0/channels`
 
 You need to define in `parameters.api` section in `config.neon`.
@@ -71,7 +71,12 @@ parameters:
                                 - App\SomeOtherMiddleware # last in row
                                 - App\UsuallyRequestDataValidationMiddleware # second in row
                                 - App\SomeAuthMiddleware # this one is called first 
-                                
+        
+		globalMiddlewares:
+        	- App\SomeGlobalMiddleware # this is called for each route, before route middlewares
+        	
+		appMiddlewares:
+      		- App\SomeAppMiddleware # this is called for each request
 ```
 
 You can also reference the named service by it's name.
