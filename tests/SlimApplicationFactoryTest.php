@@ -2,10 +2,11 @@
 
 namespace BrandEmbassyTest\Slim;
 
-use BrandEmbassy\Slim\Request\Request;
-use BrandEmbassy\Slim\Response\Response;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassy\Slim\SlimApplicationFactory;
+use BrandEmbassy\Slim\Request\Request;
+use BrandEmbassy\Slim\Response\Response;
+use LogicException;
 use Nette\DI\Compiler;
 use Nette\DI\Container;
 use Nette\DI\ContainerLoader;
@@ -77,27 +78,6 @@ final class SlimApplicationFactoryTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals(201, $response->getStatusCode());
         $this->assertEquals('{"channelId":"fb_1234"}', $this->getContents($response));
-    }
-
-    public function testShouldHaveHeaderByGlobalMiddleware()
-    {
-        $request = $this->createRequest('POST', '/new-api/2.0/channels');
-
-        /** @var ResponseInterface $response */
-        $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
-
-        $this->assertEquals(['correct'], $response->getHeader('processed-by-all-route-middleware'));
-        $this->assertEquals(['correct'], $response->getHeader('processed-by-app-middleware'));
-    }
-
-    public function testShouldProcessedByAppMiddleware()
-    {
-        $request = $this->createRequest('POST', '/non-existing/path');
-
-        /** @var ResponseInterface $response */
-        $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
-
-        $this->assertEquals(['correct'], $response->getHeader('processed-by-app-middleware'));
     }
 
     /**
