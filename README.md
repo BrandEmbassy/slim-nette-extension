@@ -24,7 +24,7 @@ Empowered by Nette DI and it's `neon` configuration syntax this package provides
 ## Usage
 So let's start!
 ```
-composer require brandembassy/api-slim-nette-extension
+composer require brandembassy/slim-nette-extension
 ```
 
 ### Extension
