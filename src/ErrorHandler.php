@@ -4,7 +4,7 @@ namespace BrandEmbassy\Slim;
 
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
-use Exception;
+use Throwable;
 
 interface ErrorHandler
 {
@@ -12,9 +12,9 @@ interface ErrorHandler
     /**
      * @param RequestInterface $request
      * @param ResponseInterface $response
-     * @param Exception|null $e
+     * @param Throwable|null $e
      * @return ResponseInterface
      */
-    public function __invoke(RequestInterface $request, ResponseInterface $response, Exception $e = null);
+    public function __invoke(RequestInterface $request, ResponseInterface $response, Throwable $e = null);
 
 }
