@@ -2,6 +2,7 @@
 
 namespace BrandEmbassyTest\Slim\Request;
 
+use BrandEmbassy\Slim\MissingApiArgumentException;
 use BrandEmbassy\Slim\Request\Request;
 use DateTime;
 use DateTimeImmutable;
@@ -23,15 +24,20 @@ final class RequestTest extends PHPUnit_Framework_TestCase
 
     public function testShouldDistinguishBetweenNullAndEmptyOption()
     {
-        $body = new Body(fopen('php://temp', 'rb+'));
-        $body->write('{"thisIsNull": null, "thisIsGandalf": "gandalf"}');
-        $body->rewind();
-
-        $request = $this->createRequest($body);
+        $request = $this->createDummyRequest();
 
         $this->assertTrue($request->hasField('thisIsNull'));
         $this->assertFalse($request->hasField('nonExistingField'));
         $this->assertTrue($request->hasField('thisIsGandalf'));
+    }
+
+    public function testShouldRaiseExceptionForMissingRequiredField()
+    {
+        $request = $this->createDummyRequest();
+
+        $this->assertEquals('gandalf', $request->getField('thisIsGandalf'));
+        $this->expectException(MissingApiArgumentException::class);
+        $request->getField('nonExistingField');
     }
 
     public function testGettingDateTimeQueryParam()
@@ -104,6 +110,20 @@ final class RequestTest extends PHPUnit_Framework_TestCase
         $slimRequest = new SlimRequest('POST', $url, new Headers(), [], [], $body);
 
         return new Request($slimRequest);
+    }
+
+    /**
+     * @return Request
+     */
+    private function createDummyRequest()
+    {
+        $body = new Body(fopen('php://temp', 'rb+'));
+        $body->write('{"thisIsNull": null, "thisIsGandalf": "gandalf"}');
+        $body->rewind();
+
+        $request = $this->createRequest($body);
+
+        return $request;
     }
 
 }

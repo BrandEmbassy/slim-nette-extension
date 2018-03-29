@@ -76,7 +76,7 @@ final class Request implements RequestInterface
     {
         $body = $this->getDecodedJsonFromBody();
 
-        if (!isset($body->$name)) {
+        if (!$this->hasField($name)) {
             throw new MissingApiArgumentException(sprintf('Field "%s" is missing in request body', $name));
         }
 
@@ -85,6 +85,7 @@ final class Request implements RequestInterface
 
     /**
      * @inheritdoc
+     * @throws MissingApiArgumentException
      */
     public function getOptionalField($name, $default = null)
     {
