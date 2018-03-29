@@ -96,7 +96,7 @@ final class Request implements RequestInterface
      */
     public function hasField($name)
     {
-        return isset($this->getDecodedJsonFromBody()->$name);
+        return array_key_exists($name, (array)$this->getDecodedJsonFromBody());
     }
 
     /**
