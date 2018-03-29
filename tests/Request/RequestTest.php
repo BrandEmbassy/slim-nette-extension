@@ -9,13 +9,30 @@ use LogicException;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit_Framework_TestCase;
+use Psr\Http\Message\StreamInterface;
+use Slim\Http\Body;
+use Slim\Http\Headers;
 use Slim\Http\Request as SlimRequest;
+use Slim\Http\Uri;
 
 final class RequestTest extends PHPUnit_Framework_TestCase
 {
 
     const PARAM_NAME = 'dateFrom';
     const DATE_TIME_STRING = '2017-06-10T01:00:00+01:00';
+
+    public function testShouldDistinguishBetweenNullAndEmptyOption()
+    {
+        $body = new Body(fopen('php://temp', 'rb+'));
+        $body->write('{"thisIsNull": null, "thisIsGandalf": "gandalf"}');
+        $body->rewind();
+
+        $request = $this->createRequest($body);
+
+        $this->assertTrue($request->hasField('thisIsNull'));
+        $this->assertFalse($request->hasField('nonExistingField'));
+        $this->assertTrue($request->hasField('thisIsGandalf'));
+    }
 
     public function testGettingDateTimeQueryParam()
     {
@@ -75,6 +92,18 @@ final class RequestTest extends PHPUnit_Framework_TestCase
         $mock->shouldReceive('getQueryParams')->andReturn($arguments);
 
         return $mock;
+    }
+
+    /**
+     * @param StreamInterface $body
+     * @return Request
+     */
+    private function createRequest(StreamInterface $body)
+    {
+        $url = new Uri('https', 'example.com');
+        $slimRequest = new SlimRequest('POST', $url, new Headers(), [], [], $body);
+
+        return new Request($slimRequest);
     }
 
 }
