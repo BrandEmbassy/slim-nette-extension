@@ -355,8 +355,7 @@ final class Request implements RequestInterface
     public function getDecodedJsonFromBody()
     {
         if ($this->decodedJsonFromBody === null) {
-            $this->request->getBody()->rewind();
-            $contents = $this->request->getBody()->getContents();
+            $contents = (string)$this->request->getBody();
             $this->decodedJsonFromBody = Json::decode($contents);
         }
 
