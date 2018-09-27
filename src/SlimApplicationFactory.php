@@ -5,6 +5,7 @@ namespace BrandEmbassy\Slim;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use Closure;
+use LogicException;
 use Nette\DI\Container;
 use Slim\Collection;
 
@@ -67,11 +68,13 @@ final class SlimApplicationFactory
         $configuration = $this->container->getParameters()[$configurationCode];
 
         if (!is_array($configuration)) {
-            throw new \LogicException(sprintf('Missing %s configuration', $configurationCode));
+            throw new LogicException(sprintf('Missing %s configuration', $configurationCode));
         }
 
         $this->validateConfiguration($configuration, $configurationCode, 'routes', 'array');
-        $this->validateConfiguration($configuration, $configurationCode, 'handlers', 'array');
+        if (isset($configuration['handlers'])) {
+            $this->validateConfiguration($configuration, $configurationCode, 'handlers', 'array');
+        }
 
         return $configuration;
     }
@@ -85,13 +88,13 @@ final class SlimApplicationFactory
     private function validateConfiguration(array $configuration, $configurationCode, $name, $type)
     {
         if (!isset($configuration[$name]) || gettype($configuration[$name]) !== $type) {
-            throw new \LogicException(
+            throw new LogicException(
                 sprintf(
                     'Missing or empty %s.%s configuration (has to be %s, but is %s)',
                     $configurationCode,
                     $name,
                     $type,
-                    gettype($configuration[$name])
+                    gettype(isset($configuration[$name]) ? $configuration[$name] : null)
                 )
             );
         }

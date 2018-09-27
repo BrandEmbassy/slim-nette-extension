@@ -3,6 +3,7 @@
 namespace BrandEmbassyTest\Slim;
 
 use BrandEmbassy\Slim\Response\ResponseInterface;
+use BrandEmbassy\Slim\SlimApp;
 use BrandEmbassy\Slim\SlimApplicationFactory;
 use BrandEmbassy\Slim\Request\Request;
 use BrandEmbassy\Slim\Response\Response;
@@ -20,6 +21,12 @@ use Slim\Http\Uri;
 
 final class SlimApplicationFactoryTest extends PHPUnit_Framework_TestCase
 {
+
+    public function testShouldAllowEmptyErrorHandlers()
+    {
+        $result = $this->createSlimApp(__DIR__ . '/configNoHandlers.neon');
+        $this->assertInstanceOf(SlimApp::class, $result);
+    }
 
     public function testShouldBeHandledByNotFoundErrorHandler()
     {
@@ -81,17 +88,19 @@ final class SlimApplicationFactoryTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * @param string $configPath
      * @return Container
      */
-    private function createContainer()
+    private function createContainer($configPath = __DIR__ . '/config.neon')
     {
-        $loader = new ContainerLoader(__DIR__ . '/temp');
+        $loader = new ContainerLoader(__DIR__ . '/temp', true);
         $class = $loader->load(
-            function ($compiler) {
+            function ($compiler) use ($configPath) {
                 /** @var Compiler $compiler */
-                $compiler->loadConfig(__DIR__ . '/config.neon');
+                $compiler->loadConfig($configPath);
                 $compiler->addExtension('extensions', new ExtensionsExtension());
-            }
+            },
+            \md5($configPath)
         );
 
         return new $class;
@@ -118,12 +127,13 @@ final class SlimApplicationFactoryTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * @param string $configPath
      * @return App
      */
-    private function createSlimApp()
+    private function createSlimApp($configPath = __DIR__ . '/config.neon')
     {
         /** @var SlimApplicationFactory $factory */
-        $factory = $this->createContainer()->getByType(SlimApplicationFactory::class);
+        $factory = $this->createContainer($configPath)->getByType(SlimApplicationFactory::class);
 
         return $factory->create();
     }
