@@ -1,0 +1,14 @@
+extensions:
+    slimApi: \BrandEmbassy\Slim\DI\SlimApiExtension
+
+
+parameters:
+    api:
+        routes: []
+
+slimApi:
+    slimConfiguration:
+        settings:
+            removeDefaultHandlers: false
+
+    apiDefinitionKey: "api"
