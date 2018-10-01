@@ -71,12 +71,14 @@ parameters:
                                 - App\SomeOtherMiddleware # last in row
                                 - App\UsuallyRequestDataValidationMiddleware # second in row
                                 - App\SomeAuthMiddleware # this one is called first 
-        
-		globalMiddlewares:
-        	- App\SomeGlobalMiddleware # this is called for each route, before route middlewares
-        	
-		appMiddlewares:
-      		- App\SomeAppMiddleware # this is called for each request
+
+        beforeRouteMiddlewares:
+            # this is called for each route, before route middlewares
+            - App\SomeBeforeRequestMiddleware 
+            
+        beforeRequestMiddlewares:
+            # this is called for each request, even when route does NOT exist (404 requests)
+            - App\SomeBeforeRouteMiddleware tests/Dummy/BeforeRequestMiddleware.php
 ```
 
 You can also reference the named service by it's name.

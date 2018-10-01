@@ -6,7 +6,7 @@ use BrandEmbassy\Slim\Middleware;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 
-class AppMiddleware implements Middleware
+class BeforeRouteMiddleware implements Middleware
 {
 
     /**
@@ -17,7 +17,10 @@ class AppMiddleware implements Middleware
      */
     public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next)
     {
-        $response = $response->withAddedHeader('processed-by-app-middleware', 'correct');
+        $response = $response->withAddedHeader(
+            'processed-by-before-route-middlewares',
+            'proof-for-before-route'
+        );
 
         return $next($request, $response);
     }
