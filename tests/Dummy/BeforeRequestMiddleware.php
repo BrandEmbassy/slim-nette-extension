@@ -15,7 +15,7 @@ class BeforeRequestMiddleware implements Middleware
      * @param callable $next
      * @return ResponseInterface
      */
-    public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next)
+    public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next): ResponseInterface
     {
         $response = $response->withAddedHeader(
             'processed-by-before-request-middleware',

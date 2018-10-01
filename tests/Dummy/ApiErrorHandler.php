@@ -13,8 +13,11 @@ final class ApiErrorHandler implements ErrorHandler
     /**
      * @inheritdoc
      */
-    public function __invoke(RequestInterface $request, ResponseInterface $response, Throwable $e = null)
-    {
+    public function __invoke(
+        RequestInterface $request,
+        ResponseInterface $response,
+        Throwable $e = null
+    ): ResponseInterface {
         $error = $e !== null ? $e->getMessage() : 'Unknown error.';
 
         return $response->withJson(['error' => $error], 500);

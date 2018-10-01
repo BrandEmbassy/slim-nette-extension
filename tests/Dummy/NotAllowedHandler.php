@@ -14,7 +14,7 @@ final class NotAllowedHandler
     /**
      * @inheritdoc
      */
-    public function __invoke(RequestInterface $request, ResponseInterface $response)
+    public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
         return $response->withJson(['error' => 'Dummy NotAllowedHandler here!'], 405);
     }

@@ -11,7 +11,6 @@ use Nette\Utils\Strings;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
-use Slim\Http\Request as SlimRequest;
 use Slim\Route;
 use stdClass;
 
@@ -58,7 +57,7 @@ final class Request implements RequestInterface
     {
         $arguments = $this->request->getAttributes();
 
-        $value = isset($arguments[$name]) ? $arguments[$name] : '';
+        $value = $arguments[$name] ?? '';
         $value = Strings::trim($value);
 
         if ($value === '') {
@@ -95,7 +94,7 @@ final class Request implements RequestInterface
     /**
      * @inheritdoc
      */
-    public function hasField($name)
+    public function hasField($name): bool
     {
         return array_key_exists($name, (array)$this->getDecodedJsonFromBody());
     }
@@ -103,7 +102,7 @@ final class Request implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function getProtocolVersion()
+    public function getProtocolVersion(): string
     {
         return $this->request->getProtocolVersion();
     }
@@ -119,7 +118,7 @@ final class Request implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function getHeaders()
+    public function getHeaders(): array
     {
         return $this->request->getHeaders();
     }
@@ -127,7 +126,7 @@ final class Request implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function hasHeader($name)
+    public function hasHeader($name): bool
     {
         return $this->request->hasHeader($name);
     }
@@ -135,7 +134,7 @@ final class Request implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function getHeader($name)
+    public function getHeader($name): array
     {
         return $this->request->getHeader($name);
     }
@@ -143,7 +142,7 @@ final class Request implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function getHeaderLine($name)
+    public function getHeaderLine($name): string
     {
         return $this->request->getHeaderLine($name);
     }
@@ -175,7 +174,7 @@ final class Request implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function getBody()
+    public function getBody(): StreamInterface
     {
         return $this->request->getBody();
     }
@@ -191,7 +190,7 @@ final class Request implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function getRequestTarget()
+    public function getRequestTarget(): string
     {
         return $this->request->getRequestTarget();
     }
@@ -207,7 +206,7 @@ final class Request implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function getMethod()
+    public function getMethod(): string
     {
         return $this->request->getMethod();
     }
@@ -223,7 +222,7 @@ final class Request implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function getUri()
+    public function getUri(): UriInterface
     {
         return $this->request->getUri();
     }
@@ -239,7 +238,7 @@ final class Request implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function getServerParams()
+    public function getServerParams(): array
     {
         return $this->request->getServerParams();
     }
@@ -247,7 +246,7 @@ final class Request implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function getCookieParams()
+    public function getCookieParams(): array
     {
         return $this->request->getCookieParams();
     }
@@ -263,7 +262,7 @@ final class Request implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function getQueryParams()
+    public function getQueryParams(): array
     {
         return $this->request->getQueryParams();
     }
@@ -279,7 +278,7 @@ final class Request implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function getUploadedFiles()
+    public function getUploadedFiles(): array
     {
         return $this->request->getUploadedFiles();
     }
@@ -311,7 +310,7 @@ final class Request implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function getAttributes()
+    public function getAttributes(): array
     {
         return $this->request->getAttributes();
     }

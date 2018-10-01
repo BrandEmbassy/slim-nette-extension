@@ -14,6 +14,10 @@ interface ActionHandler
      * @param array $arguments
      * @return ResponseInterface
      */
-    public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = []);
+    public function __invoke(
+        RequestInterface $request,
+        ResponseInterface $response,
+        array $arguments = []
+    ): ResponseInterface;
 
 }

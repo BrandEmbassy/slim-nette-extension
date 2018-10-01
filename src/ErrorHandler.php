@@ -15,6 +15,10 @@ interface ErrorHandler
      * @param Throwable|null $e
      * @return ResponseInterface
      */
-    public function __invoke(RequestInterface $request, ResponseInterface $response, Throwable $e = null);
+    public function __invoke(
+        RequestInterface $request,
+        ResponseInterface $response,
+        Throwable $e = null
+    ): ResponseInterface;
 
 }

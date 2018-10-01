@@ -14,7 +14,7 @@ final class GoldenKeyAuthMiddleware implements Middleware
      * @inheritdoc
      * @throws Exception
      */
-    public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next)
+    public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next): ResponseInterface
     {
         $headerData = $request->getHeader('goldenKey');
         $token = reset($headerData);

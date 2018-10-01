@@ -17,7 +17,7 @@ abstract class Controller extends Container
      * @param RequestInterface $request
      * @param ResponseInterface $response
      */
-    public function beforeAction(RequestInterface $request, ResponseInterface $response)
+    public function beforeAction(RequestInterface $request, ResponseInterface $response): void
     {
         // intentionally - this method is empty in default
     }
@@ -26,7 +26,7 @@ abstract class Controller extends Container
      * @param RequestInterface $request
      * @param ResponseInterface $response
      */
-    public function afterAction(RequestInterface $request, ResponseInterface $response)
+    public function afterAction(RequestInterface $request, ResponseInterface $response): void
     {
         // intentionally - this method is empty in default
     }
@@ -37,7 +37,7 @@ abstract class Controller extends Container
      * @param Route $next
      * @return ResponseInterface
      */
-    public function middleware(RequestInterface $request, ResponseInterface $response, Route $next)
+    public function middleware(RequestInterface $request, ResponseInterface $response, Route $next): ResponseInterface
     {
         $this->beforeAction($request, $response);
         /** @var ResponseInterface $response */

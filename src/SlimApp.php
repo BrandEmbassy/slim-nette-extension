@@ -4,6 +4,7 @@ namespace BrandEmbassy\Slim;
 
 use BrandEmbassy\Slim\Request\Request;
 use BrandEmbassy\Slim\Response\Response;
+use Psr\Http\Message\ResponseInterface;
 use Slim\App;
 
 class SlimApp extends App
@@ -12,7 +13,7 @@ class SlimApp extends App
     /**
      * @inheritdoc
      */
-    public function run($silent = false)
+    public function run($silent = false): ResponseInterface
     {
         $request = new Request($this->getContainer()->get('request'));
         $response = new Response($this->getContainer()->get('response'));

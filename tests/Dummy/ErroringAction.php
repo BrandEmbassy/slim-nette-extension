@@ -13,8 +13,11 @@ final class ErroringAction implements ActionHandler
     /**
      * @inheritdoc
      */
-    public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = [])
-    {
+    public function __invoke(
+        RequestInterface $request,
+        ResponseInterface $response,
+        array $arguments = []
+    ): ResponseInterface {
         throw new LogicException('Error or not to error, that\'s the question!');
     }
 

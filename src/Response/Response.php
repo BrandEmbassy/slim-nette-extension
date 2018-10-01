@@ -24,7 +24,7 @@ final class Response implements ResponseInterface
     /**
      * @inheritdoc
      */
-    public function getProtocolVersion()
+    public function getProtocolVersion(): string
     {
         return $this->slimResponse->getProtocolVersion();
     }
@@ -40,7 +40,7 @@ final class Response implements ResponseInterface
     /**
      * @inheritdoc
      */
-    public function getHeaders()
+    public function getHeaders(): array
     {
         return $this->slimResponse->getHeaders();
     }
@@ -48,7 +48,7 @@ final class Response implements ResponseInterface
     /**
      * @inheritdoc
      */
-    public function hasHeader($name)
+    public function hasHeader($name): bool
     {
         return $this->slimResponse->hasHeader($name);
     }
@@ -56,7 +56,7 @@ final class Response implements ResponseInterface
     /**
      * @inheritdoc
      */
-    public function getHeader($name)
+    public function getHeader($name): array
     {
         return $this->slimResponse->getHeader($name);
     }
@@ -64,7 +64,7 @@ final class Response implements ResponseInterface
     /**
      * @inheritdoc
      */
-    public function getHeaderLine($name)
+    public function getHeaderLine($name): string
     {
         return $this->slimResponse->getHeaderLine($name);
     }
@@ -96,7 +96,7 @@ final class Response implements ResponseInterface
     /**
      * @inheritdoc
      */
-    public function getBody()
+    public function getBody(): StreamInterface
     {
         return $this->slimResponse->getBody();
     }
@@ -112,7 +112,7 @@ final class Response implements ResponseInterface
     /**
      * @inheritdoc
      */
-    public function getStatusCode()
+    public function getStatusCode(): int
     {
         return $this->slimResponse->getStatusCode();
     }
@@ -136,7 +136,7 @@ final class Response implements ResponseInterface
     /**
      * @inheritdoc
      */
-    public function getReasonPhrase()
+    public function getReasonPhrase(): string
     {
         return $this->slimResponse->getReasonPhrase();
     }
