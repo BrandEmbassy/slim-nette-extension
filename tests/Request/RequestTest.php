@@ -1,11 +1,10 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace BrandEmbassyTest\Slim\Request;
 
 use BrandEmbassy\Slim\MissingApiArgumentException;
 use BrandEmbassy\Slim\Request\Request;
 use DateTime;
-use DateTimeImmutable;
 use LogicException;
 use Mockery;
 use Mockery\MockInterface;
@@ -48,13 +47,11 @@ final class RequestTest extends TestCase
         $request = new Request($slimRequest);
         $dateTime = $request->getDateTimeQueryParam(self::PARAM_NAME);
 
-        self::assertInstanceOf(DateTimeImmutable::class, $dateTime);
         self::assertSame(self::DATE_TIME_STRING, $dateTime->format(DateTime::ATOM));
     }
 
     /**
      * @dataProvider getDataForInvalidDateTimeArgument
-     *
      * @param string $logicExceptionMessage
      * @param array $arguments
      */
@@ -77,12 +74,12 @@ final class RequestTest extends TestCase
     {
         return [
             'Missing from' => [
-                sprintf('Could not find %s in request\'s params', self::PARAM_NAME),
-                []
+                \sprintf('Could not find %s in request\'s params', self::PARAM_NAME),
+                [],
             ],
             'Invalid from' => [
-                sprintf('Could not parse %s as datetime', self::PARAM_NAME),
-                [self::PARAM_NAME => 123456789]
+                \sprintf('Could not parse %s as datetime', self::PARAM_NAME),
+                [self::PARAM_NAME => '123456789'],
             ],
         ];
     }
@@ -100,10 +97,6 @@ final class RequestTest extends TestCase
         return $mock;
     }
 
-    /**
-     * @param StreamInterface $body
-     * @return Request
-     */
     private function createRequest(StreamInterface $body): Request
     {
         $url = new Uri('https', 'example.com');
@@ -112,12 +105,9 @@ final class RequestTest extends TestCase
         return new Request($slimRequest);
     }
 
-    /**
-     * @return Request
-     */
     private function createDummyRequest(): Request
     {
-        $resource = fopen('php://temp', 'rb+');
+        $resource = \fopen('php://temp', 'rb+');
         \assert(\is_resource($resource));
         $body = new Body($resource);
         $body->write('{"thisIsNull": null, "thisIsGandalf": "gandalf"}');

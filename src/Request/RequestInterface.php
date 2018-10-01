@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace BrandEmbassy\Slim\Request;
 
@@ -14,42 +14,30 @@ interface RequestInterface extends ServerRequestInterface
      * @param mixed $default
      * @return mixed|null
      */
-    public function getQueryParam($key, $default = null);
+    public function getQueryParam(string $key, $default = null);
 
-    /**
-     * @param string $name
-     * @return string
-     */
-    public function getRequiredArgument($name);
+    public function getRequiredArgument(string $name): string;
 
     /**
      * @param string $name
      * @return array|stdClass|string
      */
-    public function getField($name);
+    public function getField(string $name);
 
     /**
      * @param string $name
      * @param mixed $default
      * @return mixed
      */
-    public function getOptionalField($name, $default = null);
+    public function getOptionalField(string $name, $default = null);
 
-    /**
-     * @param string $name
-     * @return bool
-     */
-    public function hasField($name);
+    public function hasField(string $name): bool;
 
     /**
      * @return mixed
      */
     public function getDecodedJsonFromBody();
 
-    /**
-     * @param string $key
-     * @return DateTimeImmutable
-     */
-    public function getDateTimeQueryParam($key);
+    public function getDateTimeQueryParam(string $key): DateTimeImmutable;
 
 }

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace BrandEmbassyTest\Slim\Dummy;
 
@@ -10,9 +10,6 @@ use LogicException;
 final class ErroringAction implements ActionHandler
 {
 
-    /**
-     * @inheritdoc
-     */
     public function __invoke(
         RequestInterface $request,
         ResponseInterface $response,

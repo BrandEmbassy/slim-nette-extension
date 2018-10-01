@@ -1,11 +1,11 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace BrandEmbassyTest\Slim;
 
-use BrandEmbassy\Slim\Response\ResponseInterface;
-use BrandEmbassy\Slim\SlimApplicationFactory;
 use BrandEmbassy\Slim\Request\Request;
 use BrandEmbassy\Slim\Response\Response;
+use BrandEmbassy\Slim\Response\ResponseInterface;
+use BrandEmbassy\Slim\SlimApplicationFactory;
 use Nette\DI\Compiler;
 use Nette\DI\Container;
 use Nette\DI\ContainerLoader;
@@ -23,6 +23,7 @@ final class SlimApplicationFactoryTest extends TestCase
     public function testShouldAllowEmptyErrorHandlers(): void
     {
         $this->createSlimApp(__DIR__ . '/configNoHandlers.neon');
+        $this->expectNotToPerformAssertions();
     }
 
     public function testShouldBeHandledByNotFoundErrorHandler(): void
@@ -115,23 +116,18 @@ final class SlimApplicationFactoryTest extends TestCase
         );
     }
 
-    /**
-     * @param string $configPath
-     * @return Container
-     */
     private function createContainer(string $configPath = __DIR__ . '/config.neon'): Container
     {
         $loader = new ContainerLoader(__DIR__ . '/temp', true);
         $class = $loader->load(
-            function ($compiler) use ($configPath) {
-                /** @var Compiler $compiler */
+            static function (Compiler $compiler) use ($configPath): void {
                 $compiler->loadConfig($configPath);
                 $compiler->addExtension('extensions', new ExtensionsExtension());
             },
             \md5($configPath)
         );
 
-        return new $class;
+        return new $class();
     }
 
     /**
@@ -142,7 +138,7 @@ final class SlimApplicationFactoryTest extends TestCase
      */
     private function createRequest(string $requestMethod, string $requestUrlPath, array $headers = []): Request
     {
-        $body = fopen('php://temp', 'rb+');
+        $body = \fopen('php://temp', 'rb+');
         \assert(\is_resource($body));
         $slimRequest = new SlimRequest(
             $requestMethod,
@@ -156,10 +152,6 @@ final class SlimApplicationFactoryTest extends TestCase
         return new Request($slimRequest);
     }
 
-    /**
-     * @param string $configPath
-     * @return App
-     */
     private function createSlimApp(string $configPath = __DIR__ . '/config.neon'): App
     {
         /** @var SlimApplicationFactory $factory */
@@ -168,10 +160,6 @@ final class SlimApplicationFactoryTest extends TestCase
         return $factory->create();
     }
 
-    /**
-     * @param ResponseInterface $response
-     * @return string
-     */
     private function getContents(ResponseInterface $response): string
     {
         $body = $response->getBody();

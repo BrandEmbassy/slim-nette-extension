@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace BrandEmbassy\Slim;
 
@@ -9,16 +9,10 @@ use Throwable;
 interface ErrorHandler
 {
 
-    /**
-     * @param RequestInterface $request
-     * @param ResponseInterface $response
-     * @param Throwable|null $e
-     * @return ResponseInterface
-     */
     public function __invoke(
         RequestInterface $request,
         ResponseInterface $response,
-        Throwable $e = null
+        ?Throwable $e = null
     ): ResponseInterface;
 
 }

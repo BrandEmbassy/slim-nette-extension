@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace BrandEmbassy\Slim;
 
@@ -20,7 +20,7 @@ class SlimApp extends App
         $response = $this->process($request, $response);
 
         $contentTypes = $response->getHeader('Content-Type');
-        $contentType = reset($contentTypes);
+        $contentType = \reset($contentTypes);
 
         if ($contentType === 'text/html; charset=UTF-8' && $response->getBody()->getSize() === 0) {
             $response = $response->withHeader('Content-Type', 'text/plain; charset=UTF-8');
@@ -32,4 +32,5 @@ class SlimApp extends App
 
         return $response;
     }
+
 }

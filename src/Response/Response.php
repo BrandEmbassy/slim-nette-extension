@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace BrandEmbassy\Slim\Response;
 
@@ -13,17 +13,11 @@ final class Response implements ResponseInterface
      */
     private $slimResponse;
 
-    /**
-     * @param SlimResponse $slimResponse
-     */
     public function __construct(SlimResponse $slimResponse)
     {
         $this->slimResponse = $slimResponse;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getProtocolVersion(): string
     {
         return $this->slimResponse->getProtocolVersion();
@@ -93,9 +87,6 @@ final class Response implements ResponseInterface
         return new static($this->slimResponse->withoutHeader($name));
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getBody(): StreamInterface
     {
         return $this->slimResponse->getBody();
@@ -109,9 +100,6 @@ final class Response implements ResponseInterface
         return new static($this->slimResponse->withBody($body));
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getStatusCode(): int
     {
         return $this->slimResponse->getStatusCode();
@@ -133,9 +121,6 @@ final class Response implements ResponseInterface
         return new static($this->slimResponse->withJson($data, $status, $encodingOptions));
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getReasonPhrase(): string
     {
         return $this->slimResponse->getReasonPhrase();

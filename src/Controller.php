@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace BrandEmbassy\Slim;
 
@@ -13,30 +13,16 @@ use Slim\Route;
 abstract class Controller extends Container
 {
 
-    /**
-     * @param RequestInterface $request
-     * @param ResponseInterface $response
-     */
     public function beforeAction(RequestInterface $request, ResponseInterface $response): void
     {
         // intentionally - this method is empty in default
     }
 
-    /**
-     * @param RequestInterface $request
-     * @param ResponseInterface $response
-     */
     public function afterAction(RequestInterface $request, ResponseInterface $response): void
     {
         // intentionally - this method is empty in default
     }
 
-    /**
-     * @param RequestInterface $request
-     * @param ResponseInterface $response
-     * @param Route $next
-     * @return ResponseInterface
-     */
     public function middleware(RequestInterface $request, ResponseInterface $response, Route $next): ResponseInterface
     {
         $this->beforeAction($request, $response);

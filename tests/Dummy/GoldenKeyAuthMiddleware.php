@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace BrandEmbassyTest\Slim\Dummy;
 
@@ -17,8 +17,10 @@ final class GoldenKeyAuthMiddleware implements Middleware
     public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next): ResponseInterface
     {
         $headerData = $request->getHeader('goldenKey');
-        $token = reset($headerData);
-        $token = $token !== false ? $token : '';
+        $token = \reset($headerData);
+        $token = $token !== false
+            ? $token
+            : '';
 
         if ($token !== 'uber-secret-token-made-of-pure-gold') {
             return $response->withJson(['error' => 'YOU SHALL NOT PASS!'], 401);
@@ -26,4 +28,5 @@ final class GoldenKeyAuthMiddleware implements Middleware
 
         return $next($request, $response);
     }
+
 }

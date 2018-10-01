@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace BrandEmbassy\Slim\DI;
 
@@ -23,4 +23,5 @@ final class SlimApiExtension extends CompilerExtension
         $builder->addDefinition($this->prefix('slimApi.factory'))
             ->setFactory(SlimApplicationFactory::class, [$this->config]);
     }
+
 }

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace BrandEmbassyTest\Slim\Dummy;
 
@@ -10,13 +10,10 @@ use Throwable;
 final class NotFoundHandler implements ErrorHandler
 {
 
-    /**
-     * @inheritdoc
-     */
     public function __invoke(
         RequestInterface $request,
         ResponseInterface $response,
-        Throwable $e = null
+        ?Throwable $e = null
     ): ResponseInterface {
         return $response->withJson(['error' => 'Dummy NotFoundHandler here!'], 404);
     }
