@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace BrandEmbassyTest\Slim\Dummy;
 
@@ -9,13 +9,7 @@ use BrandEmbassy\Slim\Response\ResponseInterface;
 class BeforeRequestMiddleware implements Middleware
 {
 
-    /**
-     * @param RequestInterface $request
-     * @param ResponseInterface $response
-     * @param callable $next
-     * @return ResponseInterface
-     */
-    public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next)
+    public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next): ResponseInterface
     {
         $response = $response->withAddedHeader(
             'processed-by-before-request-middleware',
@@ -24,4 +18,5 @@ class BeforeRequestMiddleware implements Middleware
 
         return $next($request, $response);
     }
+
 }

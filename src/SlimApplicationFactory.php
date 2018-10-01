@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace BrandEmbassy\Slim;
 
@@ -38,10 +38,7 @@ final class SlimApplicationFactory
         $this->beforeRoutesMiddlewares = [];
     }
 
-    /**
-     * @return SlimApp
-     */
-    public function create()
+    public function create(): SlimApp
     {
         $app = new SlimApp($this->configuration);
 
@@ -53,8 +50,11 @@ final class SlimApplicationFactory
             $this->registerApis($app, $api, $apiName);
         }
 
+        $container = $app->getContainer();
+
         /** @var Collection $settings */
-        $settings = $app->getContainer()['settings'];
+        $settings = $container->get('settings');
+
         if ($settings->get('removeDefaultHandlers') === true) {
             $this->removeDefaultSlimErrorHandlers($app);
         }
@@ -70,22 +70,22 @@ final class SlimApplicationFactory
         }
 
         return $app;
-
     }
 
     /**
      * @param string $configurationCode
      * @return array
      */
-    private function getConfiguration($configurationCode)
+    private function getConfiguration(string $configurationCode): array
     {
         $configuration = $this->container->getParameters()[$configurationCode];
 
-        if (!is_array($configuration)) {
-            throw new LogicException(sprintf('Missing %s configuration', $configurationCode));
+        if (!\is_array($configuration)) {
+            throw new LogicException(\sprintf('Missing %s configuration', $configurationCode));
         }
 
         $this->validateConfiguration($configuration, $configurationCode, 'routes', 'array');
+
         if (isset($configuration['handlers'])) {
             $this->validateConfiguration($configuration, $configurationCode, 'handlers', 'array');
         }
@@ -99,16 +99,20 @@ final class SlimApplicationFactory
      * @param string $name
      * @param string $type
      */
-    private function validateConfiguration(array $configuration, $configurationCode, $name, $type)
-    {
-        if (!isset($configuration[$name]) || gettype($configuration[$name]) !== $type) {
+    private function validateConfiguration(
+        array $configuration,
+        string $configurationCode,
+        string $name,
+        string $type
+    ): void {
+        if (!isset($configuration[$name]) || \gettype($configuration[$name]) !== $type) {
             throw new LogicException(
-                sprintf(
+                \sprintf(
                     'Missing or empty %s.%s configuration (has to be %s, but is %s)',
                     $configurationCode,
                     $name,
                     $type,
-                    gettype(isset($configuration[$name]) ? $configuration[$name] : null)
+                    \gettype($configuration[$name] ?? null)
                 )
             );
         }
@@ -118,11 +122,12 @@ final class SlimApplicationFactory
      * @param string $serviceName
      * @return Closure
      */
-    private function getServiceProvider($serviceName)
+    private function getServiceProvider(string $serviceName): callable
     {
         return function () use ($serviceName) {
             /** @var object|null $service */
             $service = $this->container->getByType($serviceName, false);
+
             if ($service === null) {
                 $service = $this->container->getService($serviceName);
             }
@@ -131,13 +136,10 @@ final class SlimApplicationFactory
         };
     }
 
-    /**
-     * @param SlimApp $app
-     */
-    private function removeDefaultSlimErrorHandlers(SlimApp $app)
+    private function removeDefaultSlimErrorHandlers(SlimApp $app): void
     {
-        $app->getContainer()['phpErrorHandler'] = function () {
-            return function (RequestInterface $request, ResponseInterface $response, \Exception $e) {
+        $app->getContainer()['phpErrorHandler'] = static function () {
+            return static function (RequestInterface $request, ResponseInterface $response, \Throwable $e): void {
                 throw $e;
             };
         };
@@ -147,18 +149,14 @@ final class SlimApplicationFactory
      * @param SlimApp $app
      * @param array $handlers
      */
-    private function registerHandlers(SlimApp $app, array $handlers)
+    private function registerHandlers(SlimApp $app, array $handlers): void
     {
         foreach ($handlers as $handlerName => $handlerClass) {
             $app->getContainer()[$handlerName . 'Handler'] = $this->getServiceProvider($handlerClass);
         }
     }
 
-    /**
-     * @param SlimApp $app
-     * @param string $serviceName
-     */
-    private function registerServiceIntoContainer(SlimApp $app, $serviceName)
+    private function registerServiceIntoContainer(SlimApp $app, string $serviceName): void
     {
         if (!$app->getContainer()->has($serviceName)) {
             $app->getContainer()[$serviceName] = $this->getServiceProvider($serviceName);
@@ -170,7 +168,7 @@ final class SlimApplicationFactory
      * @param array $api
      * @param string $apiName
      */
-    private function registerApis(SlimApp $app, array $api, $apiName)
+    private function registerApis(SlimApp $app, array $api, string $apiName): void
     {
         foreach ($api as $version => $routes) {
             $this->registerApi($app, $apiName, $version, $routes);
@@ -183,7 +181,7 @@ final class SlimApplicationFactory
      * @param string $version
      * @param array $routes
      */
-    private function registerApi(SlimApp $app, $apiName, $version, array $routes)
+    private function registerApi(SlimApp $app, string $apiName, string $version, array $routes): void
     {
         foreach ($routes as $routeName => $routeData) {
             $urlPattern = $this->createUrlPattern($apiName, $version, $routeName);
@@ -198,12 +196,11 @@ final class SlimApplicationFactory
 
     /**
      * @deprecated Do not use Controllers, use Invokable Action classes (use MiddleWareInterface)
-     *
      * @param SlimApp $app
      * @param string $urlPattern
      * @param array $routeData
      */
-    private function registerControllerRoute(SlimApp $app, $urlPattern, array $routeData)
+    private function registerControllerRoute(SlimApp $app, string $urlPattern, array $routeData): void
     {
         $this->registerServiceIntoContainer($app, $routeData['service']);
 
@@ -218,7 +215,7 @@ final class SlimApplicationFactory
      * @param array $routeData
      * @param string $urlPattern
      */
-    private function registerInvokableActionRoutes(SlimApp $app, array $routeData, $urlPattern)
+    private function registerInvokableActionRoutes(SlimApp $app, array $routeData, string $urlPattern): void
     {
         foreach ($routeData as $method => $config) {
             $service = $config['service'];
@@ -240,22 +237,12 @@ final class SlimApplicationFactory
         }
     }
 
-    /**
-     * @param string $apiName
-     * @param string $version
-     * @param string $routeName
-     * @return string
-     */
-    private function createUrlPattern($apiName, $version, $routeName)
+    private function createUrlPattern(string $apiName, string $version, string $routeName): string
     {
-        return sprintf('/%s/%s%s', $apiName, $version, $routeName);
+        return \sprintf('/%s/%s%s', $apiName, $version, $routeName);
     }
 
-    /**
-     * @param SlimApp $app
-     * @param string $middleware
-     */
-    private function registerBeforeRequestMiddleware(SlimApp $app, $middleware)
+    private function registerBeforeRequestMiddleware(SlimApp $app, string $middleware): void
     {
         $this->registerServiceIntoContainer($app, $middleware);
         $app->add($middleware);
@@ -265,7 +252,7 @@ final class SlimApplicationFactory
      * @param SlimApp $app
      * @param array $configuration
      */
-    private function registerBeforeRouteMiddlewares(SlimApp $app, $configuration)
+    private function registerBeforeRouteMiddlewares(SlimApp $app, array $configuration): void
     {
         if (isset($configuration['beforeRouteMiddlewares'])) {
             foreach ($configuration['beforeRouteMiddlewares'] as $globalMiddleware) {
@@ -274,4 +261,5 @@ final class SlimApplicationFactory
             }
         }
     }
+
 }

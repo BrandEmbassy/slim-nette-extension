@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace BrandEmbassy\Slim\Request;
 
@@ -11,7 +11,6 @@ use Nette\Utils\Strings;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
-use Slim\Http\Request as SlimRequest;
 use Slim\Route;
 use stdClass;
 
@@ -28,9 +27,6 @@ final class Request implements RequestInterface
      */
     private $request;
 
-    /**
-     * @param ServerRequestInterface $request
-     */
     public function __construct(ServerRequestInterface $request)
     {
         $this->request = $request;
@@ -39,10 +35,11 @@ final class Request implements RequestInterface
     /**
      * @inheritdoc
      */
-    public function getQueryParam($key, $default = null)
+    public function getQueryParam(string $key, $default = null)
     {
         $getParams = $this->getQueryParams();
         $result = $default;
+
         if (isset($getParams[$key])) {
             $result = $getParams[$key];
         }
@@ -54,15 +51,15 @@ final class Request implements RequestInterface
      * @inheritdoc
      * @throws MissingApiArgumentException
      */
-    public function getRequiredArgument($name)
+    public function getRequiredArgument(string $name): string
     {
         $arguments = $this->request->getAttributes();
 
-        $value = isset($arguments[$name]) ? $arguments[$name] : '';
+        $value = $arguments[$name] ?? '';
         $value = Strings::trim($value);
 
         if ($value === '') {
-            throw new MissingApiArgumentException(sprintf('Missing "%s" argument', $name));
+            throw new MissingApiArgumentException(\sprintf('Missing "%s" argument', $name));
         }
 
         return $value;
@@ -72,12 +69,12 @@ final class Request implements RequestInterface
      * @inheritdoc
      * @throws MissingApiArgumentException
      */
-    public function getField($name)
+    public function getField(string $name)
     {
         $body = $this->getDecodedJsonFromBody();
 
         if (!$this->hasField($name)) {
-            throw new MissingApiArgumentException(sprintf('Field "%s" is missing in request body', $name));
+            throw new MissingApiArgumentException(\sprintf('Field "%s" is missing in request body', $name));
         }
 
         return $body->$name;
@@ -89,21 +86,20 @@ final class Request implements RequestInterface
      */
     public function getOptionalField($name, $default = null)
     {
-        return $this->hasField($name) ? $this->getField($name) : $default;
+        return $this->hasField($name)
+            ? $this->getField($name)
+            : $default;
     }
 
     /**
      * @inheritdoc
      */
-    public function hasField($name)
+    public function hasField($name): bool
     {
-        return array_key_exists($name, (array)$this->getDecodedJsonFromBody());
+        return \array_key_exists($name, (array)$this->getDecodedJsonFromBody());
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getProtocolVersion()
+    public function getProtocolVersion(): string
     {
         return $this->request->getProtocolVersion();
     }
@@ -119,7 +115,7 @@ final class Request implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function getHeaders()
+    public function getHeaders(): array
     {
         return $this->request->getHeaders();
     }
@@ -127,7 +123,7 @@ final class Request implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function hasHeader($name)
+    public function hasHeader($name): bool
     {
         return $this->request->hasHeader($name);
     }
@@ -135,7 +131,7 @@ final class Request implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function getHeader($name)
+    public function getHeader($name): array
     {
         return $this->request->getHeader($name);
     }
@@ -143,7 +139,7 @@ final class Request implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function getHeaderLine($name)
+    public function getHeaderLine($name): string
     {
         return $this->request->getHeaderLine($name);
     }
@@ -172,10 +168,7 @@ final class Request implements RequestInterface
         return new static($this->request->withoutHeader($name));
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getBody()
+    public function getBody(): StreamInterface
     {
         return $this->request->getBody();
     }
@@ -188,10 +181,7 @@ final class Request implements RequestInterface
         return new static($this->request->withBody($body));
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getRequestTarget()
+    public function getRequestTarget(): string
     {
         return $this->request->getRequestTarget();
     }
@@ -204,10 +194,7 @@ final class Request implements RequestInterface
         return new static($this->request->withRequestTarget($requestTarget));
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getMethod()
+    public function getMethod(): string
     {
         return $this->request->getMethod();
     }
@@ -220,10 +207,7 @@ final class Request implements RequestInterface
         return new static($this->request->withMethod($method));
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getUri()
+    public function getUri(): UriInterface
     {
         return $this->request->getUri();
     }
@@ -239,7 +223,7 @@ final class Request implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function getServerParams()
+    public function getServerParams(): array
     {
         return $this->request->getServerParams();
     }
@@ -247,7 +231,7 @@ final class Request implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function getCookieParams()
+    public function getCookieParams(): array
     {
         return $this->request->getCookieParams();
     }
@@ -263,7 +247,7 @@ final class Request implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function getQueryParams()
+    public function getQueryParams(): array
     {
         return $this->request->getQueryParams();
     }
@@ -279,7 +263,7 @@ final class Request implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function getUploadedFiles()
+    public function getUploadedFiles(): array
     {
         return $this->request->getUploadedFiles();
     }
@@ -311,7 +295,7 @@ final class Request implements RequestInterface
     /**
      * @inheritDoc
      */
-    public function getAttributes()
+    public function getAttributes(): array
     {
         return $this->request->getAttributes();
     }
@@ -325,6 +309,7 @@ final class Request implements RequestInterface
 
         if ($value === $default) {
             $route = $this->request->getAttribute('route', $default);
+
             if ($route instanceof Route) {
                 $value = $route->getArgument($name, $default);
             }
@@ -362,21 +347,18 @@ final class Request implements RequestInterface
         return $this->decodedJsonFromBody;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function getDateTimeQueryParam($field)
+    public function getDateTimeQueryParam(string $field): DateTimeImmutable
     {
         $datetimeParam = $this->getQueryParam($field);
 
         if ($datetimeParam === null) {
-            throw new LogicException(sprintf('Could not find %s in request\'s params', $field));
+            throw new LogicException(\sprintf('Could not find %s in request\'s params', $field));
         }
 
         $datetime = DateTimeImmutable::createFromFormat(DateTime::ATOM, $datetimeParam);
 
         if ($datetime === false || $datetime->format(DateTime::ATOM) !== $datetimeParam) {
-            throw new LogicException(sprintf('Could not parse %s as datetime', $field));
+            throw new LogicException(\sprintf('Could not parse %s as datetime', $field));
         }
 
         return $datetime;

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace BrandEmbassyTest\Slim\Dummy;
 
@@ -12,8 +12,11 @@ final class CreateChannelAction implements ActionHandler
     /**
      * @inheritdoc
      */
-    public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = [])
-    {
+    public function __invoke(
+        RequestInterface $request,
+        ResponseInterface $response,
+        array $arguments = []
+    ): ResponseInterface {
         return $response->withJson(['channelId' => 'fb_1234'], 201);
     }
 
