@@ -7,7 +7,6 @@ use BrandEmbassy\Slim\SlimApp;
 use BrandEmbassy\Slim\SlimApplicationFactory;
 use BrandEmbassy\Slim\Request\Request;
 use BrandEmbassy\Slim\Response\Response;
-use LogicException;
 use Nette\DI\Compiler;
 use Nette\DI\Container;
 use Nette\DI\ContainerLoader;
@@ -85,6 +84,37 @@ final class SlimApplicationFactoryTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals(201, $response->getStatusCode());
         $this->assertEquals('{"channelId":"fb_1234"}', $this->getContents($response));
+    }
+
+    public function testShouldProcessBothGlobalMiddlewares()
+    {
+        $request = $this->createRequest('POST', '/new-api/2.0/channels');
+
+        /** @var ResponseInterface $response */
+        $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
+
+        $this->assertEquals(
+            ['proof-for-before-request'],
+            $response->getHeader('processed-by-before-request-middleware')
+        );
+
+        $this->assertEquals(
+            ['proof-for-before-route'],
+            $response->getHeader('processed-by-before-route-middlewares')
+        );
+    }
+
+    public function testShouldProcessBeforeRequestMiddleware()
+    {
+        $request = $this->createRequest('POST', '/non-existing/path');
+
+        /** @var ResponseInterface $response */
+        $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
+
+        $this->assertEquals(
+            ['proof-for-before-request'],
+            $response->getHeader('processed-by-before-request-middleware')
+        );
     }
 
     /**

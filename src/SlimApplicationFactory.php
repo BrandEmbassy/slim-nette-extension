@@ -23,6 +23,11 @@ final class SlimApplicationFactory
     private $container;
 
     /**
+     * @var Middleware[]
+     */
+    private $beforeRoutesMiddlewares;
+
+    /**
      * @param array $configuration
      * @param Container $container
      */
@@ -30,6 +35,7 @@ final class SlimApplicationFactory
     {
         $this->configuration = $configuration;
         $this->container = $container;
+        $this->beforeRoutesMiddlewares = [];
     }
 
     /**
@@ -40,6 +46,8 @@ final class SlimApplicationFactory
         $app = new SlimApp($this->configuration);
 
         $configuration = $this->getConfiguration($this->configuration['apiDefinitionKey']);
+
+        $this->registerBeforeRouteMiddlewares($app, $configuration);
 
         foreach ($configuration['routes'] as $apiName => $api) {
             $this->registerApis($app, $api, $apiName);
@@ -53,6 +61,12 @@ final class SlimApplicationFactory
 
         if (isset($configuration['handlers'])) {
             $this->registerHandlers($app, $configuration['handlers']);
+        }
+
+        if (isset($configuration['beforeRequestMiddlewares'])) {
+            foreach ($configuration['beforeRequestMiddlewares'] as $middleware) {
+                $this->registerBeforeRequestMiddleware($app, $middleware);
+            }
         }
 
         return $app;
@@ -146,7 +160,9 @@ final class SlimApplicationFactory
      */
     private function registerServiceIntoContainer(SlimApp $app, $serviceName)
     {
-        $app->getContainer()[$serviceName] = $this->getServiceProvider($serviceName);
+        if (!$app->getContainer()->has($serviceName)) {
+            $app->getContainer()[$serviceName] = $this->getServiceProvider($serviceName);
+        }
     }
 
     /**
@@ -210,16 +226,16 @@ final class SlimApplicationFactory
             $this->registerServiceIntoContainer($app, $service);
             $routeToAdd = $app->map([$method], $urlPattern, $service);
 
-            if (isset($config['middleware']) && count($config['middleware']) > 0) {
+            if (isset($config['middleware'])) {
                 foreach ($config['middleware'] as $middleware) {
-                    $container = $app->getContainer();
-
-                    if (!$container->has($middleware)) {
-                        $this->registerServiceIntoContainer($app, $middleware);
-                    }
+                    $this->registerServiceIntoContainer($app, $middleware);
 
                     $routeToAdd->add($middleware);
                 }
+            }
+
+            foreach ($this->beforeRoutesMiddlewares as $middleware) {
+                $routeToAdd->add($middleware);
             }
         }
     }
@@ -235,4 +251,27 @@ final class SlimApplicationFactory
         return sprintf('/%s/%s%s', $apiName, $version, $routeName);
     }
 
+    /**
+     * @param SlimApp $app
+     * @param string $middleware
+     */
+    private function registerBeforeRequestMiddleware(SlimApp $app, $middleware)
+    {
+        $this->registerServiceIntoContainer($app, $middleware);
+        $app->add($middleware);
+    }
+
+    /**
+     * @param SlimApp $app
+     * @param array $configuration
+     */
+    private function registerBeforeRouteMiddlewares(SlimApp $app, $configuration)
+    {
+        if (isset($configuration['beforeRouteMiddlewares'])) {
+            foreach ($configuration['beforeRouteMiddlewares'] as $globalMiddleware) {
+                $this->registerServiceIntoContainer($app, $globalMiddleware);
+                $this->beforeRoutesMiddlewares[] = $app->getContainer()->get($globalMiddleware);
+            }
+        }
+    }
 }

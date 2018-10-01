@@ -9,6 +9,8 @@ services:
     - BrandEmbassyTest\Slim\Dummy\GoldenKeyAuthMiddleware
     - BrandEmbassyTest\Slim\Dummy\CreateChannelAction
     - BrandEmbassyTest\Slim\Dummy\ErroringAction
+    - BrandEmbassyTest\Slim\Dummy\BeforeRequestMiddleware
+    - BrandEmbassyTest\Slim\Dummy\BeforeRouteMiddleware
 
 parameters:
     api:
@@ -29,6 +31,13 @@ parameters:
                     '/error':
                         post:
                             service: BrandEmbassyTest\Slim\Dummy\ErroringAction
+
+        beforeRouteMiddlewares:
+            - BrandEmbassyTest\Slim\Dummy\BeforeRouteMiddleware
+
+        beforeRequestMiddlewares:
+            - BrandEmbassyTest\Slim\Dummy\BeforeRequestMiddleware
+
 
 slimApi:
     slimConfiguration:
