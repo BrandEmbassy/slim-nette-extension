@@ -20,6 +20,14 @@ use Slim\Http\Uri;
 final class SlimApplicationFactoryTest extends TestCase
 {
 
+	public function testShouldPassSettingsToSlimContainer(): void
+	{
+		$app = $this->createSlimApp();
+		$settings = $app->getContainer()->get('settings');
+
+		$this->assertSame('Dummy', $settings['myCustomOption']);
+	}
+
     public function testShouldAllowEmptyErrorHandlers(): void
     {
         $this->createSlimApp(__DIR__ . '/configNoHandlers.neon');

@@ -43,5 +43,6 @@ slimApi:
     slimConfiguration:
         settings:
             removeDefaultHandlers: true
+            myCustomOption: 'Dummy'
 
     apiDefinitionKey: "api"
