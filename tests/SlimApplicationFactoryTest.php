@@ -20,13 +20,13 @@ use Slim\Http\Uri;
 final class SlimApplicationFactoryTest extends TestCase
 {
 
-	public function testShouldPassSettingsToSlimContainer(): void
-	{
-		$app = $this->createSlimApp();
-		$settings = $app->getContainer()->get('settings');
+    public function testShouldPassSettingsToSlimContainer(): void
+    {
+        $app = $this->createSlimApp();
+        $settings = $app->getContainer()->get('settings');
 
-		$this->assertSame('Dummy', $settings['myCustomOption']);
-	}
+        $this->assertSame('Dummy', $settings['myCustomOption']);
+    }
 
     public function testShouldAllowEmptyErrorHandlers(): void
     {
