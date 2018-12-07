@@ -40,7 +40,7 @@ final class SlimApplicationFactory
 
     public function create(): SlimApp
     {
-        $app = new SlimApp($this->configuration);
+        $app = new SlimApp($this->configuration['slimConfiguration']);
 
         $configuration = $this->getConfiguration($this->configuration['apiDefinitionKey']);
 
