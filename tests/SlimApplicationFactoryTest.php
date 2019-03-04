@@ -34,6 +34,17 @@ final class SlimApplicationFactoryTest extends TestCase
         $this->expectNotToPerformAssertions();
     }
 
+    public function testHandledRouteForOmittedUrlParts(): void
+    {
+        $request = $this->createRequest('GET', '/app');
+
+        /** @var ResponseInterface $response */
+        $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
+
+        self::assertEquals(200, $response->getStatusCode());
+        self::assertEquals('"Hello World"', $this->getContents($response));
+    }
+
     public function testShouldBeHandledByNotFoundErrorHandler(): void
     {
         $request = $this->createRequest('POST', '/non-existing/path');

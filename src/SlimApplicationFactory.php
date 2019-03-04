@@ -239,7 +239,23 @@ final class SlimApplicationFactory
 
     private function createUrlPattern(string $apiName, string $version, string $routeName): string
     {
-        return \sprintf('/%s/%s%s', $apiName, $version, $routeName);
+        $apiName = \trim($apiName, '/');
+        $version = \trim($version, '/');
+        $routeName = \trim($routeName, '/');
+
+        if ($version !== '') {
+            $version = '/' . $version;
+        }
+
+        if ($apiName !== '') {
+            $apiName = '/' . $apiName;
+        }
+
+        if ($routeName !== '') {
+            $routeName = '/' . $routeName;
+        }
+
+        return $apiName . $version . $routeName;
     }
 
     private function registerBeforeRequestMiddleware(SlimApp $app, string $middleware): void

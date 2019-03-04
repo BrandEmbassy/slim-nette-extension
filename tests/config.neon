@@ -8,6 +8,7 @@ services:
     - BrandEmbassyTest\Slim\Dummy\ApiErrorHandler
     - BrandEmbassyTest\Slim\Dummy\GoldenKeyAuthMiddleware
     - BrandEmbassyTest\Slim\Dummy\CreateChannelAction
+    - BrandEmbassyTest\Slim\Dummy\GetHelloWorldAction
     - BrandEmbassyTest\Slim\Dummy\ErroringAction
     - BrandEmbassyTest\Slim\Dummy\BeforeRequestMiddleware
     - BrandEmbassyTest\Slim\Dummy\BeforeRouteMiddleware
@@ -20,6 +21,13 @@ parameters:
             error: BrandEmbassyTest\Slim\Dummy\ApiErrorHandler
 
         routes:
+            "app":
+                "":
+                    "":
+                        get:
+                            service: BrandEmbassyTest\Slim\Dummy\GetHelloWorldAction
+
+
             new-api:
                 "2.0":
                     '/channels':
