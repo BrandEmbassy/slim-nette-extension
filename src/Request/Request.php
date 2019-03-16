@@ -54,7 +54,11 @@ final class Request implements RequestInterface
     }
 
 
-    public function getRequiredArgument(string $name): string
+    /**
+     * @param string $name
+     * @return string|integer
+     */
+    public function getRequiredArgument(string $name)
     {
         $arguments = $this->request->getAttributes();
 
