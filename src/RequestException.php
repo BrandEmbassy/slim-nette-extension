@@ -4,5 +4,4 @@ namespace BrandEmbassy\Slim;
 
 interface RequestException
 {
-
 }

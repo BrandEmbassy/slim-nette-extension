@@ -12,16 +12,17 @@ use Slim\Route;
  */
 abstract class Controller extends Container
 {
-
     public function beforeAction(RequestInterface $request, ResponseInterface $response): void
     {
         // intentionally - this method is empty in default
     }
 
+
     public function afterAction(RequestInterface $request, ResponseInterface $response): void
     {
         // intentionally - this method is empty in default
     }
+
 
     public function middleware(RequestInterface $request, ResponseInterface $response, Route $next): ResponseInterface
     {
@@ -32,5 +33,4 @@ abstract class Controller extends Container
 
         return $response;
     }
-
 }

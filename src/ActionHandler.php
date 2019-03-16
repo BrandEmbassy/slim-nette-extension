@@ -7,11 +7,10 @@ use BrandEmbassy\Slim\Response\ResponseInterface;
 
 interface ActionHandler
 {
-
     /**
-     * @param RequestInterface $request
+     * @param RequestInterface  $request
      * @param ResponseInterface $response
-     * @param array $arguments
+     * @param mixed[]           $arguments
      * @return ResponseInterface
      */
     public function __invoke(
@@ -19,5 +18,4 @@ interface ActionHandler
         ResponseInterface $response,
         array $arguments = []
     ): ResponseInterface;
-
 }

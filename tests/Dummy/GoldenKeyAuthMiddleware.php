@@ -5,19 +5,14 @@ namespace BrandEmbassyTest\Slim\Dummy;
 use BrandEmbassy\Slim\Middleware;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
-use Exception;
+use function reset;
 
 final class GoldenKeyAuthMiddleware implements Middleware
 {
-
-    /**
-     * @inheritdoc
-     * @throws Exception
-     */
     public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next): ResponseInterface
     {
         $headerData = $request->getHeader('goldenKey');
-        $token = \reset($headerData);
+        $token = reset($headerData);
         $token = $token !== false
             ? $token
             : '';
@@ -28,5 +23,4 @@ final class GoldenKeyAuthMiddleware implements Middleware
 
         return $next($request, $response);
     }
-
 }

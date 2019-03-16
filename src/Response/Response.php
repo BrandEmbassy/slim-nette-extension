@@ -7,123 +7,152 @@ use Slim\Http\Response as SlimResponse;
 
 final class Response implements ResponseInterface
 {
-
     /**
      * @var SlimResponse
      */
     private $slimResponse;
+
 
     public function __construct(SlimResponse $slimResponse)
     {
         $this->slimResponse = $slimResponse;
     }
 
+
     public function getProtocolVersion(): string
     {
         return $this->slimResponse->getProtocolVersion();
     }
 
+
     /**
-     * @inheritdoc
+     * @param string $version
+     * @return static
      */
-    public function withProtocolVersion($version)
+    public function withProtocolVersion($version): self
     {
         return new static($this->slimResponse->withProtocolVersion($version));
     }
 
+
     /**
-     * @inheritdoc
+     * @return string[][]
      */
     public function getHeaders(): array
     {
         return $this->slimResponse->getHeaders();
     }
 
+
     /**
-     * @inheritdoc
+     * @param string $name
+     * @return boolean
      */
     public function hasHeader($name): bool
     {
         return $this->slimResponse->hasHeader($name);
     }
 
+
     /**
-     * @inheritdoc
+     * @param string $name
+     * @return string[]
      */
     public function getHeader($name): array
     {
         return $this->slimResponse->getHeader($name);
     }
 
+
     /**
-     * @inheritdoc
+     * @param string $name
+     * @return string
      */
     public function getHeaderLine($name): string
     {
         return $this->slimResponse->getHeaderLine($name);
     }
 
+
     /**
-     * @inheritdoc
+     * @param string          $name
+     * @param string|string[] $value
+     * @return static
      */
-    public function withHeader($name, $value)
+    public function withHeader($name, $value): self
     {
         return new static($this->slimResponse->withHeader($name, $value));
     }
 
+
     /**
-     * @inheritdoc
+     * @param string          $name
+     * @param string|string[] $value
+     * @return static
      */
-    public function withAddedHeader($name, $value)
+    public function withAddedHeader($name, $value): self
     {
         return new static($this->slimResponse->withAddedHeader($name, $value));
     }
 
+
     /**
-     * @inheritdoc
+     * @param string $name
+     * @return static
      */
-    public function withoutHeader($name)
+    public function withoutHeader($name): self
     {
         return new static($this->slimResponse->withoutHeader($name));
     }
+
 
     public function getBody(): StreamInterface
     {
         return $this->slimResponse->getBody();
     }
 
+
     /**
-     * @inheritdoc
+     * @param StreamInterface $body
+     * @return static
      */
-    public function withBody(StreamInterface $body)
+    public function withBody(StreamInterface $body): self
     {
         return new static($this->slimResponse->withBody($body));
     }
+
 
     public function getStatusCode(): int
     {
         return $this->slimResponse->getStatusCode();
     }
 
+
     /**
-     * @inheritdoc
+     * @param int    $code
+     * @param string $reasonPhrase
+     * @return static
      */
-    public function withStatus($code, $reasonPhrase = '')
+    public function withStatus($code, $reasonPhrase = ''): self
     {
         return new static($this->slimResponse->withStatus($code, $reasonPhrase));
     }
 
+
     /**
-     * @inheritdoc
+     * @param mixed[]|object $data
+     * @param int|null       $status
+     * @param int            $encodingOptions
+     * @return static
      */
-    public function withJson($data, $status = null, $encodingOptions = 0)
+    public function withJson($data, ?int $status = null, int $encodingOptions = 0): self
     {
         return new static($this->slimResponse->withJson($data, $status, $encodingOptions));
     }
+
 
     public function getReasonPhrase(): string
     {
         return $this->slimResponse->getReasonPhrase();
     }
-
 }

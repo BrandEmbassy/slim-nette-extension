@@ -16,23 +16,28 @@ use Slim\Http\Body;
 use Slim\Http\Headers;
 use Slim\Http\Request as SlimRequest;
 use Slim\Http\Uri;
+use function assert;
+use function fopen;
+use function is_resource;
+use function md5;
 
 final class SlimApplicationFactoryTest extends TestCase
 {
-
     public function testShouldPassSettingsToSlimContainer(): void
     {
         $app = $this->createSlimApp();
         $settings = $app->getContainer()->get('settings');
 
-        $this->assertSame('Dummy', $settings['myCustomOption']);
+        self::assertSame('Dummy', $settings['myCustomOption']);
     }
+
 
     public function testShouldAllowEmptyErrorHandlers(): void
     {
         $this->createSlimApp(__DIR__ . '/configNoHandlers.neon');
         $this->expectNotToPerformAssertions();
     }
+
 
     public function testHandledRouteForOmittedUrlParts(): void
     {
@@ -42,8 +47,9 @@ final class SlimApplicationFactoryTest extends TestCase
         $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
 
         self::assertEquals(200, $response->getStatusCode());
-        self::assertEquals('"Hello World"', $this->getContents($response));
+        self::assertEquals('["Hello World"]', $this->getContents($response));
     }
+
 
     public function testShouldBeHandledByNotFoundErrorHandler(): void
     {
@@ -56,6 +62,7 @@ final class SlimApplicationFactoryTest extends TestCase
         self::assertEquals('{"error":"Dummy NotFoundHandler here!"}', $this->getContents($response));
     }
 
+
     public function testShouldBeHandledByNotAllowedHandler(): void
     {
         $request = $this->createRequest('PATCH', '/new-api/2.0/channels');
@@ -66,6 +73,7 @@ final class SlimApplicationFactoryTest extends TestCase
         self::assertEquals(405, $response->getStatusCode());
         self::assertEquals('{"error":"Dummy NotAllowedHandler here!"}', $this->getContents($response));
     }
+
 
     public function testShouldBeHandledByApiErrorHandler(): void
     {
@@ -78,6 +86,7 @@ final class SlimApplicationFactoryTest extends TestCase
         self::assertEquals('{"error":"Error or not to error, that\'s the question!"}', $this->getContents($response));
     }
 
+
     public function testShouldDenyRequestByAccessMiddleware(): void
     {
         $request = $this->createRequest('POST', '/new-api/2.0/channels');
@@ -88,6 +97,7 @@ final class SlimApplicationFactoryTest extends TestCase
         self::assertEquals(401, $response->getStatusCode());
         self::assertEquals('{"error":"YOU SHALL NOT PASS!"}', $this->getContents($response));
     }
+
 
     public function testShouldAllowRequestByAccessMiddleware(): void
     {
@@ -103,6 +113,7 @@ final class SlimApplicationFactoryTest extends TestCase
         self::assertEquals(201, $response->getStatusCode());
         self::assertEquals('{"channelId":"fb_1234"}', $this->getContents($response));
     }
+
 
     public function testShouldProcessBothGlobalMiddlewares(): void
     {
@@ -122,6 +133,7 @@ final class SlimApplicationFactoryTest extends TestCase
         );
     }
 
+
     public function testShouldProcessBeforeRequestMiddleware(): void
     {
         $request = $this->createRequest('POST', '/non-existing/path');
@@ -135,6 +147,7 @@ final class SlimApplicationFactoryTest extends TestCase
         );
     }
 
+
     private function createContainer(string $configPath = __DIR__ . '/config.neon'): Container
     {
         $loader = new ContainerLoader(__DIR__ . '/temp', true);
@@ -143,22 +156,23 @@ final class SlimApplicationFactoryTest extends TestCase
                 $compiler->loadConfig($configPath);
                 $compiler->addExtension('extensions', new ExtensionsExtension());
             },
-            \md5($configPath)
+            md5($configPath)
         );
 
         return new $class();
     }
 
+
     /**
-     * @param string $requestMethod
-     * @param string $requestUrlPath
-     * @param string[] $headers
+     * @param string        $requestMethod
+     * @param string        $requestUrlPath
+     * @param array<string> $headers
      * @return Request
      */
     private function createRequest(string $requestMethod, string $requestUrlPath, array $headers = []): Request
     {
-        $body = \fopen('php://temp', 'rb+');
-        \assert(\is_resource($body));
+        $body = fopen('php://temp', 'rb+');
+        assert(is_resource($body));
         $slimRequest = new SlimRequest(
             $requestMethod,
             new Uri('http', 'api.be.com', 80, $requestUrlPath),
@@ -171,6 +185,7 @@ final class SlimApplicationFactoryTest extends TestCase
         return new Request($slimRequest);
     }
 
+
     private function createSlimApp(string $configPath = __DIR__ . '/config.neon'): App
     {
         /** @var SlimApplicationFactory $factory */
@@ -179,6 +194,7 @@ final class SlimApplicationFactoryTest extends TestCase
         return $factory->create();
     }
 
+
     private function getContents(ResponseInterface $response): string
     {
         $body = $response->getBody();
@@ -186,5 +202,4 @@ final class SlimApplicationFactoryTest extends TestCase
 
         return $body->getContents();
     }
-
 }

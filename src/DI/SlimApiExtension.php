@@ -7,14 +7,14 @@ use Nette\DI\CompilerExtension;
 
 final class SlimApiExtension extends CompilerExtension
 {
-
     /**
-     * @var array
+     * @var mixed[]
      */
     private $defaults = [
-        'apiDefinitionKey' => 'api',
+        'apiDefinitionKey'  => 'api',
         'slimConfiguration' => [],
     ];
+
 
     public function loadConfiguration(): void
     {
@@ -23,5 +23,4 @@ final class SlimApiExtension extends CompilerExtension
         $builder->addDefinition($this->prefix('slimApi.factory'))
             ->setFactory(SlimApplicationFactory::class, [$this->config]);
     }
-
 }

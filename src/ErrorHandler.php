@@ -8,11 +8,9 @@ use Throwable;
 
 interface ErrorHandler
 {
-
     public function __invoke(
         RequestInterface $request,
         ResponseInterface $response,
         ?Throwable $e = null
     ): ResponseInterface;
-
 }

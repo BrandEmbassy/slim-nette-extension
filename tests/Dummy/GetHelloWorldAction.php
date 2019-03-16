@@ -8,13 +8,17 @@ use BrandEmbassy\Slim\Response\ResponseInterface;
 
 final class GetHelloWorldAction implements ActionHandler
 {
-
+    /**
+     * @param RequestInterface  $request
+     * @param ResponseInterface $response
+     * @param mixed[]           $arguments
+     * @return ResponseInterface
+     */
     public function __invoke(
         RequestInterface $request,
         ResponseInterface $response,
         array $arguments = []
     ): ResponseInterface {
-        return $response->withJson('Hello World');
+        return $response->withJson(['Hello World']);
     }
-
 }

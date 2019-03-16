@@ -7,7 +7,5 @@ use BrandEmbassy\Slim\Response\ResponseInterface;
 
 interface Middleware
 {
-
     public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next): ResponseInterface;
-
 }

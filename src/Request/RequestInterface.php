@@ -8,36 +8,40 @@ use stdClass;
 
 interface RequestInterface extends ServerRequestInterface
 {
-
     /**
-     * @param string $key
-     * @param mixed $default
-     * @return mixed|null
+     * @param string          $key
+     * @param string|int|null $default
+     * @return string|integer|null
      */
     public function getQueryParam(string $key, $default = null);
 
+
     public function getRequiredArgument(string $name): string;
+
 
     /**
      * @param string $name
-     * @return array|stdClass|string
+     * @return mixed[]|stdClass|string
      */
     public function getField(string $name);
 
+
     /**
-     * @param string $name
-     * @param mixed $default
-     * @return mixed
+     * @param string          $name
+     * @param string|int|null $default
+     * @return mixed[]|stdClass|string|integer|null
      */
     public function getOptionalField(string $name, $default = null);
 
+
     public function hasField(string $name): bool;
 
+
     /**
-     * @return mixed
+     * @return mixed[]|object
      */
     public function getDecodedJsonFromBody();
 
-    public function getDateTimeQueryParam(string $key): DateTimeImmutable;
 
+    public function getDateTimeQueryParam(string $key): DateTimeImmutable;
 }

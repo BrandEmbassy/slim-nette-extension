@@ -9,7 +9,6 @@ use Throwable;
 
 final class NotFoundHandler implements ErrorHandler
 {
-
     public function __invoke(
         RequestInterface $request,
         ResponseInterface $response,
@@ -17,5 +16,4 @@ final class NotFoundHandler implements ErrorHandler
     ): ResponseInterface {
         return $response->withJson(['error' => 'Dummy NotFoundHandler here!'], 404);
     }
-
 }

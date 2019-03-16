@@ -8,7 +8,6 @@ use BrandEmbassy\Slim\Response\ResponseInterface;
 
 class BeforeRequestMiddleware implements Middleware
 {
-
     public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next): ResponseInterface
     {
         $response = $response->withAddedHeader(
@@ -18,5 +17,4 @@ class BeforeRequestMiddleware implements Middleware
 
         return $next($request, $response);
     }
-
 }
