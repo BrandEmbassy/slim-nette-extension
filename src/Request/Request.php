@@ -397,7 +397,7 @@ final class Request implements RequestInterface
 
 
     /**
-     * @return mixed[]|object
+     * @return mixed[]|stdClass
      */
     public function getDecodedJsonFromBody()
     {

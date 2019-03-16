@@ -38,7 +38,7 @@ interface RequestInterface extends ServerRequestInterface
 
 
     /**
-     * @return mixed[]|object
+     * @return mixed[]|stdClass
      */
     public function getDecodedJsonFromBody();
 
