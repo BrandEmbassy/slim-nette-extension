@@ -14,6 +14,7 @@ use Psr\Http\Message\UriInterface;
 use Slim\Route;
 use stdClass;
 use function array_key_exists;
+use function is_string;
 use function sprintf;
 
 final class Request implements RequestInterface
@@ -38,7 +39,7 @@ final class Request implements RequestInterface
     /**
      * @param string          $key
      * @param string|int|null $default
-     * @return string|integer|null
+     * @return string|integer|mixed[]|null
      */
     public function getQueryParam(string $key, $default = null)
     {
@@ -411,10 +412,14 @@ final class Request implements RequestInterface
 
     public function getDateTimeQueryParam(string $field): DateTimeImmutable
     {
-        $datetimeParam = (string)$this->getQueryParam($field);
+        $datetimeParam = $this->getQueryParam($field);
 
-        if ($datetimeParam === '') {
+        if ($datetimeParam === null) {
             throw new LogicException(sprintf('Could not find %s in request\'s params', $field));
+        }
+
+        if (!is_string($datetimeParam)) {
+            throw new LogicException(sprintf('Invalid data type %s in request\'s params', $field));
         }
 
         $datetime = DateTimeImmutable::createFromFormat(DateTime::ATOM, $datetimeParam);
