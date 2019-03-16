@@ -8,7 +8,6 @@ use BrandEmbassy\Slim\Response\ResponseInterface;
 
 final class CreateChannelAction implements ActionHandler
 {
-
     /**
      * @inheritdoc
      */
@@ -19,5 +18,4 @@ final class CreateChannelAction implements ActionHandler
     ): ResponseInterface {
         return $response->withJson(['channelId' => 'fb_1234'], 201);
     }
-
 }

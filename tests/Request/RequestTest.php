@@ -14,12 +14,16 @@ use Slim\Http\Body;
 use Slim\Http\Headers;
 use Slim\Http\Request as SlimRequest;
 use Slim\Http\Uri;
+use function assert;
+use function fopen;
+use function is_resource;
+use function sprintf;
 
 final class RequestTest extends TestCase
 {
-
     private const PARAM_NAME = 'dateFrom';
     private const DATE_TIME_STRING = '2017-06-10T01:00:00+01:00';
+
 
     public function testShouldDistinguishBetweenNullAndEmptyOption(): void
     {
@@ -30,6 +34,7 @@ final class RequestTest extends TestCase
         self::assertTrue($request->hasField('thisIsGandalf'));
     }
 
+
     public function testShouldRaiseExceptionForMissingRequiredField(): void
     {
         $request = $this->createDummyRequest();
@@ -38,6 +43,7 @@ final class RequestTest extends TestCase
         $this->expectException(MissingApiArgumentException::class);
         $request->getField('nonExistingField');
     }
+
 
     public function testGettingDateTimeQueryParam(): void
     {
@@ -50,10 +56,11 @@ final class RequestTest extends TestCase
         self::assertSame(self::DATE_TIME_STRING, $dateTime->format(DateTime::ATOM));
     }
 
+
     /**
      * @dataProvider getDataForInvalidDateTimeArgument
-     * @param string $logicExceptionMessage
-     * @param array $arguments
+     * @param string  $logicExceptionMessage
+     * @param mixed[] $arguments
      */
     public function testGettingDateTimeQueryParamThrowsExceptionIfInvalidArgument(
         string $logicExceptionMessage,
@@ -67,25 +74,27 @@ final class RequestTest extends TestCase
         $request->getDateTimeQueryParam(self::PARAM_NAME);
     }
 
+
     /**
-     * @return array
+     * @return mixed[]
      */
     public function getDataForInvalidDateTimeArgument(): array
     {
         return [
             'Missing from' => [
-                \sprintf('Could not find %s in request\'s params', self::PARAM_NAME),
+                sprintf('Could not find %s in request\'s params', self::PARAM_NAME),
                 [],
             ],
             'Invalid from' => [
-                \sprintf('Could not parse %s as datetime', self::PARAM_NAME),
+                sprintf('Could not parse %s as datetime', self::PARAM_NAME),
                 [self::PARAM_NAME => '123456789'],
             ],
         ];
     }
 
+
     /**
-     * @param array $arguments
+     * @param mixed[] $arguments
      * @return MockInterface&SlimRequest
      */
     private function createMockSlimRequest(array $arguments): MockInterface
@@ -97,6 +106,7 @@ final class RequestTest extends TestCase
         return $mock;
     }
 
+
     private function createRequest(StreamInterface $body): Request
     {
         $url = new Uri('https', 'example.com');
@@ -105,15 +115,15 @@ final class RequestTest extends TestCase
         return new Request($slimRequest);
     }
 
+
     private function createDummyRequest(): Request
     {
-        $resource = \fopen('php://temp', 'rb+');
-        \assert(\is_resource($resource));
+        $resource = fopen('php://temp', 'rb+');
+        assert(is_resource($resource));
         $body = new Body($resource);
         $body->write('{"thisIsNull": null, "thisIsGandalf": "gandalf"}');
         $body->rewind();
 
         return $this->createRequest($body);
     }
-
 }

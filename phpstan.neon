@@ -2,8 +2,6 @@ parameters:
     excludes_analyse:
         - %rootDir%/../../../tests/temp/*
 
-    ignoreErrors:
-        - '#Call to an undefined method Mockery\\ExpectationInterface|Mockery\\HigherOrderMessage::andReturn().#'
-
 includes:
-    - vendor/phpstan/phpstan-phpunit/extension.neon
+    - vendor/brandembassy/coding-standard/default-phpstan.neon
+

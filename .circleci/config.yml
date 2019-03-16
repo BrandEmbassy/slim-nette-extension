@@ -22,6 +22,7 @@ jobs:
             - ./vendor
           key: v1-dependencies-{{ checksum "composer.json" }}
 
+      - run: composer lint
       - run: composer phpcs
       - run: composer phpstan
       - run: composer test

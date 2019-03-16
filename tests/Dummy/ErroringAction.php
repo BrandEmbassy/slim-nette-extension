@@ -9,7 +9,13 @@ use LogicException;
 
 final class ErroringAction implements ActionHandler
 {
-
+    // phpcs:disable
+    /**
+     * @param RequestInterface  $request
+     * @param ResponseInterface $response
+     * @param mixed[]           $arguments
+     * @return ResponseInterface
+     */
     public function __invoke(
         RequestInterface $request,
         ResponseInterface $response,
@@ -17,5 +23,5 @@ final class ErroringAction implements ActionHandler
     ): ResponseInterface {
         throw new LogicException('Error or not to error, that\'s the question!');
     }
-
+    // phpcs:enable
 }

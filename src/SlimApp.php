@@ -6,13 +6,10 @@ use BrandEmbassy\Slim\Request\Request;
 use BrandEmbassy\Slim\Response\Response;
 use Psr\Http\Message\ResponseInterface;
 use Slim\App;
+use function reset;
 
 class SlimApp extends App
 {
-
-    /**
-     * @inheritdoc
-     */
     public function run($silent = false): ResponseInterface
     {
         $request = new Request($this->getContainer()->get('request'));
@@ -20,7 +17,7 @@ class SlimApp extends App
         $response = $this->process($request, $response);
 
         $contentTypes = $response->getHeader('Content-Type');
-        $contentType = \reset($contentTypes);
+        $contentType = reset($contentTypes);
 
         if ($contentType === 'text/html; charset=UTF-8' && $response->getBody()->getSize() === 0) {
             $response = $response->withHeader('Content-Type', 'text/plain; charset=UTF-8');
@@ -32,5 +29,4 @@ class SlimApp extends App
 
         return $response;
     }
-
 }

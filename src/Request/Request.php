@@ -13,10 +13,11 @@ use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
 use Slim\Route;
 use stdClass;
+use function array_key_exists;
+use function sprintf;
 
 final class Request implements RequestInterface
 {
-
     /**
      * @var stdClass|null
      */
@@ -27,13 +28,17 @@ final class Request implements RequestInterface
      */
     private $request;
 
+
     public function __construct(ServerRequestInterface $request)
     {
         $this->request = $request;
     }
 
+
     /**
-     * @inheritdoc
+     * @param string          $key
+     * @param string|int|null $default
+     * @return string|integer|null
      */
     public function getQueryParam(string $key, $default = null)
     {
@@ -47,10 +52,7 @@ final class Request implements RequestInterface
         return $result;
     }
 
-    /**
-     * @inheritdoc
-     * @throws MissingApiArgumentException
-     */
+
     public function getRequiredArgument(string $name): string
     {
         $arguments = $this->request->getAttributes();
@@ -59,30 +61,33 @@ final class Request implements RequestInterface
         $value = Strings::trim($value);
 
         if ($value === '') {
-            throw new MissingApiArgumentException(\sprintf('Missing "%s" argument', $name));
+            throw new MissingApiArgumentException(sprintf('Missing "%s" argument', $name));
         }
 
         return $value;
     }
 
+
     /**
-     * @inheritdoc
-     * @throws MissingApiArgumentException
+     * @param string $name
+     * @return mixed[]|stdClass|string
      */
     public function getField(string $name)
     {
         $body = $this->getDecodedJsonFromBody();
 
         if (!$this->hasField($name)) {
-            throw new MissingApiArgumentException(\sprintf('Field "%s" is missing in request body', $name));
+            throw new MissingApiArgumentException(sprintf('Field "%s" is missing in request body', $name));
         }
 
-        return $body->$name;
+        return ((array)$body)[$name];
     }
 
+
     /**
-     * @inheritdoc
-     * @throws MissingApiArgumentException
+     * @param string          $name
+     * @param int|string|null $default
+     * @return mixed[]|stdClass|string|integer|null
      */
     public function getOptionalField($name, $default = null)
     {
@@ -91,217 +96,267 @@ final class Request implements RequestInterface
             : $default;
     }
 
+
     /**
-     * @inheritdoc
+     * @param string $name
+     * @return boolean
      */
     public function hasField($name): bool
     {
-        return \array_key_exists($name, (array)$this->getDecodedJsonFromBody());
+        return array_key_exists($name, (array)$this->getDecodedJsonFromBody());
     }
+
 
     public function getProtocolVersion(): string
     {
         return $this->request->getProtocolVersion();
     }
 
+
     /**
-     * @inheritDoc
+     * @param string $version
+     * @return static
      */
-    public function withProtocolVersion($version)
+    public function withProtocolVersion($version): self
     {
         return new static($this->request->withProtocolVersion($version));
     }
 
+
     /**
-     * @inheritDoc
+     * @return string[][]
      */
     public function getHeaders(): array
     {
         return $this->request->getHeaders();
     }
 
+
     /**
-     * @inheritDoc
+     * @param string $name
+     * @return boolean
      */
     public function hasHeader($name): bool
     {
         return $this->request->hasHeader($name);
     }
 
+
     /**
-     * @inheritDoc
+     * @param string $name
+     * @return string[]
      */
     public function getHeader($name): array
     {
         return $this->request->getHeader($name);
     }
 
+
     /**
-     * @inheritDoc
+     * @param string $name
+     * @return string
      */
     public function getHeaderLine($name): string
     {
         return $this->request->getHeaderLine($name);
     }
 
+
     /**
-     * @inheritDoc
+     * @param string          $name
+     * @param string|string[] $value
+     * @return static
      */
-    public function withHeader($name, $value)
+    public function withHeader($name, $value): self
     {
         return new static($this->request->withHeader($name, $value));
     }
 
+
     /**
-     * @inheritDoc
+     * @param string          $name
+     * @param string|string[] $value
+     * @return static
      */
-    public function withAddedHeader($name, $value)
+    public function withAddedHeader($name, $value): self
     {
         return new static($this->request->withAddedHeader($name, $value));
     }
 
+
     /**
-     * @inheritDoc
+     * @param string $name
+     * @return static
      */
-    public function withoutHeader($name)
+    public function withoutHeader($name): self
     {
         return new static($this->request->withoutHeader($name));
     }
+
 
     public function getBody(): StreamInterface
     {
         return $this->request->getBody();
     }
 
+
     /**
-     * @inheritDoc
+     * @param StreamInterface $body
+     * @return static
      */
-    public function withBody(StreamInterface $body)
+    public function withBody(StreamInterface $body): self
     {
         return new static($this->request->withBody($body));
     }
+
 
     public function getRequestTarget(): string
     {
         return $this->request->getRequestTarget();
     }
 
+
     /**
-     * @inheritDoc
+     * @param mixed $requestTarget
+     * @return static
      */
-    public function withRequestTarget($requestTarget)
+    public function withRequestTarget($requestTarget): self
     {
         return new static($this->request->withRequestTarget($requestTarget));
     }
+
 
     public function getMethod(): string
     {
         return $this->request->getMethod();
     }
 
+
     /**
-     * @inheritDoc
+     * @param string $method
+     * @return static
      */
-    public function withMethod($method)
+    public function withMethod($method): self
     {
         return new static($this->request->withMethod($method));
     }
+
 
     public function getUri(): UriInterface
     {
         return $this->request->getUri();
     }
 
+
     /**
-     * @inheritDoc
+     * @param UriInterface $uri
+     * @param bool         $preserveHost
+     * @return static
      */
-    public function withUri(UriInterface $uri, $preserveHost = false)
+    public function withUri(UriInterface $uri, $preserveHost = false): self
     {
         return new static($this->request->withUri($uri, $preserveHost));
     }
 
+
     /**
-     * @inheritDoc
+     * @return mixed[]
      */
     public function getServerParams(): array
     {
         return $this->request->getServerParams();
     }
 
+
     /**
-     * @inheritDoc
+     * @return mixed[]
      */
     public function getCookieParams(): array
     {
         return $this->request->getCookieParams();
     }
 
+
     /**
-     * @inheritDoc
+     * @param mixed[] $cookies
+     * @return static
      */
-    public function withCookieParams(array $cookies)
+    public function withCookieParams(array $cookies): self
     {
         return new static($this->request->withCookieParams($cookies));
     }
 
+
     /**
-     * @inheritDoc
+     * @return mixed[]
      */
     public function getQueryParams(): array
     {
         return $this->request->getQueryParams();
     }
 
+
     /**
-     * @inheritDoc
+     * @param mixed[] $query
+     * @return static
      */
-    public function withQueryParams(array $query)
+    public function withQueryParams(array $query): self
     {
         return new static($this->request->withQueryParams($query));
     }
 
+
     /**
-     * @inheritDoc
+     * @return mixed[]
      */
     public function getUploadedFiles(): array
     {
         return $this->request->getUploadedFiles();
     }
 
+
     /**
-     * @inheritDoc
+     * @param mixed[] $uploadedFiles
+     * @return static
      */
     public function withUploadedFiles(array $uploadedFiles)
     {
         return new static($this->request->withUploadedFiles($uploadedFiles));
     }
 
+
     /**
-     * @inheritDoc
+     * @return mixed[]|object|null
      */
     public function getParsedBody()
     {
         return $this->request->getParsedBody();
     }
 
+
     /**
-     * @inheritDoc
+     * @param mixed[]|object|null $data
+     * @return static
      */
-    public function withParsedBody($data)
+    public function withParsedBody($data): self
     {
         return new static($this->request->withParsedBody($data));
     }
 
+
     /**
-     * @inheritDoc
+     * @return mixed[]
      */
     public function getAttributes(): array
     {
         return $this->request->getAttributes();
     }
 
+
     /**
-     * @inheritDoc
+     * @param string $name
+     * @param mixed  $default
+     * @return mixed
      */
     public function getAttribute($name, $default = null)
     {
@@ -318,24 +373,30 @@ final class Request implements RequestInterface
         return $value;
     }
 
+
     /**
-     * @inheritDoc
+     * @param string $name
+     * @param mixed  $value
+     * @return static
      */
-    public function withAttribute($name, $value)
+    public function withAttribute($name, $value): self
     {
         return new static($this->request->withAttribute($name, $value));
     }
 
+
     /**
-     * @inheritDoc
+     * @param string $name
+     * @return static
      */
-    public function withoutAttribute($name)
+    public function withoutAttribute($name): self
     {
         return new static($this->request->withoutAttribute($name));
     }
 
+
     /**
-     * @inheritdoc
+     * @return mixed[]|object
      */
     public function getDecodedJsonFromBody()
     {
@@ -347,21 +408,21 @@ final class Request implements RequestInterface
         return $this->decodedJsonFromBody;
     }
 
+
     public function getDateTimeQueryParam(string $field): DateTimeImmutable
     {
-        $datetimeParam = $this->getQueryParam($field);
+        $datetimeParam = (string)$this->getQueryParam($field);
 
-        if ($datetimeParam === null) {
-            throw new LogicException(\sprintf('Could not find %s in request\'s params', $field));
+        if ($datetimeParam === '') {
+            throw new LogicException(sprintf('Could not find %s in request\'s params', $field));
         }
 
         $datetime = DateTimeImmutable::createFromFormat(DateTime::ATOM, $datetimeParam);
 
         if ($datetime === false || $datetime->format(DateTime::ATOM) !== $datetimeParam) {
-            throw new LogicException(\sprintf('Could not parse %s as datetime', $field));
+            throw new LogicException(sprintf('Could not parse %s as datetime', $field));
         }
 
         return $datetime;
     }
-
 }

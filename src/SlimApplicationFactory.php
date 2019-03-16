@@ -8,12 +8,16 @@ use Closure;
 use LogicException;
 use Nette\DI\Container;
 use Slim\Collection;
+use Throwable;
+use function gettype;
+use function is_array;
+use function sprintf;
+use function trim;
 
 final class SlimApplicationFactory
 {
-
     /**
-     * @var array
+     * @var mixed[]
      */
     private $configuration;
 
@@ -23,12 +27,13 @@ final class SlimApplicationFactory
     private $container;
 
     /**
-     * @var Middleware[]
+     * @var array<Middleware>
      */
     private $beforeRoutesMiddlewares;
 
+
     /**
-     * @param array $configuration
+     * @param mixed[]   $configuration
      * @param Container $container
      */
     public function __construct(array $configuration, Container $container)
@@ -37,6 +42,7 @@ final class SlimApplicationFactory
         $this->container = $container;
         $this->beforeRoutesMiddlewares = [];
     }
+
 
     public function create(): SlimApp
     {
@@ -72,16 +78,17 @@ final class SlimApplicationFactory
         return $app;
     }
 
+
     /**
      * @param string $configurationCode
-     * @return array
+     * @return mixed[]
      */
     private function getConfiguration(string $configurationCode): array
     {
         $configuration = $this->container->getParameters()[$configurationCode];
 
-        if (!\is_array($configuration)) {
-            throw new LogicException(\sprintf('Missing %s configuration', $configurationCode));
+        if (!is_array($configuration)) {
+            throw new LogicException(sprintf('Missing %s configuration', $configurationCode));
         }
 
         $this->validateConfiguration($configuration, $configurationCode, 'routes', 'array');
@@ -93,11 +100,12 @@ final class SlimApplicationFactory
         return $configuration;
     }
 
+
     /**
-     * @param array $configuration
-     * @param string $configurationCode
-     * @param string $name
-     * @param string $type
+     * @param mixed[] $configuration
+     * @param string  $configurationCode
+     * @param string  $name
+     * @param string  $type
      */
     private function validateConfiguration(
         array $configuration,
@@ -105,18 +113,19 @@ final class SlimApplicationFactory
         string $name,
         string $type
     ): void {
-        if (!isset($configuration[$name]) || \gettype($configuration[$name]) !== $type) {
+        if (!isset($configuration[$name]) || gettype($configuration[$name]) !== $type) {
             throw new LogicException(
-                \sprintf(
+                sprintf(
                     'Missing or empty %s.%s configuration (has to be %s, but is %s)',
                     $configurationCode,
                     $name,
                     $type,
-                    \gettype($configuration[$name] ?? null)
+                    gettype($configuration[$name] ?? null)
                 )
             );
         }
     }
+
 
     /**
      * @param string $serviceName
@@ -136,18 +145,20 @@ final class SlimApplicationFactory
         };
     }
 
+
     private function removeDefaultSlimErrorHandlers(SlimApp $app): void
     {
         $app->getContainer()['phpErrorHandler'] = static function () {
-            return static function (RequestInterface $request, ResponseInterface $response, \Throwable $e): void {
+            return static function (RequestInterface $request, ResponseInterface $response, Throwable $e): void {
                 throw $e;
             };
         };
     }
 
+
     /**
      * @param SlimApp $app
-     * @param array $handlers
+     * @param mixed[] $handlers
      */
     private function registerHandlers(SlimApp $app, array $handlers): void
     {
@@ -156,6 +167,7 @@ final class SlimApplicationFactory
         }
     }
 
+
     private function registerServiceIntoContainer(SlimApp $app, string $serviceName): void
     {
         if (!$app->getContainer()->has($serviceName)) {
@@ -163,10 +175,11 @@ final class SlimApplicationFactory
         }
     }
 
+
     /**
      * @param SlimApp $app
-     * @param array $api
-     * @param string $apiName
+     * @param mixed[] $api
+     * @param string  $apiName
      */
     private function registerApis(SlimApp $app, array $api, string $apiName): void
     {
@@ -175,11 +188,12 @@ final class SlimApplicationFactory
         }
     }
 
+
     /**
      * @param SlimApp $app
-     * @param string $apiName
-     * @param string $version
-     * @param array $routes
+     * @param string  $apiName
+     * @param string  $version
+     * @param mixed[] $routes
      */
     private function registerApi(SlimApp $app, string $apiName, string $version, array $routes): void
     {
@@ -194,11 +208,12 @@ final class SlimApplicationFactory
         }
     }
 
+
     /**
      * @deprecated Do not use Controllers, use Invokable Action classes (use MiddleWareInterface)
      * @param SlimApp $app
-     * @param string $urlPattern
-     * @param array $routeData
+     * @param string  $urlPattern
+     * @param mixed[] $routeData
      */
     private function registerControllerRoute(SlimApp $app, string $urlPattern, array $routeData): void
     {
@@ -206,14 +221,15 @@ final class SlimApplicationFactory
 
         foreach ($routeData['methods'] as $method => $action) {
             $app->map([$method], $urlPattern, $routeData['service'] . ':' . $action)
-                ->add($routeData['service'] . ':' . 'middleware');
+                ->add($routeData['service'] . ':middleware');
         }
     }
 
+
     /**
      * @param SlimApp $app
-     * @param array $routeData
-     * @param string $urlPattern
+     * @param mixed[] $routeData
+     * @param string  $urlPattern
      */
     private function registerInvokableActionRoutes(SlimApp $app, array $routeData, string $urlPattern): void
     {
@@ -237,11 +253,12 @@ final class SlimApplicationFactory
         }
     }
 
+
     private function createUrlPattern(string $apiName, string $version, string $routeName): string
     {
-        $apiName = \trim($apiName, '/');
-        $version = \trim($version, '/');
-        $routeName = \trim($routeName, '/');
+        $apiName = trim($apiName, '/');
+        $version = trim($version, '/');
+        $routeName = trim($routeName, '/');
 
         if ($version !== '') {
             $version = '/' . $version;
@@ -258,15 +275,17 @@ final class SlimApplicationFactory
         return $apiName . $version . $routeName;
     }
 
+
     private function registerBeforeRequestMiddleware(SlimApp $app, string $middleware): void
     {
         $this->registerServiceIntoContainer($app, $middleware);
         $app->add($middleware);
     }
 
+
     /**
      * @param SlimApp $app
-     * @param array $configuration
+     * @param mixed[] $configuration
      */
     private function registerBeforeRouteMiddlewares(SlimApp $app, array $configuration): void
     {
@@ -277,5 +296,4 @@ final class SlimApplicationFactory
             }
         }
     }
-
 }

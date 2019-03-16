@@ -10,10 +10,8 @@ use BrandEmbassy\Slim\Response\ResponseInterface;
  */
 final class NotAllowedHandler
 {
-
     public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
         return $response->withJson(['error' => 'Dummy NotAllowedHandler here!'], 405);
     }
-
 }

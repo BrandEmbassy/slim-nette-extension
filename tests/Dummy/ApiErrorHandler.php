@@ -9,7 +9,6 @@ use Throwable;
 
 final class ApiErrorHandler implements ErrorHandler
 {
-
     public function __invoke(
         RequestInterface $request,
         ResponseInterface $response,
@@ -21,5 +20,4 @@ final class ApiErrorHandler implements ErrorHandler
 
         return $response->withJson(['error' => $error], 500);
     }
-
 }
