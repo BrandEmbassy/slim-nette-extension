@@ -11,7 +11,7 @@ interface RequestInterface extends ServerRequestInterface
     /**
      * @param string          $key
      * @param string|int|null $default
-     * @return string|integer|null
+     * @return string|integer|mixed[]|null
      */
     public function getQueryParam(string $key, $default = null);
 
