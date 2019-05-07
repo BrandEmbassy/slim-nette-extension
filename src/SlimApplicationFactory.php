@@ -8,14 +8,19 @@ use Closure;
 use LogicException;
 use Nette\DI\Container;
 use Slim\Collection;
+use Slim\Interfaces\RouterInterface;
 use Throwable;
 use function gettype;
 use function is_array;
 use function sprintf;
-use function trim;
 
 final class SlimApplicationFactory
 {
+    /**
+     * @var RouterInterface
+     */
+    protected $router;
+
     /**
      * @var mixed[]
      */
@@ -26,35 +31,28 @@ final class SlimApplicationFactory
      */
     private $container;
 
-    /**
-     * @var array<Middleware>
-     */
-    private $beforeRoutesMiddlewares;
-
 
     /**
-     * @param mixed[]   $configuration
-     * @param Container $container
+     * @param mixed[]         $configuration
+     * @param RouterInterface $router
+     * @param Container       $container
      */
-    public function __construct(array $configuration, Container $container)
+    public function __construct(array $configuration, RouterInterface $router, Container $container)
     {
         $this->configuration = $configuration;
         $this->container = $container;
-        $this->beforeRoutesMiddlewares = [];
+        $this->router = $router;
     }
 
 
     public function create(): SlimApp
     {
-        $app = new SlimApp($this->configuration['slimConfiguration']);
+        $slimConfiguration = $this->configuration['slimConfiguration'];
+        $slimConfiguration['router'] = $this->router;
+
+        $app = new SlimApp($slimConfiguration);
 
         $configuration = $this->getConfiguration($this->configuration['apiDefinitionKey']);
-
-        $this->registerBeforeRouteMiddlewares($app, $configuration);
-
-        foreach ($configuration['routes'] as $apiName => $api) {
-            $this->registerApis($app, $api, $apiName);
-        }
 
         $container = $app->getContainer();
 
@@ -90,8 +88,6 @@ final class SlimApplicationFactory
         if (!is_array($configuration)) {
             throw new LogicException(sprintf('Missing %s configuration', $configurationCode));
         }
-
-        $this->validateConfiguration($configuration, $configurationCode, 'routes', 'array');
 
         if (isset($configuration['handlers'])) {
             $this->validateConfiguration($configuration, $configurationCode, 'handlers', 'array');
@@ -176,124 +172,9 @@ final class SlimApplicationFactory
     }
 
 
-    /**
-     * @param SlimApp $app
-     * @param mixed[] $api
-     * @param string  $apiName
-     */
-    private function registerApis(SlimApp $app, array $api, string $apiName): void
-    {
-        foreach ($api as $version => $routes) {
-            $this->registerApi($app, $apiName, $version, $routes);
-        }
-    }
-
-
-    /**
-     * @param SlimApp $app
-     * @param string  $apiName
-     * @param string  $version
-     * @param mixed[] $routes
-     */
-    private function registerApi(SlimApp $app, string $apiName, string $version, array $routes): void
-    {
-        foreach ($routes as $routeName => $routeData) {
-            $urlPattern = $this->createUrlPattern($apiName, $version, $routeName);
-
-            if (isset($routeData['type']) && $routeData['type'] === 'controller') {
-                $this->registerControllerRoute($app, $urlPattern, $routeData);
-            } else {
-                $this->registerInvokableActionRoutes($app, $routeData, $urlPattern);
-            }
-        }
-    }
-
-
-    /**
-     * @deprecated Do not use Controllers, use Invokable Action classes (use MiddleWareInterface)
-     * @param SlimApp $app
-     * @param string  $urlPattern
-     * @param mixed[] $routeData
-     */
-    private function registerControllerRoute(SlimApp $app, string $urlPattern, array $routeData): void
-    {
-        $this->registerServiceIntoContainer($app, $routeData['service']);
-
-        foreach ($routeData['methods'] as $method => $action) {
-            $app->map([$method], $urlPattern, $routeData['service'] . ':' . $action)
-                ->add($routeData['service'] . ':middleware');
-        }
-    }
-
-
-    /**
-     * @param SlimApp $app
-     * @param mixed[] $routeData
-     * @param string  $urlPattern
-     */
-    private function registerInvokableActionRoutes(SlimApp $app, array $routeData, string $urlPattern): void
-    {
-        foreach ($routeData as $method => $config) {
-            $service = $config['service'];
-
-            $this->registerServiceIntoContainer($app, $service);
-            $routeToAdd = $app->map([$method], $urlPattern, $service);
-
-            if (isset($config['middleware'])) {
-                foreach ($config['middleware'] as $middleware) {
-                    $this->registerServiceIntoContainer($app, $middleware);
-
-                    $routeToAdd->add($middleware);
-                }
-            }
-
-            foreach ($this->beforeRoutesMiddlewares as $middleware) {
-                $routeToAdd->add($middleware);
-            }
-        }
-    }
-
-
-    private function createUrlPattern(string $apiName, string $version, string $routeName): string
-    {
-        $apiName = trim($apiName, '/');
-        $version = trim($version, '/');
-        $routeName = trim($routeName, '/');
-
-        if ($version !== '') {
-            $version = '/' . $version;
-        }
-
-        if ($apiName !== '') {
-            $apiName = '/' . $apiName;
-        }
-
-        if ($routeName !== '') {
-            $routeName = '/' . $routeName;
-        }
-
-        return $apiName . $version . $routeName;
-    }
-
-
     private function registerBeforeRequestMiddleware(SlimApp $app, string $middleware): void
     {
         $this->registerServiceIntoContainer($app, $middleware);
         $app->add($middleware);
-    }
-
-
-    /**
-     * @param SlimApp $app
-     * @param mixed[] $configuration
-     */
-    private function registerBeforeRouteMiddlewares(SlimApp $app, array $configuration): void
-    {
-        if (isset($configuration['beforeRouteMiddlewares'])) {
-            foreach ($configuration['beforeRouteMiddlewares'] as $globalMiddleware) {
-                $this->registerServiceIntoContainer($app, $globalMiddleware);
-                $this->beforeRoutesMiddlewares[] = $app->getContainer()->get($globalMiddleware);
-            }
-        }
     }
 }

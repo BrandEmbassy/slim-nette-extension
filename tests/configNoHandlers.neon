@@ -1,14 +1,17 @@
 extensions:
     slimApi: \BrandEmbassy\Slim\DI\SlimApiExtension
 
+services:
+    - BrandEmbassy\Slim\RouterFactory("%configuration%", ...)::create
 
 parameters:
     api:
         routes: []
 
-slimApi:
-    slimConfiguration:
-        settings:
-            removeDefaultHandlers: false
+    configuration:
+        slimConfiguration:
+            settings:
+                removeDefaultHandlers: true
+        apiDefinitionKey: "api"
 
-    apiDefinitionKey: "api"
+slimApi: "%configuration%"

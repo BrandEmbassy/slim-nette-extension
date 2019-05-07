@@ -33,13 +33,19 @@ Now register new extension by adding this code into your `config.neon`:
 extensions:
     slimApi: BrandEmbassy\Slim\DI\SlimApiExtension # Register extension
 
-slimApi: # Configure it
-    slimConfiguration:
-        settings:
-            removeDefaultHandlers: true # It's recommended to disable original error handling 
-                                        # and use your own error handlers suited for needs of your app. 
+services:
+    - BrandEmbassy\Slim\RouterFactory("%configuration%", ...)::create # Register a router factory
 
-    apiDefinitionKey: api # Your API definition will be under this key in "parameters" section. 
+parameters:
+    configuration:
+        slimConfiguration:
+            settings:
+                removeDefaultHandlers: true # It's recommended to disable original error handling 
+                                            # and use your own error handlers suited for needs of your app. 
+
+        apiDefinitionKey: api # Your API definition will be under this key in "parameters" section.
+    
+slimApi: %configuration% # Configure it 
 ```
 
 
