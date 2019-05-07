@@ -92,3 +92,30 @@ Now you can simply get `SlimApplicationFactory` class from your DI Container (or
 $factory = $container->getByType(SlimApplicationFactory::class);
 $factory->create()->run();
 ```
+
+## Development
+### Docker :heart:
+Because no one likes to install or change his own environment for someone else's code, you can use Docker and run tests inside Docker.
+
+To build and prepare the docker image, you can run the command bellow.
+```bash
+docker-compose build slim-nette-extension
+```
+
+You can run command bellow to run `composer install`.
+```bash
+docker-compose run slim-nette-extension
+```
+
+OR
+
+If you want to run `composer update` or one of the scripts defined inside `composer.json`, you can use one of these commands bellow.
+```bash
+docker-compose run slim-nette-extension composer update
+docker-compose run slim-nette-extension composer lint
+docker-compose run slim-nette-extension composer phpcs
+docker-compose run slim-nette-extension composer phpcbf
+docker-compose run slim-nette-extension composer phpstan
+docker-compose run slim-nette-extension composer tests
+docker-compose run slim-nette-extension composer tests-debug
+```

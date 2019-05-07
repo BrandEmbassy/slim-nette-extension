@@ -30,7 +30,8 @@
         "phpcs": "./vendor/bin/phpcs  --ignore=\"tests/temp/*\" --standard=ruleset.xml src tests",
         "phpcbf": "./vendor/bin/phpcbf --standard=ruleset.xml src tests",
         "phpstan": "./vendor/bin/phpstan analyse src tests",
-        "test": "./vendor/bin/phpunit tests"
+        "tests": "./vendor/bin/phpunit tests",
+        "tests-debug": "XDEBUG_CONFIG='idekey=PHPSTORM remote_autostart=1' PHP_IDE_CONFIG='serverName=default' ./vendor/bin/phpunit tests --stop-on-failure"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
