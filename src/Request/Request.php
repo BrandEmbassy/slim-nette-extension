@@ -43,9 +43,12 @@ final class Request implements RequestInterface
     {
         $this->request = $request;
 
-        $this->registerMediaTypeEncoder('application/json', function ($data): ?string {
-            return Json::encode($data);
-        });
+        $this->registerMediaTypeEncoder(
+            'application/json',
+            static function ($data): ?string {
+                return Json::encode($data);
+            }
+        );
     }
 
     /**
