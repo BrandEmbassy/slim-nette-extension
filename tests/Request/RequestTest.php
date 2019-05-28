@@ -8,8 +8,10 @@ use DateTime;
 use LogicException;
 use Mockery;
 use Mockery\MockInterface;
+use Nette\Utils\Json;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\StreamInterface;
+use RuntimeException;
 use Slim\Http\Body;
 use Slim\Http\Headers;
 use Slim\Http\Request as SlimRequest;
@@ -23,7 +25,51 @@ final class RequestTest extends TestCase
 {
     private const PARAM_NAME = 'dateFrom';
     private const DATE_TIME_STRING = '2017-06-10T01:00:00+01:00';
+    private const DUMMY_REQUEST_BODY = '{"thisIsNull":null,"thisIsGandalf":"gandalf"}';
 
+
+    public function testWithParsedBodyWithNotKnownMediaType(): void
+    {
+        $request = $this->createDummyRequest();
+        $request = $request->withHeader('Content-Type', 'application/xml');
+
+        $this->expectExceptionMessage(
+            'Parsed body could not be set because there is no encoder for media type \'application/xml\''
+        );
+        $this->expectException(RuntimeException::class);
+        $request->withParsedBody([]);
+    }
+
+
+    public function testWithBody(): void
+    {
+        $expectedUpdatedBody = '{"thisIsNull":null,"thisIsGandalf":"gandalf","thisIsNewField":"new field"}';
+        $expectedUpdatedParsedBody = Json::decode($expectedUpdatedBody, Json::FORCE_ARRAY);
+
+        $request = $this->createDummyRequest();
+
+        $newRequestBody = $this->createRequestBody($expectedUpdatedBody);
+        $requestNew = $request->withBody($newRequestBody);
+
+        $this->assertEquals($expectedUpdatedBody, $requestNew->getBody()->getContents());
+        $this->assertEquals($expectedUpdatedParsedBody, $requestNew->getParsedBody());
+    }
+
+
+    public function testWithParsedBody(): void
+    {
+        $expectedUpdatedBody = '{"thisIsNull":null,"thisIsGandalf":"gandalf","thisIsNewField":"new field"}';
+        $expectedUpdatedParsedBody = Json::decode($expectedUpdatedBody, Json::FORCE_ARRAY);
+
+        $request = $this->createDummyRequest();
+
+        $body = $request->getParsedBody();
+        $body['thisIsNewField'] = 'new field';
+        $requestNew = $request->withParsedBody($body);
+
+        $this->assertEquals($expectedUpdatedBody, $requestNew->getBody()->getContents());
+        $this->assertEquals($expectedUpdatedParsedBody, $requestNew->getParsedBody());
+    }
 
     public function testShouldDistinguishBetweenNullAndEmptyOption(): void
     {
@@ -111,6 +157,7 @@ final class RequestTest extends TestCase
     {
         $url = new Uri('https', 'example.com');
         $slimRequest = new SlimRequest('POST', $url, new Headers(), [], [], $body);
+        $slimRequest = $slimRequest->withAddedHeader('Content-Type', 'application/json');
 
         return new Request($slimRequest);
     }
@@ -118,12 +165,19 @@ final class RequestTest extends TestCase
 
     private function createDummyRequest(): Request
     {
+        return $this->createRequest($this->createRequestBody(self::DUMMY_REQUEST_BODY));
+    }
+
+
+    private function createRequestBody(string $bodyAsString): Body
+    {
         $resource = fopen('php://temp', 'rb+');
         assert(is_resource($resource));
         $body = new Body($resource);
-        $body->write('{"thisIsNull": null, "thisIsGandalf": "gandalf"}');
+        $body->write($bodyAsString);
         $body->rewind();
 
-        return $this->createRequest($body);
+        return $body;
     }
+
 }
