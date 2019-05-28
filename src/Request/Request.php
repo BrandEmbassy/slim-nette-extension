@@ -3,6 +3,7 @@
 namespace BrandEmbassy\Slim\Request;
 
 use BrandEmbassy\Slim\MissingApiArgumentException;
+use Closure;
 use DateTime;
 use DateTimeImmutable;
 use LogicException;
@@ -11,6 +12,8 @@ use Nette\Utils\Strings;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
+use RuntimeException;
+use Slim\Http\RequestBody;
 use Slim\Route;
 use stdClass;
 use function array_key_exists;
@@ -29,15 +32,24 @@ final class Request implements RequestInterface
      */
     private $request;
 
+    /**
+     * List of request body encoders (e.g., url-encoded, JSON, XML, multipart)
+     *
+     * @var callable[]
+     */
+    private $bodyEncoders = [];
 
     public function __construct(ServerRequestInterface $request)
     {
         $this->request = $request;
+
+        $this->registerMediaTypeEncoder('application/json', function ($data): ?string {
+            return Json::encode($data);
+        });
     }
 
-
     /**
-     * @param string          $key
+     * @param string $key
      * @param string|int|null $default
      * @return string|integer|mixed[]|null
      */
@@ -90,7 +102,7 @@ final class Request implements RequestInterface
 
 
     /**
-     * @param string          $name
+     * @param string $name
      * @param int|string|null $default
      * @return mixed[]|stdClass|string|integer|null
      */
@@ -168,7 +180,7 @@ final class Request implements RequestInterface
 
 
     /**
-     * @param string          $name
+     * @param string $name
      * @param string|string[] $value
      * @return static
      */
@@ -179,7 +191,7 @@ final class Request implements RequestInterface
 
 
     /**
-     * @param string          $name
+     * @param string $name
      * @param string|string[] $value
      * @return static
      */
@@ -255,7 +267,7 @@ final class Request implements RequestInterface
 
     /**
      * @param UriInterface $uri
-     * @param bool         $preserveHost
+     * @param bool $preserveHost
      * @return static
      */
     public function withUri(UriInterface $uri, $preserveHost = false): self
@@ -345,7 +357,39 @@ final class Request implements RequestInterface
      */
     public function withParsedBody($data): self
     {
-        return new static($this->request->withParsedBody($data));
+        $mediaType = $this->getMediaType();
+
+        // Check if this specific media type has a encoder registered first
+        if (!isset($this->bodyEncoders[$mediaType])) {
+            // If not, look for a media type with a structured syntax suffix (RFC 6839)
+            $parts = explode('+', $mediaType);
+            if (count($parts) >= 2) {
+                $mediaType = 'application/' . $parts[count($parts)-1];
+            }
+        }
+
+        if (isset($this->bodyEncoders[$mediaType])) {
+            $encoded = $this->bodyEncoders[$mediaType]($data);
+
+            if (!is_string($encoded)) {
+                throw new RuntimeException(
+                    'Request body media type encoder return value must be a string'
+                );
+            }
+        } else {
+            throw new RuntimeException(
+                \sprintf(
+                    'Parsed body could not be set because there is no encoder for media type \'%s\'',
+                    $mediaType
+                )
+            );
+        }
+
+        $requestBody = new RequestBody();
+        $requestBody->write($encoded);
+        $requestBody->rewind();
+
+        return new static($this->request->withBody($requestBody)->withParsedBody($data));
     }
 
 
@@ -381,7 +425,7 @@ final class Request implements RequestInterface
 
     /**
      * @param string $name
-     * @param mixed  $value
+     * @param mixed $value
      * @return static
      */
     public function withAttribute($name, $value): self
@@ -434,4 +478,55 @@ final class Request implements RequestInterface
 
         return $datetime;
     }
+
+    /**
+     * Register media type encoder.
+     *
+     * Note: This method is not part of the PSR-7 standard.
+     *
+     * @param string $mediaType A HTTP media type (excluding content-type params).
+     * @param callable $callable A callable that returns encoded content for  media type.
+     */
+    public function registerMediaTypeEncoder(string $mediaType, callable $callable): void
+    {
+        if ($callable instanceof Closure) {
+            $callable = $callable->bindTo($this);
+        }
+
+        $this->bodyEncoders[$mediaType] = $callable;
+    }
+
+    /**
+     * Get request content type.
+     *
+     * Note: This method is not part of the PSR-7 standard.
+     *
+     * @return string|null The request content type, if known
+     */
+    public function getContentType(): ?string
+    {
+        $result = $this->getHeader('Content-Type');
+
+        return $result ? $result[0] : null;
+    }
+
+    /**
+     * Get request media type, if known.
+     *
+     * Note: This method is not part of the PSR-7 standard.
+     *
+     * @return string|null The request media type, minus content-type params
+     */
+    public function getMediaType(): ?string
+    {
+        $contentType = $this->getContentType();
+        if ($contentType) {
+            $contentTypeParts = preg_split('/\s*[;,]\s*/', $contentType);
+
+            return strtolower($contentTypeParts[0]);
+        }
+
+        return null;
+    }
+
 }

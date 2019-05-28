@@ -9,7 +9,7 @@ use stdClass;
 interface RequestInterface extends ServerRequestInterface
 {
     /**
-     * @param string          $key
+     * @param string $key
      * @param string|int|null $default
      * @return string|integer|mixed[]|null
      */
