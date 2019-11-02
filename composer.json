@@ -23,7 +23,7 @@
         "phpunit/phpunit": "^8",
         "roave/security-advisories": "dev-master",
         "mockery/mockery": "^1.2",
-        "brandembassy/coding-standard": "^5.3"
+        "brandembassy/coding-standard": "^6.0"
     },
     "scripts": {
         "lint": " find src tests -name \"*.php\" -print0 | xargs -0 -n1 -P8 php -l",

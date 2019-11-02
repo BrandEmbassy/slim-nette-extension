@@ -37,8 +37,8 @@ final class Request implements RequestInterface
 
 
     /**
-     * @param string          $key
-     * @param string|int|null $default
+     * @param string                         $key
+     * @param string|int|string[]|int[]|null $default
      * @return string|integer|mixed[]|null
      */
     public function getQueryParam(string $key, $default = null)
