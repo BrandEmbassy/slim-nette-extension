@@ -12,6 +12,7 @@ services:
     - BrandEmbassyTest\Slim\Dummy\ErroringAction
     - BrandEmbassyTest\Slim\Dummy\BeforeRequestMiddleware
     - BrandEmbassyTest\Slim\Dummy\BeforeRouteMiddleware
+    - BrandEmbassy\Slim\RouterFactory("%configuration%", ...)::create
 
 parameters:
     api:
@@ -46,11 +47,12 @@ parameters:
         beforeRequestMiddlewares:
             - BrandEmbassyTest\Slim\Dummy\BeforeRequestMiddleware
 
+    configuration:
+        slimConfiguration:
+            settings:
+                removeDefaultHandlers: true
+                myCustomOption: 'Dummy'
 
-slimApi:
-    slimConfiguration:
-        settings:
-            removeDefaultHandlers: true
-            myCustomOption: 'Dummy'
+        apiDefinitionKey: "api"
 
-    apiDefinitionKey: "api"
+slimApi: %configuration%
