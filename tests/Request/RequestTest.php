@@ -27,7 +27,7 @@ final class RequestTest extends TestCase
 
     public function testShouldDistinguishBetweenNullAndEmptyOption(): void
     {
-        $request = $this->createDummyRequest();
+        $request = $this->createSampleRequest();
 
         self::assertTrue($request->hasField('thisIsNull'));
         self::assertFalse($request->hasField('nonExistingField'));
@@ -37,7 +37,7 @@ final class RequestTest extends TestCase
 
     public function testShouldRaiseExceptionForMissingRequiredField(): void
     {
-        $request = $this->createDummyRequest();
+        $request = $this->createSampleRequest();
 
         self::assertEquals('gandalf', $request->getField('thisIsGandalf'));
         $this->expectException(MissingApiArgumentException::class);
@@ -59,7 +59,7 @@ final class RequestTest extends TestCase
 
     /**
      * @dataProvider getDataForInvalidDateTimeArgument
-     * @param string  $logicExceptionMessage
+     *
      * @param mixed[] $arguments
      */
     public function testGettingDateTimeQueryParamThrowsExceptionIfInvalidArgument(
@@ -95,6 +95,7 @@ final class RequestTest extends TestCase
 
     /**
      * @param mixed[] $arguments
+     *
      * @return MockInterface&SlimRequest
      */
     private function createMockSlimRequest(array $arguments): MockInterface
@@ -116,7 +117,7 @@ final class RequestTest extends TestCase
     }
 
 
-    private function createDummyRequest(): Request
+    private function createSampleRequest(): Request
     {
         $resource = fopen('php://temp', 'rb+');
         assert(is_resource($resource));

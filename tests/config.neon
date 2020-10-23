@@ -3,54 +3,54 @@ extensions:
 
 
 services:
-    - BrandEmbassyTest\Slim\Dummy\NotFoundHandler
-    - BrandEmbassyTest\Slim\Dummy\NotAllowedHandler
-    - BrandEmbassyTest\Slim\Dummy\ApiErrorHandler
-    - BrandEmbassyTest\Slim\Dummy\GoldenKeyAuthMiddleware
-    - BrandEmbassyTest\Slim\Dummy\CreateChannelAction
-    - BrandEmbassyTest\Slim\Dummy\GetHelloWorldAction
-    - BrandEmbassyTest\Slim\Dummy\ErroringAction
-    - BrandEmbassyTest\Slim\Dummy\BeforeRequestMiddleware
-    - BrandEmbassyTest\Slim\Dummy\BeforeRouteMiddleware
+    - BrandEmbassyTest\Slim\Sample\NotFoundHandler
+    - BrandEmbassyTest\Slim\Sample\NotAllowedHandler
+    - BrandEmbassyTest\Slim\Sample\ApiErrorHandler
+    - BrandEmbassyTest\Slim\Sample\GoldenKeyAuthMiddleware
+    - BrandEmbassyTest\Slim\Sample\CreateChannelAction
+    - BrandEmbassyTest\Slim\Sample\GetHelloWorldAction
+    - BrandEmbassyTest\Slim\Sample\ErroringAction
+    - BrandEmbassyTest\Slim\Sample\BeforeRequestMiddleware
+    - BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware
 
 parameters:
     api:
         handlers:
-            notFound: BrandEmbassyTest\Slim\Dummy\NotFoundHandler
-            notAllowed: BrandEmbassyTest\Slim\Dummy\NotAllowedHandler
-            error: BrandEmbassyTest\Slim\Dummy\ApiErrorHandler
+            notFound: BrandEmbassyTest\Slim\Sample\NotFoundHandler
+            notAllowed: BrandEmbassyTest\Slim\Sample\NotAllowedHandler
+            error: BrandEmbassyTest\Slim\Sample\ApiErrorHandler
 
         routes:
             "app":
                 "":
                     "":
                         get:
-                            service: BrandEmbassyTest\Slim\Dummy\GetHelloWorldAction
+                            service: BrandEmbassyTest\Slim\Sample\GetHelloWorldAction
 
 
             new-api:
                 "2.0":
                     '/channels':
                         post:
-                            service: BrandEmbassyTest\Slim\Dummy\CreateChannelAction
+                            service: BrandEmbassyTest\Slim\Sample\CreateChannelAction
                             middleware:
-                                - BrandEmbassyTest\Slim\Dummy\GoldenKeyAuthMiddleware
+                                - BrandEmbassyTest\Slim\Sample\GoldenKeyAuthMiddleware
 
                     '/error':
                         post:
-                            service: BrandEmbassyTest\Slim\Dummy\ErroringAction
+                            service: BrandEmbassyTest\Slim\Sample\ErroringAction
 
         beforeRouteMiddlewares:
-            - BrandEmbassyTest\Slim\Dummy\BeforeRouteMiddleware
+            - BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware
 
         beforeRequestMiddlewares:
-            - BrandEmbassyTest\Slim\Dummy\BeforeRequestMiddleware
+            - BrandEmbassyTest\Slim\Sample\BeforeRequestMiddleware
 
 
 slimApi:
     slimConfiguration:
         settings:
             removeDefaultHandlers: true
-            myCustomOption: 'Dummy'
+            myCustomOption: 'Sample'
 
     apiDefinitionKey: "api"

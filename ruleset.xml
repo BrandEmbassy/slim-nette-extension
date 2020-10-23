@@ -1,6 +1,0 @@
-<?xml version="1.0"?>
-<ruleset name="BrandEmbassyCodingStandard">
-    <rule ref="vendor/brandembassy/coding-standard/src/BrandEmbassyCodingStandard/ruleset.xml">
-        <exclude name="SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint"/>
-    </rule>
-</ruleset>

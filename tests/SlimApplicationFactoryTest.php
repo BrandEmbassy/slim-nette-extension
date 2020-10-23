@@ -2,14 +2,17 @@
 
 namespace BrandEmbassyTest\Slim;
 
+use BrandEmbassy\MockeryTools\Http\ResponseAssertions;
 use BrandEmbassy\Slim\Request\Request;
 use BrandEmbassy\Slim\Response\Response;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassy\Slim\SlimApplicationFactory;
+use BrandEmbassyTest\Slim\Sample\GoldenKeyAuthMiddleware;
 use Nette\DI\Compiler;
 use Nette\DI\Container;
 use Nette\DI\ContainerLoader;
 use Nette\DI\Extensions\ExtensionsExtension;
+use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Slim\App;
 use Slim\Http\Body;
@@ -28,7 +31,7 @@ final class SlimApplicationFactoryTest extends TestCase
         $app = $this->createSlimApp();
         $settings = $app->getContainer()->get('settings');
 
-        self::assertSame('Dummy', $settings['myCustomOption']);
+        Assert::assertSame('Sample', $settings['myCustomOption']);
     }
 
 
@@ -39,79 +42,63 @@ final class SlimApplicationFactoryTest extends TestCase
     }
 
 
-    public function testHandledRouteForOmittedUrlParts(): void
-    {
-        $request = $this->createRequest('GET', '/app');
-
-        /** @var ResponseInterface $response */
+    /**
+     * @dataProvider routeResponseDataProvider
+     *
+     * @param mixed[] $expectedResponseBody
+     */
+    public function testRouteIsDispatchedAndProcessed(
+        array $expectedResponseBody,
+        int $expectedStatusCode,
+        Request $request
+    ): void {
         $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
 
-        self::assertEquals(200, $response->getStatusCode());
-        self::assertEquals('["Hello World"]', $this->getContents($response));
+        ResponseAssertions::assertJsonResponseEqualsArray($expectedResponseBody, $response, $expectedStatusCode);
     }
 
 
-    public function testShouldBeHandledByNotFoundErrorHandler(): void
+    /**
+     * @return mixed[][]
+     */
+    public function routeResponseDataProvider(): array
     {
-        $request = $this->createRequest('POST', '/non-existing/path');
-
-        /** @var ResponseInterface $response */
-        $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
-
-        self::assertEquals(404, $response->getStatusCode());
-        self::assertEquals('{"error":"Dummy NotFoundHandler here!"}', $this->getContents($response));
-    }
-
-
-    public function testShouldBeHandledByNotAllowedHandler(): void
-    {
-        $request = $this->createRequest('PATCH', '/new-api/2.0/channels');
-
-        /** @var ResponseInterface $response */
-        $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
-
-        self::assertEquals(405, $response->getStatusCode());
-        self::assertEquals('{"error":"Dummy NotAllowedHandler here!"}', $this->getContents($response));
-    }
-
-
-    public function testShouldBeHandledByApiErrorHandler(): void
-    {
-        $request = $this->createRequest('POST', '/new-api/2.0/error');
-
-        /** @var ResponseInterface $response */
-        $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
-
-        self::assertEquals(500, $response->getStatusCode());
-        self::assertEquals('{"error":"Error or not to error, that\'s the question!"}', $this->getContents($response));
-    }
-
-
-    public function testShouldDenyRequestByAccessMiddleware(): void
-    {
-        $request = $this->createRequest('POST', '/new-api/2.0/channels');
-
-        /** @var ResponseInterface $response */
-        $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
-
-        self::assertEquals(401, $response->getStatusCode());
-        self::assertEquals('{"error":"YOU SHALL NOT PASS!"}', $this->getContents($response));
-    }
-
-
-    public function testShouldAllowRequestByAccessMiddleware(): void
-    {
-        $request = $this->createRequest(
-            'POST',
-            '/new-api/2.0/channels',
-            ['goldenKey' => 'uber-secret-token-made-of-pure-gold']
-        );
-
-        /** @var ResponseInterface $response */
-        $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
-
-        self::assertEquals(201, $response->getStatusCode());
-        self::assertEquals('{"channelId":"fb_1234"}', $this->getContents($response));
+        return [
+            '200 Hello world' => [
+                'expectedResponse' => ['Hello World'],
+                'expectedStatusCode' => 200,
+                'request' => $this->createRequest('GET', '/app'),
+            ],
+            '404 Not found' => [
+                'expectedResponse' => ['error' => 'Sample NotFoundHandler here!'],
+                'expectedStatusCode' => 404,
+                'request' => $this->createRequest('POST', '/non-existing/path'),
+            ],
+            '405 Not allowed' => [
+                'expectedResponse' => ['error' => 'Sample NotAllowedHandler here!'],
+                'expectedStatusCode' => 405,
+                'request' => $this->createRequest('PATCH', '/new-api/2.0/channels'),
+            ],
+            '500 is 500' => [
+                'expectedResponse' => ['error' => 'Error or not to error, that\'s the question!'],
+                'expectedStatusCode' => 500,
+                'request' => $this->createRequest('POST', '/new-api/2.0/error'),
+            ],
+            '401 Unauthorized' => [
+                'expectedResponse' => ['error' => 'YOU SHALL NOT PASS!'],
+                'expectedStatusCode' => 401,
+                'request' => $this->createRequest('POST', '/new-api/2.0/channels'),
+            ],
+            'Token authorization passed' => [
+                'expectedResponse' => ['status' => 'created'],
+                'expectedStatusCode' => 201,
+                'request' => $this->createRequest(
+                    'POST',
+                    '/new-api/2.0/channels',
+                    ['goldenKey' => GoldenKeyAuthMiddleware::ACCESS_TOKEN]
+                ),
+            ],
+        ];
     }
 
 
@@ -122,12 +109,12 @@ final class SlimApplicationFactoryTest extends TestCase
         /** @var ResponseInterface $response */
         $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
 
-        self::assertEquals(
+        Assert::assertSame(
             ['proof-for-before-request'],
             $response->getHeader('processed-by-before-request-middleware')
         );
 
-        self::assertEquals(
+        Assert::assertSame(
             ['proof-for-before-route'],
             $response->getHeader('processed-by-before-route-middlewares')
         );
@@ -141,7 +128,7 @@ final class SlimApplicationFactoryTest extends TestCase
         /** @var ResponseInterface $response */
         $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
 
-        self::assertEquals(
+        Assert::assertSame(
             ['proof-for-before-request'],
             $response->getHeader('processed-by-before-request-middleware')
         );
@@ -164,10 +151,7 @@ final class SlimApplicationFactoryTest extends TestCase
 
 
     /**
-     * @param string        $requestMethod
-     * @param string        $requestUrlPath
      * @param array<string> $headers
-     * @return Request
      */
     private function createRequest(string $requestMethod, string $requestUrlPath, array $headers = []): Request
     {
@@ -192,14 +176,5 @@ final class SlimApplicationFactoryTest extends TestCase
         $factory = $this->createContainer($configPath)->getByType(SlimApplicationFactory::class);
 
         return $factory->create();
-    }
-
-
-    private function getContents(ResponseInterface $response): string
-    {
-        $body = $response->getBody();
-        $body->rewind();
-
-        return $body->getContents();
     }
 }

@@ -1,23 +1,21 @@
 <?php declare(strict_types = 1);
 
-namespace BrandEmbassyTest\Slim\Dummy;
+namespace BrandEmbassyTest\Slim\Sample;
 
 use BrandEmbassy\Slim\Middleware;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
-use function reset;
 
 final class GoldenKeyAuthMiddleware implements Middleware
 {
+    public const ACCESS_TOKEN = 'uber-secret-token-made-of-pure-gold';
+
+
     public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next): ResponseInterface
     {
-        $headerData = $request->getHeader('goldenKey');
-        $token = reset($headerData);
-        $token = $token !== false
-            ? $token
-            : '';
+        $token = $request->getHeaderLine('goldenKey');
 
-        if ($token !== 'uber-secret-token-made-of-pure-gold') {
+        if ($token !== self::ACCESS_TOKEN) {
             return $response->withJson(['error' => 'YOU SHALL NOT PASS!'], 401);
         }
 

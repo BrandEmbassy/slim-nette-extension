@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 
-namespace BrandEmbassyTest\Slim\Dummy;
+namespace BrandEmbassyTest\Slim\Sample;
 
 use BrandEmbassy\Slim\ErrorHandler;
 use BrandEmbassy\Slim\Request\RequestInterface;
