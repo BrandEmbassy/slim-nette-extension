@@ -7,8 +7,8 @@ services:
     - BrandEmbassyTest\Slim\Sample\NotAllowedHandler
     - BrandEmbassyTest\Slim\Sample\ApiErrorHandler
     - BrandEmbassyTest\Slim\Sample\GoldenKeyAuthMiddleware
-    - BrandEmbassyTest\Slim\Sample\CreateChannelAction
-    - BrandEmbassyTest\Slim\Sample\ErroringAction
+    - BrandEmbassyTest\Slim\Sample\CreateChannelRoute
+    - BrandEmbassyTest\Slim\Sample\ErrorThrowingRoute
     - BrandEmbassyTest\Slim\Sample\BeforeRequestMiddleware
     - BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware
     helloWorldRoute: BrandEmbassyTest\Slim\Sample\HelloWorldRoute
@@ -36,13 +36,13 @@ slimApi:
         "api":
             '/channels':
                 post:
-                    service: BrandEmbassyTest\Slim\Sample\CreateChannelAction
+                    service: BrandEmbassyTest\Slim\Sample\CreateChannelRoute
                     middlewares:
                         - BrandEmbassyTest\Slim\Sample\GoldenKeyAuthMiddleware
 
             '/error':
                 post:
-                    service: BrandEmbassyTest\Slim\Sample\ErroringAction
+                    service: BrandEmbassyTest\Slim\Sample\ErrorThrowingRoute
 
     beforeRouteMiddlewares:
         - BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware

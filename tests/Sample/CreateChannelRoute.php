@@ -6,10 +6,10 @@ use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassy\Slim\Route\Route;
 
-final class CreateChannelAction implements Route
+final class CreateChannelRoute implements Route
 {
     /**
-     * @inheritdoc
+     * @param string[] $arguments
      */
     public function __invoke(
         RequestInterface $request,

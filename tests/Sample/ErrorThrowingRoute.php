@@ -7,14 +7,10 @@ use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassy\Slim\Route\Route;
 use LogicException;
 
-final class ErroringAction implements Route
+final class ErrorThrowingRoute implements Route
 {
-    // phpcs:disable
     /**
-     * @param RequestInterface  $request
-     * @param ResponseInterface $response
-     * @param mixed[]           $arguments
-     * @return ResponseInterface
+     * @param string[] $arguments
      */
     public function __invoke(
         RequestInterface $request,
@@ -23,5 +19,4 @@ final class ErroringAction implements Route
     ): ResponseInterface {
         throw new LogicException('Error or not to error, that\'s the question!');
     }
-    // phpcs:enable
 }

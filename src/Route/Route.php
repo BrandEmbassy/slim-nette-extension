@@ -8,7 +8,7 @@ use BrandEmbassy\Slim\Response\ResponseInterface;
 interface Route
 {
     /**
-     * @param mixed[] $arguments
+     * @param string[] $arguments
      */
     public function __invoke(
         RequestInterface $request,
