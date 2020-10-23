@@ -26,7 +26,10 @@ final class Response implements ResponseInterface
 
 
     /**
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     *
      * @param string $version
+     *
      * @return static
      */
     public function withProtocolVersion($version): self
@@ -45,8 +48,9 @@ final class Response implements ResponseInterface
 
 
     /**
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     *
      * @param string $name
-     * @return boolean
      */
     public function hasHeader($name): bool
     {
@@ -55,7 +59,10 @@ final class Response implements ResponseInterface
 
 
     /**
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     *
      * @param string $name
+     *
      * @return string[]
      */
     public function getHeader($name): array
@@ -65,8 +72,9 @@ final class Response implements ResponseInterface
 
 
     /**
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     *
      * @param string $name
-     * @return string
      */
     public function getHeaderLine($name): string
     {
@@ -75,8 +83,11 @@ final class Response implements ResponseInterface
 
 
     /**
-     * @param string          $name
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     *
+     * @param string $name
      * @param string|string[] $value
+     *
      * @return static
      */
     public function withHeader($name, $value): self
@@ -86,8 +97,11 @@ final class Response implements ResponseInterface
 
 
     /**
-     * @param string          $name
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     *
+     * @param string $name
      * @param string|string[] $value
+     *
      * @return static
      */
     public function withAddedHeader($name, $value): self
@@ -97,7 +111,10 @@ final class Response implements ResponseInterface
 
 
     /**
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     *
      * @param string $name
+     *
      * @return static
      */
     public function withoutHeader($name): self
@@ -113,7 +130,6 @@ final class Response implements ResponseInterface
 
 
     /**
-     * @param StreamInterface $body
      * @return static
      */
     public function withBody(StreamInterface $body): self
@@ -129,8 +145,11 @@ final class Response implements ResponseInterface
 
 
     /**
-     * @param int    $code
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     *
+     * @param int $code
      * @param string $reasonPhrase
+     *
      * @return static
      */
     public function withStatus($code, $reasonPhrase = ''): self
@@ -141,8 +160,7 @@ final class Response implements ResponseInterface
 
     /**
      * @param mixed[]|object $data
-     * @param int|null       $status
-     * @param int            $encodingOptions
+     *
      * @return static
      */
     public function withJson($data, ?int $status = null, int $encodingOptions = 0): self

@@ -37,8 +37,8 @@ final class Request implements RequestInterface
 
 
     /**
-     * @param string                         $key
      * @param string|int|string[]|int[]|null $default
+     *
      * @return string|integer|mixed[]|null
      */
     public function getQueryParam(string $key, $default = null)
@@ -55,7 +55,6 @@ final class Request implements RequestInterface
 
 
     /**
-     * @param string $name
      * @return string|integer
      */
     public function getRequiredArgument(string $name)
@@ -74,7 +73,6 @@ final class Request implements RequestInterface
 
 
     /**
-     * @param string $name
      * @return mixed[]|stdClass|string
      */
     public function getField(string $name)
@@ -90,11 +88,11 @@ final class Request implements RequestInterface
 
 
     /**
-     * @param string          $name
      * @param int|string|null $default
+     *
      * @return mixed[]|stdClass|string|integer|null
      */
-    public function getOptionalField($name, $default = null)
+    public function getOptionalField(string $name, $default = null)
     {
         return $this->hasField($name)
             ? $this->getField($name)
@@ -102,11 +100,7 @@ final class Request implements RequestInterface
     }
 
 
-    /**
-     * @param string $name
-     * @return boolean
-     */
-    public function hasField($name): bool
+    public function hasField(string $name): bool
     {
         return array_key_exists($name, (array)$this->getDecodedJsonFromBody());
     }
@@ -119,7 +113,10 @@ final class Request implements RequestInterface
 
 
     /**
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     *
      * @param string $version
+     *
      * @return static
      */
     public function withProtocolVersion($version): self
@@ -138,8 +135,9 @@ final class Request implements RequestInterface
 
 
     /**
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     *
      * @param string $name
-     * @return boolean
      */
     public function hasHeader($name): bool
     {
@@ -148,7 +146,10 @@ final class Request implements RequestInterface
 
 
     /**
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     *
      * @param string $name
+     *
      * @return string[]
      */
     public function getHeader($name): array
@@ -158,8 +159,9 @@ final class Request implements RequestInterface
 
 
     /**
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     *
      * @param string $name
-     * @return string
      */
     public function getHeaderLine($name): string
     {
@@ -168,8 +170,11 @@ final class Request implements RequestInterface
 
 
     /**
-     * @param string          $name
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     *
+     * @param string $name
      * @param string|string[] $value
+     *
      * @return static
      */
     public function withHeader($name, $value): self
@@ -179,8 +184,11 @@ final class Request implements RequestInterface
 
 
     /**
-     * @param string          $name
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     *
+     * @param string $name
      * @param string|string[] $value
+     *
      * @return static
      */
     public function withAddedHeader($name, $value): self
@@ -190,7 +198,10 @@ final class Request implements RequestInterface
 
 
     /**
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     *
      * @param string $name
+     *
      * @return static
      */
     public function withoutHeader($name): self
@@ -206,7 +217,6 @@ final class Request implements RequestInterface
 
 
     /**
-     * @param StreamInterface $body
      * @return static
      */
     public function withBody(StreamInterface $body): self
@@ -223,6 +233,7 @@ final class Request implements RequestInterface
 
     /**
      * @param mixed $requestTarget
+     *
      * @return static
      */
     public function withRequestTarget($requestTarget): self
@@ -238,7 +249,10 @@ final class Request implements RequestInterface
 
 
     /**
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     *
      * @param string $method
+     *
      * @return static
      */
     public function withMethod($method): self
@@ -254,8 +268,10 @@ final class Request implements RequestInterface
 
 
     /**
-     * @param UriInterface $uri
-     * @param bool         $preserveHost
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     *
+     * @param bool $preserveHost
+     *
      * @return static
      */
     public function withUri(UriInterface $uri, $preserveHost = false): self
@@ -284,6 +300,7 @@ final class Request implements RequestInterface
 
     /**
      * @param mixed[] $cookies
+     *
      * @return static
      */
     public function withCookieParams(array $cookies): self
@@ -303,6 +320,7 @@ final class Request implements RequestInterface
 
     /**
      * @param mixed[] $query
+     *
      * @return static
      */
     public function withQueryParams(array $query): self
@@ -322,6 +340,7 @@ final class Request implements RequestInterface
 
     /**
      * @param mixed[] $uploadedFiles
+     *
      * @return static
      */
     public function withUploadedFiles(array $uploadedFiles)
@@ -341,6 +360,7 @@ final class Request implements RequestInterface
 
     /**
      * @param mixed[]|object|null $data
+     *
      * @return static
      */
     public function withParsedBody($data): self
@@ -359,8 +379,11 @@ final class Request implements RequestInterface
 
 
     /**
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     *
      * @param string $name
-     * @param mixed  $default
+     * @param mixed $default
+     *
      * @return mixed
      */
     public function getAttribute($name, $default = null)
@@ -380,8 +403,11 @@ final class Request implements RequestInterface
 
 
     /**
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     *
      * @param string $name
-     * @param mixed  $value
+     * @param mixed $value
+     *
      * @return static
      */
     public function withAttribute($name, $value): self
@@ -391,7 +417,10 @@ final class Request implements RequestInterface
 
 
     /**
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     *
      * @param string $name
+     *
      * @return static
      */
     public function withoutAttribute($name): self

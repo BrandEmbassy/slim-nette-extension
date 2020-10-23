@@ -1,21 +1,21 @@
 <?php declare(strict_types = 1);
 
-namespace BrandEmbassyTest\Slim\Dummy;
+namespace BrandEmbassyTest\Slim\Sample;
 
 use BrandEmbassy\Slim\ActionHandler;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 
-final class CreateChannelAction implements ActionHandler
+final class GetHelloWorldAction implements ActionHandler
 {
     /**
-     * @inheritdoc
+     * @param mixed[]           $arguments
      */
     public function __invoke(
         RequestInterface $request,
         ResponseInterface $response,
         array $arguments = []
     ): ResponseInterface {
-        return $response->withJson(['channelId' => 'fb_1234'], 201);
+        return $response->withJson(['Hello World']);
     }
 }

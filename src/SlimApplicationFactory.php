@@ -34,7 +34,6 @@ final class SlimApplicationFactory
 
     /**
      * @param mixed[]   $configuration
-     * @param Container $container
      */
     public function __construct(array $configuration, Container $container)
     {
@@ -58,7 +57,7 @@ final class SlimApplicationFactory
 
         $container = $app->getContainer();
 
-        /** @var Collection $settings */
+        /** @var Collection<string, mixed> $settings */
         $settings = $container->get('settings');
 
         if ($settings->get('removeDefaultHandlers') === true) {
@@ -80,7 +79,6 @@ final class SlimApplicationFactory
 
 
     /**
-     * @param string $configurationCode
      * @return mixed[]
      */
     private function getConfiguration(string $configurationCode): array
@@ -103,9 +101,6 @@ final class SlimApplicationFactory
 
     /**
      * @param mixed[] $configuration
-     * @param string  $configurationCode
-     * @param string  $name
-     * @param string  $type
      */
     private function validateConfiguration(
         array $configuration,
@@ -128,7 +123,6 @@ final class SlimApplicationFactory
 
 
     /**
-     * @param string $serviceName
      * @return Closure
      */
     private function getServiceProvider(string $serviceName): callable
@@ -148,16 +142,15 @@ final class SlimApplicationFactory
 
     private function removeDefaultSlimErrorHandlers(SlimApp $app): void
     {
-        $app->getContainer()['phpErrorHandler'] = static function () {
-            return static function (RequestInterface $request, ResponseInterface $response, Throwable $e): void {
-                throw $e;
+        $app->getContainer()['phpErrorHandler'] = static function (): callable {
+            return static function (RequestInterface $request, ResponseInterface $response, Throwable $exception): void {
+                throw $exception;
             };
         };
     }
 
 
     /**
-     * @param SlimApp $app
      * @param mixed[] $handlers
      */
     private function registerHandlers(SlimApp $app, array $handlers): void
@@ -177,9 +170,7 @@ final class SlimApplicationFactory
 
 
     /**
-     * @param SlimApp $app
      * @param mixed[] $api
-     * @param string  $apiName
      */
     private function registerApis(SlimApp $app, array $api, string $apiName): void
     {
@@ -190,9 +181,6 @@ final class SlimApplicationFactory
 
 
     /**
-     * @param SlimApp $app
-     * @param string  $apiName
-     * @param string  $version
      * @param mixed[] $routes
      */
     private function registerApi(SlimApp $app, string $apiName, string $version, array $routes): void
@@ -211,8 +199,7 @@ final class SlimApplicationFactory
 
     /**
      * @deprecated Do not use Controllers, use Invokable Action classes (use MiddleWareInterface)
-     * @param SlimApp $app
-     * @param string  $urlPattern
+     *
      * @param mixed[] $routeData
      */
     private function registerControllerRoute(SlimApp $app, string $urlPattern, array $routeData): void
@@ -227,9 +214,7 @@ final class SlimApplicationFactory
 
 
     /**
-     * @param SlimApp $app
      * @param mixed[] $routeData
-     * @param string  $urlPattern
      */
     private function registerInvokableActionRoutes(SlimApp $app, array $routeData, string $urlPattern): void
     {
@@ -284,7 +269,6 @@ final class SlimApplicationFactory
 
 
     /**
-     * @param SlimApp $app
      * @param mixed[] $configuration
      */
     private function registerBeforeRouteMiddlewares(SlimApp $app, array $configuration): void
