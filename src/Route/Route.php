@@ -1,21 +1,18 @@
 <?php declare(strict_types = 1);
 
-namespace BrandEmbassyTest\Slim\Sample;
+namespace BrandEmbassy\Slim\Route;
 
-use BrandEmbassy\Slim\ActionHandler;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 
-final class CreateChannelAction implements ActionHandler
+interface Route
 {
     /**
-     * @inheritdoc
+     * @param string[] $arguments
      */
     public function __invoke(
         RequestInterface $request,
         ResponseInterface $response,
         array $arguments = []
-    ): ResponseInterface {
-        return $response->withJson(['status' => 'created'], 201);
-    }
+    ): ResponseInterface;
 }

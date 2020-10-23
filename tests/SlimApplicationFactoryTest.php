@@ -64,10 +64,15 @@ final class SlimApplicationFactoryTest extends TestCase
     public function routeResponseDataProvider(): array
     {
         return [
-            '200 Hello world' => [
+            '200 Hello world as class name' => [
                 'expectedResponse' => ['Hello World'],
                 'expectedStatusCode' => 200,
-                'request' => $this->createRequest('GET', '/app'),
+                'request' => $this->createRequest('GET', '/app/hello-world-as-class-name'),
+            ],
+            '200 Hello world as service name' => [
+                'expectedResponse' => ['Hello World'],
+                'expectedStatusCode' => 200,
+                'request' => $this->createRequest('GET', '/app/hello-world-as-service-name'),
             ],
             '404 Not found' => [
                 'expectedResponse' => ['error' => 'Sample NotFoundHandler here!'],
@@ -77,24 +82,24 @@ final class SlimApplicationFactoryTest extends TestCase
             '405 Not allowed' => [
                 'expectedResponse' => ['error' => 'Sample NotAllowedHandler here!'],
                 'expectedStatusCode' => 405,
-                'request' => $this->createRequest('PATCH', '/new-api/2.0/channels'),
+                'request' => $this->createRequest('PATCH', '/api/channels'),
             ],
             '500 is 500' => [
                 'expectedResponse' => ['error' => 'Error or not to error, that\'s the question!'],
                 'expectedStatusCode' => 500,
-                'request' => $this->createRequest('POST', '/new-api/2.0/error'),
+                'request' => $this->createRequest('POST', '/api/error'),
             ],
             '401 Unauthorized' => [
                 'expectedResponse' => ['error' => 'YOU SHALL NOT PASS!'],
                 'expectedStatusCode' => 401,
-                'request' => $this->createRequest('POST', '/new-api/2.0/channels'),
+                'request' => $this->createRequest('POST', '/api/channels'),
             ],
             'Token authorization passed' => [
                 'expectedResponse' => ['status' => 'created'],
                 'expectedStatusCode' => 201,
                 'request' => $this->createRequest(
                     'POST',
-                    '/new-api/2.0/channels',
+                    '/api/channels',
                     ['goldenKey' => GoldenKeyAuthMiddleware::ACCESS_TOKEN]
                 ),
             ],
@@ -104,7 +109,7 @@ final class SlimApplicationFactoryTest extends TestCase
 
     public function testShouldProcessBothGlobalMiddlewares(): void
     {
-        $request = $this->createRequest('POST', '/new-api/2.0/channels');
+        $request = $this->createRequest('POST', '/api/channels');
 
         /** @var ResponseInterface $response */
         $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));

@@ -7,45 +7,11 @@ services:
     - BrandEmbassyTest\Slim\Sample\NotAllowedHandler
     - BrandEmbassyTest\Slim\Sample\ApiErrorHandler
     - BrandEmbassyTest\Slim\Sample\GoldenKeyAuthMiddleware
-    - BrandEmbassyTest\Slim\Sample\CreateChannelAction
-    - BrandEmbassyTest\Slim\Sample\GetHelloWorldAction
-    - BrandEmbassyTest\Slim\Sample\ErroringAction
+    - BrandEmbassyTest\Slim\Sample\CreateChannelRoute
+    - BrandEmbassyTest\Slim\Sample\ErrorThrowingRoute
     - BrandEmbassyTest\Slim\Sample\BeforeRequestMiddleware
     - BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware
-
-parameters:
-    api:
-        handlers:
-            notFound: BrandEmbassyTest\Slim\Sample\NotFoundHandler
-            notAllowed: BrandEmbassyTest\Slim\Sample\NotAllowedHandler
-            error: BrandEmbassyTest\Slim\Sample\ApiErrorHandler
-
-        routes:
-            "app":
-                "":
-                    "":
-                        get:
-                            service: BrandEmbassyTest\Slim\Sample\GetHelloWorldAction
-
-
-            new-api:
-                "2.0":
-                    '/channels':
-                        post:
-                            service: BrandEmbassyTest\Slim\Sample\CreateChannelAction
-                            middleware:
-                                - BrandEmbassyTest\Slim\Sample\GoldenKeyAuthMiddleware
-
-                    '/error':
-                        post:
-                            service: BrandEmbassyTest\Slim\Sample\ErroringAction
-
-        beforeRouteMiddlewares:
-            - BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware
-
-        beforeRequestMiddlewares:
-            - BrandEmbassyTest\Slim\Sample\BeforeRequestMiddleware
-
+    helloWorldRoute: BrandEmbassyTest\Slim\Sample\HelloWorldRoute
 
 slimApi:
     slimConfiguration:
@@ -53,4 +19,33 @@ slimApi:
             removeDefaultHandlers: true
             myCustomOption: 'Sample'
 
-    apiDefinitionKey: "api"
+    handlers:
+        notFoundHandler: BrandEmbassyTest\Slim\Sample\NotFoundHandler
+        notAllowedHandler: BrandEmbassyTest\Slim\Sample\NotAllowedHandler
+        errorHandler: BrandEmbassyTest\Slim\Sample\ApiErrorHandler
+
+    routes:
+        "app":
+            "/hello-world-as-class-name":
+                get:
+                    service: BrandEmbassyTest\Slim\Sample\HelloWorldRoute
+            "/hello-world-as-service-name":
+                get:
+                    service: helloWorldRoute
+
+        "api":
+            '/channels':
+                post:
+                    service: BrandEmbassyTest\Slim\Sample\CreateChannelRoute
+                    middlewares:
+                        - BrandEmbassyTest\Slim\Sample\GoldenKeyAuthMiddleware
+
+            '/error':
+                post:
+                    service: BrandEmbassyTest\Slim\Sample\ErrorThrowingRoute
+
+    beforeRouteMiddlewares:
+        - BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware
+
+    beforeRequestMiddlewares:
+        - BrandEmbassyTest\Slim\Sample\BeforeRequestMiddleware

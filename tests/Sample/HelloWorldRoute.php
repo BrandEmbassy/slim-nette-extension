@@ -1,18 +1,21 @@
 <?php declare(strict_types = 1);
 
-namespace BrandEmbassy\Slim;
+namespace BrandEmbassyTest\Slim\Sample;
 
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
+use BrandEmbassy\Slim\Route\Route;
 
-interface ActionHandler
+final class HelloWorldRoute implements Route
 {
     /**
-     * @param mixed[]           $arguments
+     * @param string[] $arguments
      */
     public function __invoke(
         RequestInterface $request,
         ResponseInterface $response,
         array $arguments = []
-    ): ResponseInterface;
+    ): ResponseInterface {
+        return $response->withJson(['Hello World']);
+    }
 }

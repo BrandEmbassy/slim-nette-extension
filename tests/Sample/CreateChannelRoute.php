@@ -2,20 +2,20 @@
 
 namespace BrandEmbassyTest\Slim\Sample;
 
-use BrandEmbassy\Slim\ActionHandler;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
+use BrandEmbassy\Slim\Route\Route;
 
-final class GetHelloWorldAction implements ActionHandler
+final class CreateChannelRoute implements Route
 {
     /**
-     * @param mixed[]           $arguments
+     * @param string[] $arguments
      */
     public function __invoke(
         RequestInterface $request,
         ResponseInterface $response,
         array $arguments = []
     ): ResponseInterface {
-        return $response->withJson(['Hello World']);
+        return $response->withJson(['status' => 'created'], 201);
     }
 }
