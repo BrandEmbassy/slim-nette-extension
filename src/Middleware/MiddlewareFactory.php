@@ -21,9 +21,9 @@ final class MiddlewareFactory
     }
 
 
-    public function createFromConfig(string $middlewareService): callable
+    public function createFromConfig(string $middlewareIdentifier): callable
     {
-        $middleware = ServiceProvider::getService($this->container, $middlewareService);
+        $middleware = ServiceProvider::getService($this->container, $middlewareIdentifier);
         assert(is_callable($middleware));
 
         return $middleware;

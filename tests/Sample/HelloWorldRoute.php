@@ -9,7 +9,7 @@ use BrandEmbassy\Slim\Route\Route;
 final class HelloWorldRoute implements Route
 {
     /**
-     * @param mixed[] $arguments
+     * @param string[] $arguments
      */
     public function __invoke(
         RequestInterface $request,

@@ -14,7 +14,7 @@ final class SlimApiExtension extends CompilerExtension
     {
         return Expect::structure(
             [
-                'routes' => Expect::arrayOf(
+                SlimApplicationFactory::ROUTES => Expect::arrayOf(
                     Expect::arrayOf(
                         Expect::arrayOf(
                             Expect::structure(
@@ -27,11 +27,12 @@ final class SlimApiExtension extends CompilerExtension
                         )
                     )
                 ),
-
-                'handlers' => Expect::arrayOf($this->createServiceExpect())->default([]),
-                'beforeRequestMiddlewares' => Expect::arrayOf($this->createServiceExpect())->default([]),
-                'beforeRouteMiddlewares' => Expect::arrayOf($this->createServiceExpect())->default([]),
-                'slimConfiguration' => Expect::array()->default([]),
+                SlimApplicationFactory::HANDLERS => Expect::arrayOf($this->createServiceExpect())->default([]),
+                SlimApplicationFactory::BEFORE_REQUEST_MIDDLEWARES => Expect::arrayOf($this->createServiceExpect())
+                    ->default([]),
+                SlimApplicationFactory::BEFORE_ROUTE_MIDDLEWARES => Expect::arrayOf($this->createServiceExpect())
+                    ->default([]),
+                SlimApplicationFactory::SLIM_CONFIGURATION => Expect::array()->default([]),
             ]
         );
     }

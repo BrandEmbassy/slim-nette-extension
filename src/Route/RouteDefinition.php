@@ -15,7 +15,7 @@ final class RouteDefinition
     /**
      * @var Route
      */
-    private $routeService;
+    private $route;
 
     /**
      * @var callable[]
@@ -26,10 +26,10 @@ final class RouteDefinition
     /**
      * @param callable[] $middlewares
      */
-    public function __construct(string $method, Route $routeService, array $middlewares)
+    public function __construct(string $method, Route $route, array $middlewares)
     {
         $this->method = $method;
-        $this->routeService = $routeService;
+        $this->route = $route;
         $this->middlewares = $middlewares;
     }
 
@@ -40,9 +40,9 @@ final class RouteDefinition
     }
 
 
-    public function getRouteService(): Route
+    public function getRoute(): Route
     {
-        return $this->routeService;
+        return $this->route;
     }
 
 

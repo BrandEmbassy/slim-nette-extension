@@ -156,7 +156,7 @@ final class SlimApplicationFactory
         foreach ($routeData as $method => $routeDefinitionData) {
             $routeDefinition = $this->routeDefinitionFactory->create($method, (array)$routeDefinitionData);
 
-            $routeToAdd = $app->map([$routeDefinition->getMethod()], $urlPattern, $routeDefinition->getRouteService());
+            $routeToAdd = $app->map([$routeDefinition->getMethod()], $urlPattern, $routeDefinition->getRoute());
 
             foreach ($routeDefinition->getMiddlewares() as $middleware) {
                 $routeToAdd->add($middleware);

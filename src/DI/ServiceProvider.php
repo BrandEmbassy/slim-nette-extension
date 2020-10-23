@@ -10,12 +10,12 @@ final class ServiceProvider
     /**
      * @return object
      */
-    public static function getService(Container $container, string $serviceName)
+    public static function getService(Container $container, string $serviceIdentifier)
     {
         try {
-            return $container->getByName($serviceName);
+            return $container->getByName($serviceIdentifier);
         } catch (MissingServiceException $exception) {
-            return $container->getByType($serviceName);
+            return $container->getByType($serviceIdentifier);
         }
     }
 }

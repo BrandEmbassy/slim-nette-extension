@@ -35,7 +35,9 @@ final class RouteDefinitionFactory
     {
         $route = $this->getRoute($routeDefinitionData[RouteDefinition::SERVICE]);
         $middlewares = array_map(
-            [$this->middlewareFactory, 'createFromConfig'],
+            function (string $middlewareIdentifier): callable {
+                return $this->middlewareFactory->createFromConfig($middlewareIdentifier);
+            },
             $routeDefinitionData[RouteDefinition::MIDDLEWARES]
         );
 
@@ -43,9 +45,9 @@ final class RouteDefinitionFactory
     }
 
 
-    private function getRoute(string $routeService): Route
+    private function getRoute(string $routeIdentifier): Route
     {
-        $route = ServiceProvider::getService($this->container, $routeService);
+        $route = ServiceProvider::getService($this->container, $routeIdentifier);
 
         if ($route instanceof Route) {
             return $route;
