@@ -2,14 +2,14 @@
 
 namespace BrandEmbassyTest\Slim\Sample;
 
-use BrandEmbassy\Slim\ActionHandler;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
+use BrandEmbassy\Slim\Route\Route;
 
-final class GetHelloWorldAction implements ActionHandler
+final class HelloWorldRoute implements Route
 {
     /**
-     * @param mixed[]           $arguments
+     * @param mixed[] $arguments
      */
     public function __invoke(
         RequestInterface $request,

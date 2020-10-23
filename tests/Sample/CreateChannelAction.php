@@ -2,11 +2,11 @@
 
 namespace BrandEmbassyTest\Slim\Sample;
 
-use BrandEmbassy\Slim\ActionHandler;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
+use BrandEmbassy\Slim\Route\Route;
 
-final class CreateChannelAction implements ActionHandler
+final class CreateChannelAction implements Route
 {
     /**
      * @inheritdoc

@@ -1,14 +1,14 @@
 <?php declare(strict_types = 1);
 
-namespace BrandEmbassy\Slim;
+namespace BrandEmbassy\Slim\Route;
 
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 
-interface ActionHandler
+interface Route
 {
     /**
-     * @param mixed[]           $arguments
+     * @param mixed[] $arguments
      */
     public function __invoke(
         RequestInterface $request,

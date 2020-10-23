@@ -3,8 +3,6 @@
 namespace BrandEmbassy\Slim;
 
 use ArrayAccess;
-use BrandEmbassy\Slim\Request\Request;
-use BrandEmbassy\Slim\Response\Response;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Slim\App;
@@ -23,9 +21,7 @@ class SlimApp extends App
      */
     public function run($silent = false): ResponseInterface
     {
-        $request = new Request($this->getContainer()->get('request'));
-        $response = new Response($this->getContainer()->get('response'));
-        $response = $this->process($request, $response);
+        $response = parent::run($silent);
 
         $contentTypes = $response->getHeader('Content-Type');
         $contentType = reset($contentTypes);

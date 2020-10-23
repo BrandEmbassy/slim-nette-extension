@@ -2,12 +2,12 @@
 
 namespace BrandEmbassyTest\Slim\Sample;
 
-use BrandEmbassy\Slim\ActionHandler;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
+use BrandEmbassy\Slim\Route\Route;
 use LogicException;
 
-final class ErroringAction implements ActionHandler
+final class ErroringAction implements Route
 {
     // phpcs:disable
     /**
