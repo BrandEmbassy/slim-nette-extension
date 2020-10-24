@@ -13,6 +13,8 @@ services:
     - BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware
     - BrandEmbassyTest\Slim\Sample\CreateChannelUserRoute
     - BrandEmbassyTest\Slim\Sample\UsersController
+    - BrandEmbassyTest\Slim\Sample\GroupMiddleware
+    - BrandEmbassyTest\Slim\Sample\OnlyApiGroupMiddleware
     helloWorldRoute: BrandEmbassyTest\Slim\Sample\HelloWorldRoute
 
 slimApi:
@@ -33,9 +35,13 @@ slimApi:
                 get:
                     service: BrandEmbassyTest\Slim\Sample\HelloWorldRoute
                     extraField: 'foo'
+                    middlewareGroups:
+                        - testGroup
             "/hello-world-as-service-name":
                 get:
                     service: helloWorldRoute
+                    middlewareGroups:
+                        - testGroup
 
         "api":
             '/channels':
@@ -43,14 +49,20 @@ slimApi:
                     service: BrandEmbassyTest\Slim\Sample\CreateChannelRoute
                     middlewares:
                         - BrandEmbassyTest\Slim\Sample\GoldenKeyAuthMiddleware
+                    middlewareGroups:
+                        - testGroup
 
             '/channels/{channelId}/users':
                 post:
                     service: BrandEmbassyTest\Slim\Sample\CreateChannelUserRoute
+                    middlewareGroups:
+                        - testGroup
 
             '/error':
                 post:
                     service: BrandEmbassyTest\Slim\Sample\ErrorThrowingRoute
+                    middlewareGroups:
+                        - testGroup
 
     controllers:
         app:
@@ -59,6 +71,12 @@ slimApi:
                 methods:
                     get: getUsers
                     post: createUser
+
+    middlewareGroups:
+        testGroup:
+            - BrandEmbassyTest\Slim\Sample\GroupMiddleware
+        api:
+            - BrandEmbassyTest\Slim\Sample\OnlyApiGroupMiddleware
 
     beforeRouteMiddlewares:
         - BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware

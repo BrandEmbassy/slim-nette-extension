@@ -7,6 +7,7 @@ use BrandEmbassy\Slim\Controller\ControllerDefinitionFactory;
 use BrandEmbassy\Slim\DI\ServiceProvider;
 use BrandEmbassy\Slim\Middleware\MiddlewareFactory;
 use BrandEmbassy\Slim\Route\RouteDefinitionFactory;
+use BrandEmbassy\Slim\Route\RouteRegister;
 use BrandEmbassy\Slim\Route\UrlPatternResolver;
 use LogicException;
 use Nette\DI\Container;
@@ -16,7 +17,6 @@ use function implode;
 use function in_array;
 use function is_callable;
 use function sprintf;
-use function trim;
 
 final class SlimApplicationFactory
 {
@@ -27,6 +27,7 @@ final class SlimApplicationFactory
     public const ROUTES = 'routes';
     public const CONTROLLERS = 'controllers';
     public const API_PREFIX = 'apiPrefix';
+    public const MIDDLEWARE_GROUPS = 'middlewareGroups';
     private const ALLOWED_HANDLERS = [
         'notFoundHandler',
         'notAllowedHandler',
@@ -43,16 +44,6 @@ final class SlimApplicationFactory
      * @var Container
      */
     private $container;
-
-    /**
-     * @var array<callable>
-     */
-    private $beforeRoutesMiddlewares;
-
-    /**
-     * @var RouteDefinitionFactory
-     */
-    private $routeDefinitionFactory;
 
     /**
      * @var MiddlewareFactory
@@ -74,6 +65,11 @@ final class SlimApplicationFactory
      */
     private $urlPatternResolver;
 
+    /**
+     * @var RouteRegister
+     */
+    private $routeRegister;
+
 
     /**
      * @param mixed[] $configuration
@@ -81,20 +77,19 @@ final class SlimApplicationFactory
     public function __construct(
         array $configuration,
         Container $container,
-        RouteDefinitionFactory $routeDefinitionFactory,
         MiddlewareFactory $middlewareFactory,
         SlimContainerFactory $slimContainerFactory,
         ControllerDefinitionFactory $controllerDefinitionFactory,
-        UrlPatternResolver $urlPatternResolver
+        UrlPatternResolver $urlPatternResolver,
+        RouteRegister $routeRegister
     ) {
         $this->configuration = $configuration;
         $this->container = $container;
-        $this->beforeRoutesMiddlewares = [];
-        $this->routeDefinitionFactory = $routeDefinitionFactory;
         $this->middlewareFactory = $middlewareFactory;
         $this->slimContainerFactory = $slimContainerFactory;
         $this->controllerDefinitionFactory = $controllerDefinitionFactory;
         $this->urlPatternResolver = $urlPatternResolver;
+        $this->routeRegister = $routeRegister;
     }
 
 
@@ -104,10 +99,8 @@ final class SlimApplicationFactory
 
         $app = new SlimApp($slimContainer);
 
-        $this->registerBeforeRouteMiddlewares($this->configuration[self::BEFORE_ROUTE_MIDDLEWARES]);
-
         foreach ($this->configuration[self::ROUTES] as $apiVersion => $routes) {
-            $this->registerApi($app, $apiVersion, $routes);
+            $this->registerApi($apiVersion, $routes);
         }
 
         foreach ($this->configuration[self::CONTROLLERS] as $apiVersion => $controllers) {
@@ -117,7 +110,7 @@ final class SlimApplicationFactory
         $this->registerHandlers($slimContainer, $this->configuration[self::HANDLERS]);
 
         foreach ($this->configuration[self::BEFORE_REQUEST_MIDDLEWARES] as $middleware) {
-            $middlewareService = $this->middlewareFactory->createFromConfig($middleware);
+            $middlewareService = $this->middlewareFactory->createFromIdentifier($middleware);
             $app->add($middlewareService);
         }
 
@@ -161,33 +154,10 @@ final class SlimApplicationFactory
     /**
      * @param mixed[] $routes
      */
-    private function registerApi(SlimApp $app, string $version, array $routes): void
+    private function registerApi(string $version, array $routes): void
     {
         foreach ($routes as $routeName => $routeData) {
-            $urlPattern = $this->createUrlPattern($version, $routeName);
-
-            $this->registerRoute($app, $routeData, $urlPattern);
-        }
-    }
-
-
-    /**
-     * @param mixed[] $routeData
-     */
-    private function registerRoute(SlimApp $app, array $routeData, string $urlPattern): void
-    {
-        foreach ($routeData as $method => $routeDefinitionData) {
-            $routeDefinition = $this->routeDefinitionFactory->create($method, (array)$routeDefinitionData);
-
-            $routeToAdd = $app->map([$routeDefinition->getMethod()], $urlPattern, $routeDefinition->getRoute());
-
-            foreach ($routeDefinition->getMiddlewares() as $middleware) {
-                $routeToAdd->add($middleware);
-            }
-
-            foreach ($this->beforeRoutesMiddlewares as $middleware) {
-                $routeToAdd->add($middleware);
-            }
+            $this->routeRegister->register($version, $routeName, $routeData);
         }
     }
 
@@ -198,7 +168,7 @@ final class SlimApplicationFactory
     private function registerControllers(SlimApp $app, string $version, array $controllers): void
     {
         foreach ($controllers as $controllerName => $controllerData) {
-            $urlPattern = $this->createUrlPattern($version, $controllerName);
+            $urlPattern = $this->urlPatternResolver->resolve($version, $controllerName);
             $controllerDefinition = $this->controllerDefinitionFactory->create($controllerData);
 
             $this->registerController($app, $controllerDefinition, $urlPattern);
@@ -218,36 +188,6 @@ final class SlimApplicationFactory
             $middlewareMethod = sprintf('%s:middleware', $controllerDefinition->getControllerIdentifier());
 
             $app->map([$method], $urlPattern, $callable)->add($middlewareMethod);
-        }
-    }
-
-
-    private function createUrlPattern(string $version, string $routeName): string
-    {
-        $version = trim($version, '/');
-        $routeName = trim($routeName, '/');
-
-        if ($version !== '') {
-            $version = '/' . $version;
-        }
-
-        if ($routeName !== '') {
-            $routeName = '/' . $routeName;
-        }
-
-        return $this->urlPatternResolver->resolve($version . $routeName);
-    }
-
-
-    /**
-     * @param string[] $beforeRouteMiddlewares
-     */
-    private function registerBeforeRouteMiddlewares(array $beforeRouteMiddlewares): void
-    {
-        foreach ($beforeRouteMiddlewares as $globalMiddleware) {
-            $middlewareService = $this->middlewareFactory->createFromConfig($globalMiddleware);
-
-            $this->beforeRoutesMiddlewares[] = $middlewareService;
         }
     }
 }

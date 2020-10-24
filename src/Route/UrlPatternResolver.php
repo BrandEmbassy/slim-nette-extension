@@ -2,6 +2,8 @@
 
 namespace BrandEmbassy\Slim\Route;
 
+use function trim;
+
 final class UrlPatternResolver
 {
     /**
@@ -16,8 +18,19 @@ final class UrlPatternResolver
     }
 
 
-    public function resolve(string $routeDefinitionPattern): string
+    public function resolve(string $version, string $routeName): string
     {
-        return $this->apiPrefix . $routeDefinitionPattern;
+        $version = trim($version, '/');
+        $routeName = trim($routeName, '/');
+
+        if ($version !== '') {
+            $version = '/' . $version;
+        }
+
+        if ($routeName !== '') {
+            $routeName = '/' . $routeName;
+        }
+
+        return $this->apiPrefix . $version . $routeName;
     }
 }

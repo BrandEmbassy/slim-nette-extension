@@ -29,10 +29,12 @@ final class SlimApplicationFactoryTest extends TestCase
      * @dataProvider routeResponseDataProvider
      *
      * @param mixed[] $expectedResponseBody
+     * @param mixed[] $expectedResponseBody
      * @param array<string, string> $headers
      */
     public function testRouteIsDispatchedAndProcessed(
         array $expectedResponseBody,
+        array $expectedResponseHeaders,
         int $expectedStatusCode,
         string $httpMethod,
         string $requestUri,
@@ -42,6 +44,7 @@ final class SlimApplicationFactoryTest extends TestCase
         $response = SlimAppTester::runSlimApp();
 
         ResponseAssertions::assertJsonResponseEqualsArray($expectedResponseBody, $response, $expectedStatusCode);
+        ResponseAssertions::assertResponseHeaders($expectedResponseHeaders, $response);
     }
 
 
@@ -53,42 +56,50 @@ final class SlimApplicationFactoryTest extends TestCase
         return [
             '200 Hello world as class name' => [
                 'expectedResponse' => ['Hello World'],
+//                'expectedResponseHeaders' => ['only-api-group-middleware' => 'invoked'],
+                'expectedResponseHeaders' => [],
                 'expectedStatusCode' => 200,
                 'httpMethod' => 'GET',
                 'requestUri' => '/tests/app/hello-world-as-class-name',
             ],
             '200 Hello world as service name' => [
                 'expectedResponse' => ['Hello World'],
+                'expectedResponseHeaders' => [],
                 'expectedStatusCode' => 200,
                 'httpMethod' => 'GET',
                 'requestUri' => '/tests/app/hello-world-as-service-name',
             ],
             '404 Not found' => [
                 'expectedResponse' => ['error' => 'Sample NotFoundHandler here!'],
+                'expectedResponseHeaders' => [],
                 'expectedStatusCode' => 404,
                 'httpMethod' => 'POST',
                 'requestUri' => '/tests/non-existing/path',
             ],
             '405 Not allowed' => [
                 'expectedResponse' => ['error' => 'Sample NotAllowedHandler here!'],
+                'expectedResponseHeaders' => [],
                 'expectedStatusCode' => 405,
                 'httpMethod' => 'PATCH',
                 'requestUri' => '/tests/api/channels',
             ],
             '500 is 500' => [
                 'expectedResponse' => ['error' => 'Error or not to error, that\'s the question!'],
+                'expectedResponseHeaders' => [],
                 'expectedStatusCode' => 500,
                 'httpMethod' => 'POST',
                 'requestUri' => '/tests/api/error',
             ],
             '401 Unauthorized' => [
                 'expectedResponse' => ['error' => 'YOU SHALL NOT PASS!'],
+                'expectedResponseHeaders' => [],
                 'expectedStatusCode' => 401,
                 'httpMethod' => 'POST',
                 'requestUri' => '/tests/api/channels',
             ],
             'Token authorization passed' => [
                 'expectedResponse' => ['status' => 'created'],
+                'expectedResponseHeaders' => [],
                 'expectedStatusCode' => 201,
                 'httpMethod' => 'POST',
                 'requestUri' => '/tests/api/channels',
@@ -96,12 +107,14 @@ final class SlimApplicationFactoryTest extends TestCase
             ],
             'Controller get users' => [
                 'expectedResponse' => ['users' => []],
+                'expectedResponseHeaders' => [],
                 'expectedStatusCode' => 200,
                 'httpMethod' => 'GET',
                 'requestUri' => '/tests/app/users',
             ],
             'Controller create user' => [
                 'expectedResponse' => ['status' => 'created'],
+                'expectedResponseHeaders' => [],
                 'expectedStatusCode' => 201,
                 'httpMethod' => 'POST',
                 'requestUri' => '/tests/app/users',

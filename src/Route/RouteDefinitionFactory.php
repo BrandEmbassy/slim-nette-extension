@@ -6,7 +6,6 @@ use BrandEmbassy\Slim\DI\ServiceProvider;
 use BrandEmbassy\Slim\Middleware\MiddlewareFactory;
 use LogicException;
 use Nette\DI\Container;
-use function array_map;
 
 final class RouteDefinitionFactory
 {
@@ -21,8 +20,10 @@ final class RouteDefinitionFactory
     private $middlewareFactory;
 
 
-    public function __construct(Container $container, MiddlewareFactory $middlewareFactory)
-    {
+    public function __construct(
+        Container $container,
+        MiddlewareFactory $middlewareFactory
+    ) {
         $this->container = $container;
         $this->middlewareFactory = $middlewareFactory;
     }
@@ -34,14 +35,16 @@ final class RouteDefinitionFactory
     public function create(string $method, array $routeDefinitionData): RouteDefinition
     {
         $route = $this->getRoute($routeDefinitionData[RouteDefinition::SERVICE]);
-        $middlewares = array_map(
-            function (string $middlewareIdentifier): callable {
-                return $this->middlewareFactory->createFromConfig($middlewareIdentifier);
-            },
+        $middlewares = $this->middlewareFactory->createFromIdentifiers(
             $routeDefinitionData[RouteDefinition::MIDDLEWARES]
         );
 
-        return new RouteDefinition($method, $route, $middlewares);
+        return new RouteDefinition(
+            $method,
+            $route,
+            $middlewares,
+            $routeDefinitionData[RouteDefinition::MIDDLEWARE_GROUPS]
+        );
     }
 
 

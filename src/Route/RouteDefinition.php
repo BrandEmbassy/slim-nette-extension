@@ -6,6 +6,7 @@ final class RouteDefinition
 {
     public const SERVICE = 'service';
     public const MIDDLEWARES = 'middlewares';
+    public const MIDDLEWARE_GROUPS = 'middlewareGroups';
 
     /**
      * @var string
@@ -22,15 +23,22 @@ final class RouteDefinition
      */
     private $middlewares;
 
+    /**
+     * @var array
+     */
+    private $middlewareGroups;
+
 
     /**
      * @param callable[] $middlewares
+     * @param string[] $middlewareGroups
      */
-    public function __construct(string $method, Route $route, array $middlewares)
+    public function __construct(string $method, Route $route, array $middlewares, array $middlewareGroups)
     {
         $this->method = $method;
         $this->route = $route;
         $this->middlewares = $middlewares;
+        $this->middlewareGroups = $middlewareGroups;
     }
 
 
@@ -52,5 +60,14 @@ final class RouteDefinition
     public function getMiddlewares(): array
     {
         return $this->middlewares;
+    }
+
+
+    /**
+     * @return string[]
+     */
+    public function getMiddlewareGroups(): array
+    {
+        return $this->middlewareGroups;
     }
 }
