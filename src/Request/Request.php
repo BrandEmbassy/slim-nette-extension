@@ -18,7 +18,7 @@ use function is_string;
  * @method string[]|string[][] getQueryParams()
  * @method string|string[]|null getQueryParam(string $key, ?string $default = null)
  */
-final class Request extends SlimRequest implements RequestInterface
+class Request extends SlimRequest implements RequestInterface
 {
     private const ROUTE_INFO_ATTRIBUTE = 'routeInfo';
     private const ROUTE_ATTRIBUTE = 'route';
