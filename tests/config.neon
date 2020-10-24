@@ -11,6 +11,7 @@ services:
     - BrandEmbassyTest\Slim\Sample\ErrorThrowingRoute
     - BrandEmbassyTest\Slim\Sample\BeforeRequestMiddleware
     - BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware
+    - BrandEmbassyTest\Slim\Sample\CreateChannelUserRoute
     helloWorldRoute: BrandEmbassyTest\Slim\Sample\HelloWorldRoute
 
 slimApi:
@@ -29,6 +30,7 @@ slimApi:
             "/hello-world-as-class-name":
                 get:
                     service: BrandEmbassyTest\Slim\Sample\HelloWorldRoute
+                    extraField: 'foo'
             "/hello-world-as-service-name":
                 get:
                     service: helloWorldRoute
@@ -39,6 +41,10 @@ slimApi:
                     service: BrandEmbassyTest\Slim\Sample\CreateChannelRoute
                     middlewares:
                         - BrandEmbassyTest\Slim\Sample\GoldenKeyAuthMiddleware
+
+            '/channels/{channelId}/users':
+                post:
+                    service: BrandEmbassyTest\Slim\Sample\CreateChannelUserRoute
 
             '/error':
                 post:

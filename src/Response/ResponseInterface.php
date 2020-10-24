@@ -7,9 +7,9 @@ use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 interface ResponseInterface extends PsrResponseInterface
 {
     /**
-     * @param mixed[]|object $data
+     * @param mixed[] $data
      *
      * @return static
      */
-    public function withJson($data, ?int $status = null, int $encodingOptions = 0);
+    public function withJson(array $data, ?int $status = null, int $encodingOptions = 0);
 }

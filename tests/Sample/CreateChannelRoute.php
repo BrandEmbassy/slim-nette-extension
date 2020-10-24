@@ -11,11 +11,8 @@ final class CreateChannelRoute implements Route
     /**
      * @param string[] $arguments
      */
-    public function __invoke(
-        RequestInterface $request,
-        ResponseInterface $response,
-        array $arguments = []
-    ): ResponseInterface {
+    public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface
+    {
         return $response->withJson(['status' => 'created'], 201);
     }
 }

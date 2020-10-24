@@ -8,14 +8,8 @@ use BrandEmbassy\Slim\Route\Route;
 
 final class HelloWorldRoute implements Route
 {
-    /**
-     * @param string[] $arguments
-     */
-    public function __invoke(
-        RequestInterface $request,
-        ResponseInterface $response,
-        array $arguments = []
-    ): ResponseInterface {
+    public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface
+    {
         return $response->withJson(['Hello World']);
     }
 }

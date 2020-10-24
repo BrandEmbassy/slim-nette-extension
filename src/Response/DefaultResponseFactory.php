@@ -6,6 +6,6 @@ final class DefaultResponseFactory implements ResponseFactory
 {
     public function create(): ResponseInterface
     {
-        return new Response(new \Slim\Http\Response());
+        return new Response();
     }
 }

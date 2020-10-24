@@ -11,7 +11,7 @@ class BeforeRouteMiddleware implements Middleware
     public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next): ResponseInterface
     {
         $response = $response->withAddedHeader(
-            'processed-by-before-route-middlewares',
+            'processed-by-before-route-middleware',
             'proof-for-before-route'
         );
 

@@ -4,45 +4,66 @@ namespace BrandEmbassy\Slim\Request;
 
 use DateTimeImmutable;
 use Psr\Http\Message\ServerRequestInterface;
-use stdClass;
+use Slim\Route;
 
 interface RequestInterface extends ServerRequestInterface
 {
+    public function getRoute(): Route;
+
+
     /**
-     * @param string|int|string[]|int[]|null $default
+     * @return array<string, string>
+     */
+    public function getRouteAttributes(): array;
+
+
+    public function hasRouteAttribute(string $routeAttributeName): bool;
+
+
+    public function getRouteAttribute(string $routeAttributeName): string;
+
+
+    public function findRouteAttribute(string $routeAttributeName, ?string $default = null): ?string;
+
+
+    /**
+     * @return mixed[]
+     */
+    public function getParsedBodyAsArray(): array;
+
+
+    /**
+     * @return mixed
+     */
+    public function getField(string $fieldName);
+
+
+    /**
+     * @param mixed $default
      *
-     * @return string|integer|mixed[]|null
+     * @return mixed
      */
-    public function getQueryParam(string $key, $default = null);
+    public function findField(string $fieldName, $default = null);
+
+
+    public function hasField(string $fieldName): bool;
 
 
     /**
-     * @return string|integer
+     * @return string|string[]|null
      */
-    public function getRequiredArgument(string $name);
+    public function findQueryParam(string $key, ?string $default = null);
 
 
     /**
-     * @return mixed[]|stdClass|string
-     */
-    public function getField(string $name);
-
-
-    /**
-     * @param string|int|null $default
+     * @return string|string[]
      *
-     * @return mixed[]|stdClass|string|integer|null
+     * @throws QueryParamMissingException
      */
-    public function getOptionalField(string $name, $default = null);
+    public function getQueryParamStrict(string $key);
 
 
-    public function hasField(string $name): bool;
-
-
-    /**
-     * @return mixed[]|stdClass
-     */
-    public function getDecodedJsonFromBody();
+    public function hasQueryParam(string $key): bool;
 
 
     public function getDateTimeQueryParam(string $key): DateTimeImmutable;

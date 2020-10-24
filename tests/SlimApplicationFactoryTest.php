@@ -3,32 +3,15 @@
 namespace BrandEmbassyTest\Slim;
 
 use BrandEmbassy\MockeryTools\Http\ResponseAssertions;
-use BrandEmbassy\Slim\Request\Request;
-use BrandEmbassy\Slim\Response\Response;
-use BrandEmbassy\Slim\Response\ResponseInterface;
-use BrandEmbassy\Slim\SlimApplicationFactory;
 use BrandEmbassyTest\Slim\Sample\GoldenKeyAuthMiddleware;
-use Nette\DI\Compiler;
-use Nette\DI\Container;
-use Nette\DI\ContainerLoader;
-use Nette\DI\Extensions\ExtensionsExtension;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
-use Slim\App;
-use Slim\Http\Body;
-use Slim\Http\Headers;
-use Slim\Http\Request as SlimRequest;
-use Slim\Http\Uri;
-use function assert;
-use function fopen;
-use function is_resource;
-use function md5;
 
 final class SlimApplicationFactoryTest extends TestCase
 {
     public function testShouldPassSettingsToSlimContainer(): void
     {
-        $app = $this->createSlimApp();
+        $app = SlimAppTester::createSlimApp();
         $settings = $app->getContainer()->get('settings');
 
         Assert::assertSame('Sample', $settings['myCustomOption']);
@@ -37,7 +20,7 @@ final class SlimApplicationFactoryTest extends TestCase
 
     public function testShouldAllowEmptyErrorHandlers(): void
     {
-        $this->createSlimApp(__DIR__ . '/configNoHandlers.neon');
+        SlimAppTester::runSlimApp(__DIR__ . '/configNoHandlers.neon');
         $this->expectNotToPerformAssertions();
     }
 
@@ -46,13 +29,17 @@ final class SlimApplicationFactoryTest extends TestCase
      * @dataProvider routeResponseDataProvider
      *
      * @param mixed[] $expectedResponseBody
+     * @param array<string, string> $headers
      */
     public function testRouteIsDispatchedAndProcessed(
         array $expectedResponseBody,
         int $expectedStatusCode,
-        Request $request
+        string $httpMethod,
+        string $requestUri,
+        array $headers = []
     ): void {
-        $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
+        $this->prepareEnvironment($httpMethod, $requestUri, $headers);
+        $response = SlimAppTester::runSlimApp();
 
         ResponseAssertions::assertJsonResponseEqualsArray($expectedResponseBody, $response, $expectedStatusCode);
     }
@@ -67,41 +54,45 @@ final class SlimApplicationFactoryTest extends TestCase
             '200 Hello world as class name' => [
                 'expectedResponse' => ['Hello World'],
                 'expectedStatusCode' => 200,
-                'request' => $this->createRequest('GET', '/app/hello-world-as-class-name'),
+                'httpMethod' => 'GET',
+                'requestUri' => '/app/hello-world-as-class-name',
             ],
             '200 Hello world as service name' => [
                 'expectedResponse' => ['Hello World'],
                 'expectedStatusCode' => 200,
-                'request' => $this->createRequest('GET', '/app/hello-world-as-service-name'),
+                'httpMethod' => 'GET',
+                'requestUri' => '/app/hello-world-as-service-name',
             ],
             '404 Not found' => [
                 'expectedResponse' => ['error' => 'Sample NotFoundHandler here!'],
                 'expectedStatusCode' => 404,
-                'request' => $this->createRequest('POST', '/non-existing/path'),
+                'httpMethod' => 'POST',
+                'requestUri' => '/non-existing/path',
             ],
             '405 Not allowed' => [
                 'expectedResponse' => ['error' => 'Sample NotAllowedHandler here!'],
                 'expectedStatusCode' => 405,
-                'request' => $this->createRequest('PATCH', '/api/channels'),
+                'httpMethod' => 'PATCH',
+                'requestUri' => '/api/channels',
             ],
             '500 is 500' => [
                 'expectedResponse' => ['error' => 'Error or not to error, that\'s the question!'],
                 'expectedStatusCode' => 500,
-                'request' => $this->createRequest('POST', '/api/error'),
+                'httpMethod' => 'POST',
+                'requestUri' => '/api/error',
             ],
             '401 Unauthorized' => [
                 'expectedResponse' => ['error' => 'YOU SHALL NOT PASS!'],
                 'expectedStatusCode' => 401,
-                'request' => $this->createRequest('POST', '/api/channels'),
+                'httpMethod' => 'POST',
+                'requestUri' => '/api/channels',
             ],
             'Token authorization passed' => [
                 'expectedResponse' => ['status' => 'created'],
                 'expectedStatusCode' => 201,
-                'request' => $this->createRequest(
-                    'POST',
-                    '/api/channels',
-                    ['goldenKey' => GoldenKeyAuthMiddleware::ACCESS_TOKEN]
-                ),
+                'httpMethod' => 'POST',
+                'requestUri' => '/api/channels',
+                'headers' => ['HTTP_X_API_KEY' => GoldenKeyAuthMiddleware::ACCESS_TOKEN],
             ],
         ];
     }
@@ -109,77 +100,45 @@ final class SlimApplicationFactoryTest extends TestCase
 
     public function testShouldProcessBothGlobalMiddlewares(): void
     {
-        $request = $this->createRequest('POST', '/api/channels');
+        $this->prepareEnvironment('POST', '/api/channels');
 
-        /** @var ResponseInterface $response */
-        $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
+        $response = SlimAppTester::runSlimApp();
 
-        Assert::assertSame(
-            ['proof-for-before-request'],
-            $response->getHeader('processed-by-before-request-middleware')
-        );
-
-        Assert::assertSame(
-            ['proof-for-before-route'],
-            $response->getHeader('processed-by-before-route-middlewares')
+        ResponseAssertions::assertResponseHeaders(
+            [
+                'processed-by-before-request-middleware' => 'proof-for-before-request',
+                'processed-by-before-route-middleware' => 'proof-for-before-route',
+            ],
+            $response
         );
     }
 
 
     public function testShouldProcessBeforeRequestMiddleware(): void
     {
-        $request = $this->createRequest('POST', '/non-existing/path');
+        $this->prepareEnvironment('POST', '/non-existing/path');
 
-        /** @var ResponseInterface $response */
-        $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
+        $response = SlimAppTester::runSlimApp();
 
-        Assert::assertSame(
-            ['proof-for-before-request'],
-            $response->getHeader('processed-by-before-request-middleware')
+        ResponseAssertions::assertResponseHeader(
+            'proof-for-before-request',
+            'processed-by-before-request-middleware',
+            $response
         );
-    }
-
-
-    private function createContainer(string $configPath = __DIR__ . '/config.neon'): Container
-    {
-        $loader = new ContainerLoader(__DIR__ . '/temp', true);
-        $class = $loader->load(
-            static function (Compiler $compiler) use ($configPath): void {
-                $compiler->loadConfig($configPath);
-                $compiler->addExtension('extensions', new ExtensionsExtension());
-            },
-            md5($configPath)
-        );
-
-        return new $class();
     }
 
 
     /**
      * @param array<string> $headers
      */
-    private function createRequest(string $requestMethod, string $requestUrlPath, array $headers = []): Request
+    private function prepareEnvironment(string $requestMethod, string $requestUrlPath, array $headers = []): void
     {
-        $body = fopen('php://temp', 'rb+');
-        assert(is_resource($body));
-        $slimRequest = new SlimRequest(
-            $requestMethod,
-            new Uri('http', 'api.be.com', 80, $requestUrlPath),
-            new Headers($headers),
-            [],
-            [],
-            new Body($body)
-        );
+        $_SERVER['HTTP_HOST'] = 'api.brandembassy.com';
+        $_SERVER['REQUEST_URI'] = $requestUrlPath;
+        $_SERVER['REQUEST_METHOD'] = $requestMethod;
 
-        return new Request($slimRequest);
-    }
-
-
-    private function createSlimApp(string $configPath = __DIR__ . '/config.neon'): App
-    {
-        /** @var SlimApplicationFactory $factory */
-        $factory = $this->createContainer($configPath)->getByType(SlimApplicationFactory::class);
-
-        return $factory->create();
+        foreach ($headers as $name => $value) {
+            $_SERVER[$name] = $value;
+        }
     }
 }

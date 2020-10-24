@@ -13,7 +13,7 @@ final class GoldenKeyAuthMiddleware implements Middleware
 
     public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next): ResponseInterface
     {
-        $token = $request->getHeaderLine('goldenKey');
+        $token = $request->getHeaderLine('X-Api-Key');
 
         if ($token !== self::ACCESS_TOKEN) {
             return $response->withJson(['error' => 'YOU SHALL NOT PASS!'], 401);
