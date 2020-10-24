@@ -16,6 +16,7 @@ services:
     helloWorldRoute: BrandEmbassyTest\Slim\Sample\HelloWorldRoute
 
 slimApi:
+    apiPrefix: '/tests'
     slimConfiguration:
         settings:
             removeDefaultHandlers: true

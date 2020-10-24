@@ -4,6 +4,7 @@ namespace BrandEmbassy\Slim\DI;
 
 use BrandEmbassy\Slim\Controller\ControllerDefinition;
 use BrandEmbassy\Slim\Route\RouteDefinition;
+use BrandEmbassy\Slim\Route\UrlPatternResolver;
 use BrandEmbassy\Slim\SlimApplicationFactory;
 use Nette\DI\CompilerExtension;
 use Nette\Schema\Expect;
@@ -48,6 +49,7 @@ final class SlimApiExtension extends CompilerExtension
                 SlimApplicationFactory::BEFORE_ROUTE_MIDDLEWARES => Expect::arrayOf($this->createServiceExpect())
                     ->default([]),
                 SlimApplicationFactory::SLIM_CONFIGURATION => Expect::array()->default([]),
+                SlimApplicationFactory::API_PREFIX => Expect::string()->default(''),
             ]
         );
     }
@@ -56,8 +58,13 @@ final class SlimApiExtension extends CompilerExtension
     public function loadConfiguration(): void
     {
         $builder = $this->getContainerBuilder();
+        $config = (array)$this->config;
+
+        $builder->addDefinition('slimApi.urlPatterResolver')
+            ->setFactory(UrlPatternResolver::class, [$config[SlimApplicationFactory::API_PREFIX]]);
+
         $builder->addDefinition($this->prefix('slimApi.factory'))
-            ->setFactory(SlimApplicationFactory::class, [(array)$this->config]);
+            ->setFactory(SlimApplicationFactory::class, [$config]);
 
         $this->compiler->loadDefinitionsFromConfig(
             $this->loadFromFile(__DIR__ . '/../services.neon')['services']

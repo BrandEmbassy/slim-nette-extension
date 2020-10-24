@@ -7,6 +7,7 @@ use BrandEmbassy\Slim\Controller\ControllerDefinitionFactory;
 use BrandEmbassy\Slim\DI\ServiceProvider;
 use BrandEmbassy\Slim\Middleware\MiddlewareFactory;
 use BrandEmbassy\Slim\Route\RouteDefinitionFactory;
+use BrandEmbassy\Slim\Route\UrlPatternResolver;
 use LogicException;
 use Nette\DI\Container;
 use Slim\Container as SlimContainer;
@@ -25,6 +26,7 @@ final class SlimApplicationFactory
     public const BEFORE_REQUEST_MIDDLEWARES = 'beforeRequestMiddlewares';
     public const ROUTES = 'routes';
     public const CONTROLLERS = 'controllers';
+    public const API_PREFIX = 'apiPrefix';
     private const ALLOWED_HANDLERS = [
         'notFoundHandler',
         'notAllowedHandler',
@@ -67,6 +69,11 @@ final class SlimApplicationFactory
      */
     private $controllerDefinitionFactory;
 
+    /**
+     * @var UrlPatternResolver
+     */
+    private $urlPatternResolver;
+
 
     /**
      * @param mixed[] $configuration
@@ -77,7 +84,8 @@ final class SlimApplicationFactory
         RouteDefinitionFactory $routeDefinitionFactory,
         MiddlewareFactory $middlewareFactory,
         SlimContainerFactory $slimContainerFactory,
-        ControllerDefinitionFactory $controllerDefinitionFactory
+        ControllerDefinitionFactory $controllerDefinitionFactory,
+        UrlPatternResolver $urlPatternResolver
     ) {
         $this->configuration = $configuration;
         $this->container = $container;
@@ -86,6 +94,7 @@ final class SlimApplicationFactory
         $this->middlewareFactory = $middlewareFactory;
         $this->slimContainerFactory = $slimContainerFactory;
         $this->controllerDefinitionFactory = $controllerDefinitionFactory;
+        $this->urlPatternResolver = $urlPatternResolver;
     }
 
 
@@ -226,7 +235,7 @@ final class SlimApplicationFactory
             $routeName = '/' . $routeName;
         }
 
-        return $version . $routeName;
+        return $this->urlPatternResolver->resolve($version . $routeName);
     }
 
 

@@ -55,56 +55,56 @@ final class SlimApplicationFactoryTest extends TestCase
                 'expectedResponse' => ['Hello World'],
                 'expectedStatusCode' => 200,
                 'httpMethod' => 'GET',
-                'requestUri' => '/app/hello-world-as-class-name',
+                'requestUri' => '/tests/app/hello-world-as-class-name',
             ],
             '200 Hello world as service name' => [
                 'expectedResponse' => ['Hello World'],
                 'expectedStatusCode' => 200,
                 'httpMethod' => 'GET',
-                'requestUri' => '/app/hello-world-as-service-name',
+                'requestUri' => '/tests/app/hello-world-as-service-name',
             ],
             '404 Not found' => [
                 'expectedResponse' => ['error' => 'Sample NotFoundHandler here!'],
                 'expectedStatusCode' => 404,
                 'httpMethod' => 'POST',
-                'requestUri' => '/non-existing/path',
+                'requestUri' => '/tests/non-existing/path',
             ],
             '405 Not allowed' => [
                 'expectedResponse' => ['error' => 'Sample NotAllowedHandler here!'],
                 'expectedStatusCode' => 405,
                 'httpMethod' => 'PATCH',
-                'requestUri' => '/api/channels',
+                'requestUri' => '/tests/api/channels',
             ],
             '500 is 500' => [
                 'expectedResponse' => ['error' => 'Error or not to error, that\'s the question!'],
                 'expectedStatusCode' => 500,
                 'httpMethod' => 'POST',
-                'requestUri' => '/api/error',
+                'requestUri' => '/tests/api/error',
             ],
             '401 Unauthorized' => [
                 'expectedResponse' => ['error' => 'YOU SHALL NOT PASS!'],
                 'expectedStatusCode' => 401,
                 'httpMethod' => 'POST',
-                'requestUri' => '/api/channels',
+                'requestUri' => '/tests/api/channels',
             ],
             'Token authorization passed' => [
                 'expectedResponse' => ['status' => 'created'],
                 'expectedStatusCode' => 201,
                 'httpMethod' => 'POST',
-                'requestUri' => '/api/channels',
+                'requestUri' => '/tests/api/channels',
                 'headers' => ['HTTP_X_API_KEY' => GoldenKeyAuthMiddleware::ACCESS_TOKEN],
             ],
             'Controller get users' => [
                 'expectedResponse' => ['users' => []],
                 'expectedStatusCode' => 200,
                 'httpMethod' => 'GET',
-                'requestUri' => '/app/users',
+                'requestUri' => '/tests/app/users',
             ],
             'Controller create user' => [
                 'expectedResponse' => ['status' => 'created'],
                 'expectedStatusCode' => 201,
                 'httpMethod' => 'POST',
-                'requestUri' => '/app/users',
+                'requestUri' => '/tests/app/users',
             ],
         ];
     }
@@ -112,7 +112,7 @@ final class SlimApplicationFactoryTest extends TestCase
 
     public function testShouldProcessBothGlobalMiddlewares(): void
     {
-        $this->prepareEnvironment('POST', '/api/channels');
+        $this->prepareEnvironment('POST', '/tests/api/channels');
 
         $response = SlimAppTester::runSlimApp();
 
