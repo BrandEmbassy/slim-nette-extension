@@ -6,6 +6,7 @@ use BrandEmbassy\DateTime\DateTimeFromString;
 use DateTime;
 use DateTimeImmutable;
 use InvalidArgumentException;
+use Nette\Utils\Strings;
 use Slim\Http\Request as SlimRequest;
 use Slim\Route;
 use function array_key_exists;
@@ -155,5 +156,13 @@ final class Request extends SlimRequest implements RequestInterface
         assert(is_string($datetimeParam));
 
         return DateTimeFromString::create($format, $datetimeParam);
+    }
+
+
+    public function isHtml(): bool
+    {
+        $acceptHeader = $this->getHeaderLine('accept');
+
+        return Strings::contains($acceptHeader, 'html');
     }
 }

@@ -67,4 +67,7 @@ interface RequestInterface extends ServerRequestInterface
 
 
     public function getDateTimeQueryParam(string $key): DateTimeImmutable;
+
+
+    public function isHtml(): bool;
 }
