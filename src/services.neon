@@ -5,3 +5,4 @@ services:
     middlewareFactory: BrandEmbassy\Slim\Middleware\MiddlewareFactory
     controllerDefinitionFactory: BrandEmbassy\Slim\Controller\ControllerDefinitionFactory
     slimContainerFactory: BrandEmbassy\Slim\SlimContainerFactory
+    router: Slim\Router
