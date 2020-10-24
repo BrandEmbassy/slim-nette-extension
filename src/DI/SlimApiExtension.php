@@ -2,6 +2,7 @@
 
 namespace BrandEmbassy\Slim\DI;
 
+use BrandEmbassy\Slim\Controller\ControllerDefinition;
 use BrandEmbassy\Slim\Route\RouteDefinition;
 use BrandEmbassy\Slim\SlimApplicationFactory;
 use Nette\DI\CompilerExtension;
@@ -18,6 +19,11 @@ final class SlimApiExtension extends CompilerExtension
                 ->default([]),
         ];
 
+        $controllerSchema = [
+            ControllerDefinition::SERVICE => $this->createServiceExpect(),
+            ControllerDefinition::METHODS => Expect::arrayOf('string'),
+        ];
+
         return Expect::structure(
             [
                 SlimApplicationFactory::ROUTES => Expect::arrayOf(
@@ -27,6 +33,13 @@ final class SlimApiExtension extends CompilerExtension
                                 ->castTo('array')
                                 ->otherItems()
                         )
+                    )
+                ),
+                SlimApplicationFactory::CONTROLLERS => Expect::arrayOf(
+                    Expect::arrayOf(
+                        Expect::structure($controllerSchema)
+                            ->castTo('array')
+                            ->otherItems()
                     )
                 ),
                 SlimApplicationFactory::HANDLERS => Expect::arrayOf($this->createServiceExpect())->default([]),
