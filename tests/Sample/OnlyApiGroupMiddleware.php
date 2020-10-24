@@ -7,9 +7,9 @@ use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassyTest\Slim\MiddlewareInvocationCounter;
 
-class BeforeRequestMiddleware implements Middleware
+final class OnlyApiGroupMiddleware implements Middleware
 {
-    public const HEADER_NAME = 'before-request-middleware';
+    public const HEADER_NAME = 'only-api-group-middleware';
 
 
     public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next): ResponseInterface
