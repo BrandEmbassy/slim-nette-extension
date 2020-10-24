@@ -108,7 +108,7 @@ final class RequestTest extends TestCase
     {
         $_SERVER['HTTP_HOST'] = 'api.brandembassy.com';
         $_SERVER['HTTP_CONTENT_TYPE'] = 'multipart/form-data';
-        $_SERVER['REQUEST_URI'] = '/api/channels/' . self::CHANNEL_ID . '/users' . $queryString;
+        $_SERVER['REQUEST_URI'] = '/tests/api/channels/' . self::CHANNEL_ID . '/users' . $queryString;
         $_SERVER['REQUEST_METHOD'] = 'POST';
 
         $_POST = [
