@@ -3,7 +3,6 @@
 namespace BrandEmbassy\Slim\Middleware;
 
 use function array_map;
-use function array_merge;
 use function array_merge_recursive;
 
 final class MiddlewareGroups
@@ -14,6 +13,9 @@ final class MiddlewareGroups
     private $groups;
 
 
+    /**
+     * @param array<string, string[]> $middlewareGroups
+     */
     public function __construct(array $middlewareGroups, MiddlewareFactory $middlewareFactory)
     {
         $this->groups = array_map(
@@ -34,6 +36,11 @@ final class MiddlewareGroups
     }
 
 
+    /**
+     * @param string[] $groupNames
+     *
+     * @return callable[]
+     */
     public function getMiddlewaresForMultipleGroups(array $groupNames): array
     {
         $groupsToMerge = array_map(

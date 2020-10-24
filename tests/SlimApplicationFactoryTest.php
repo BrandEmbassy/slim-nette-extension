@@ -3,7 +3,10 @@
 namespace BrandEmbassyTest\Slim;
 
 use BrandEmbassy\MockeryTools\Http\ResponseAssertions;
+use BrandEmbassyTest\Slim\Sample\BeforeRequestMiddleware;
+use BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware;
 use BrandEmbassyTest\Slim\Sample\GoldenKeyAuthMiddleware;
+use BrandEmbassyTest\Slim\Sample\GroupMiddleware;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
@@ -29,7 +32,7 @@ final class SlimApplicationFactoryTest extends TestCase
      * @dataProvider routeResponseDataProvider
      *
      * @param mixed[] $expectedResponseBody
-     * @param mixed[] $expectedResponseBody
+     * @param mixed[] $expectedResponseHeaders
      * @param array<string, string> $headers
      */
     public function testRouteIsDispatchedAndProcessed(
@@ -56,29 +59,36 @@ final class SlimApplicationFactoryTest extends TestCase
         return [
             '200 Hello world as class name' => [
                 'expectedResponse' => ['Hello World'],
-//                'expectedResponseHeaders' => ['only-api-group-middleware' => 'invoked'],
-                'expectedResponseHeaders' => [],
+                'expectedResponseHeaders' => [
+                    BeforeRequestMiddleware::HEADER_NAME => 'invoked-1',
+                    BeforeRouteMiddleware::HEADER_NAME => 'invoked-2',
+                    GroupMiddleware::HEADER_NAME => 'invoked-3',
+                ],
                 'expectedStatusCode' => 200,
                 'httpMethod' => 'GET',
                 'requestUri' => '/tests/app/hello-world-as-class-name',
             ],
             '200 Hello world as service name' => [
                 'expectedResponse' => ['Hello World'],
-                'expectedResponseHeaders' => [],
+                'expectedResponseHeaders' => [
+                    BeforeRequestMiddleware::HEADER_NAME => 'invoked-1',
+                    BeforeRouteMiddleware::HEADER_NAME => 'invoked-2',
+                    GroupMiddleware::HEADER_NAME => 'invoked-3',
+                ],
                 'expectedStatusCode' => 200,
                 'httpMethod' => 'GET',
                 'requestUri' => '/tests/app/hello-world-as-service-name',
             ],
             '404 Not found' => [
                 'expectedResponse' => ['error' => 'Sample NotFoundHandler here!'],
-                'expectedResponseHeaders' => [],
+                'expectedResponseHeaders' => [BeforeRequestMiddleware::HEADER_NAME => 'invoked-1'],
                 'expectedStatusCode' => 404,
                 'httpMethod' => 'POST',
                 'requestUri' => '/tests/non-existing/path',
             ],
             '405 Not allowed' => [
                 'expectedResponse' => ['error' => 'Sample NotAllowedHandler here!'],
-                'expectedResponseHeaders' => [],
+                'expectedResponseHeaders' => [BeforeRequestMiddleware::HEADER_NAME => 'invoked-1'],
                 'expectedStatusCode' => 405,
                 'httpMethod' => 'PATCH',
                 'requestUri' => '/tests/api/channels',
@@ -92,14 +102,18 @@ final class SlimApplicationFactoryTest extends TestCase
             ],
             '401 Unauthorized' => [
                 'expectedResponse' => ['error' => 'YOU SHALL NOT PASS!'],
-                'expectedResponseHeaders' => [],
+                'expectedResponseHeaders' => [BeforeRequestMiddleware::HEADER_NAME => 'invoked-1'],
                 'expectedStatusCode' => 401,
                 'httpMethod' => 'POST',
                 'requestUri' => '/tests/api/channels',
             ],
             'Token authorization passed' => [
                 'expectedResponse' => ['status' => 'created'],
-                'expectedResponseHeaders' => [],
+                'expectedResponseHeaders' => [
+                    BeforeRequestMiddleware::HEADER_NAME => 'invoked-1',
+                    BeforeRouteMiddleware::HEADER_NAME => 'invoked-2',
+                    GroupMiddleware::HEADER_NAME => 'invoked-3',
+                ],
                 'expectedStatusCode' => 201,
                 'httpMethod' => 'POST',
                 'requestUri' => '/tests/api/channels',
@@ -107,14 +121,14 @@ final class SlimApplicationFactoryTest extends TestCase
             ],
             'Controller get users' => [
                 'expectedResponse' => ['users' => []],
-                'expectedResponseHeaders' => [],
+                'expectedResponseHeaders' => [BeforeRequestMiddleware::HEADER_NAME => 'invoked-1'],
                 'expectedStatusCode' => 200,
                 'httpMethod' => 'GET',
                 'requestUri' => '/tests/app/users',
             ],
             'Controller create user' => [
                 'expectedResponse' => ['status' => 'created'],
-                'expectedResponseHeaders' => [],
+                'expectedResponseHeaders' => [BeforeRequestMiddleware::HEADER_NAME => 'invoked-1'],
                 'expectedStatusCode' => 201,
                 'httpMethod' => 'POST',
                 'requestUri' => '/tests/app/users',
@@ -123,41 +137,13 @@ final class SlimApplicationFactoryTest extends TestCase
     }
 
 
-    public function testShouldProcessBothGlobalMiddlewares(): void
-    {
-        $this->prepareEnvironment('POST', '/tests/api/channels');
-
-        $response = SlimAppTester::runSlimApp();
-
-        ResponseAssertions::assertResponseHeaders(
-            [
-                'processed-by-before-request-middleware' => 'proof-for-before-request',
-                'processed-by-before-route-middleware' => 'proof-for-before-route',
-            ],
-            $response
-        );
-    }
-
-
-    public function testShouldProcessBeforeRequestMiddleware(): void
-    {
-        $this->prepareEnvironment('POST', '/non-existing/path');
-
-        $response = SlimAppTester::runSlimApp();
-
-        ResponseAssertions::assertResponseHeader(
-            'proof-for-before-request',
-            'processed-by-before-request-middleware',
-            $response
-        );
-    }
-
-
     /**
      * @param array<string> $headers
      */
     private function prepareEnvironment(string $requestMethod, string $requestUrlPath, array $headers = []): void
     {
+        MiddlewareInvocationCounter::reset();
+
         $_SERVER['HTTP_HOST'] = 'api.brandembassy.com';
         $_SERVER['REQUEST_URI'] = $requestUrlPath;
         $_SERVER['REQUEST_METHOD'] = $requestMethod;

@@ -24,7 +24,7 @@ final class RouteDefinition
     private $middlewares;
 
     /**
-     * @var array
+     * @var string[]
      */
     private $middlewareGroups;
 

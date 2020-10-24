@@ -10,6 +10,9 @@ final class BeforeRouteMiddlewares
     private $middlewares;
 
 
+    /**
+     * @param string[] $beforeRouteMiddlewares
+     */
     public function __construct(array $beforeRouteMiddlewares, MiddlewareFactory $middlewareFactory)
     {
         $this->middlewares = $middlewareFactory->createFromIdentifiers($beforeRouteMiddlewares);

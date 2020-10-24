@@ -5,7 +5,6 @@ namespace BrandEmbassy\Slim\Route;
 use BrandEmbassy\Slim\Middleware\BeforeRouteMiddlewares;
 use BrandEmbassy\Slim\Middleware\MiddlewareGroups;
 use Slim\Interfaces\RouterInterface;
-use function array_merge;
 use function array_merge_recursive;
 
 final class RouteRegister
@@ -51,6 +50,9 @@ final class RouteRegister
     }
 
 
+    /**
+     * @param array<string, mixed[]> $routeData
+     */
     public function register(string $version, string $routeName, array $routeData): void
     {
         $urlPattern = $this->urlPatternResolver->resolve($version, $routeName);
@@ -73,6 +75,9 @@ final class RouteRegister
     }
 
 
+    /**
+     * @return callable[]
+     */
     private function getAllMiddlewares(string $version, RouteDefinition $routeDefinition): array
     {
         $versionMiddlewares = $this->middlewareGroups->getMiddlewares($version);

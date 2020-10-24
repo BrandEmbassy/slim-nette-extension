@@ -6,7 +6,6 @@ use BrandEmbassy\Slim\Controller\ControllerDefinition;
 use BrandEmbassy\Slim\Controller\ControllerDefinitionFactory;
 use BrandEmbassy\Slim\DI\ServiceProvider;
 use BrandEmbassy\Slim\Middleware\MiddlewareFactory;
-use BrandEmbassy\Slim\Route\RouteDefinitionFactory;
 use BrandEmbassy\Slim\Route\RouteRegister;
 use BrandEmbassy\Slim\Route\UrlPatternResolver;
 use LogicException;
