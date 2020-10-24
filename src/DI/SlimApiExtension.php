@@ -12,18 +12,20 @@ final class SlimApiExtension extends CompilerExtension
 {
     public function getConfigSchema(): Schema
     {
+        $routeSchema = [
+            RouteDefinition::SERVICE => $this->createServiceExpect(),
+            RouteDefinition::MIDDLEWARES => Expect::arrayOf($this->createServiceExpect())
+                ->default([]),
+        ];
+
         return Expect::structure(
             [
                 SlimApplicationFactory::ROUTES => Expect::arrayOf(
                     Expect::arrayOf(
                         Expect::arrayOf(
-                            Expect::structure(
-                                [
-                                    RouteDefinition::SERVICE => $this->createServiceExpect(),
-                                    RouteDefinition::MIDDLEWARES => Expect::arrayOf($this->createServiceExpect())
-                                        ->default([]),
-                                ]
-                            )
+                            Expect::structure($routeSchema)
+                                ->castTo('array')
+                                ->otherItems()
                         )
                     )
                 ),

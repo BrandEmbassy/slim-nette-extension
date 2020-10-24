@@ -7,13 +7,9 @@ use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 interface ResponseInterface extends PsrResponseInterface
 {
     /**
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
-     *
      * @param mixed[] $data
-     * @param int|null $status
-     * @param int $encodingOptions
      *
      * @return static
      */
-    public function withJson($data, $status = null, $encodingOptions = 0);
+    public function withJson(array $data, ?int $status = null, int $encodingOptions = 0);
 }

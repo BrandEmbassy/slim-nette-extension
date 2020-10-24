@@ -30,6 +30,7 @@ slimApi:
             "/hello-world-as-class-name":
                 get:
                     service: BrandEmbassyTest\Slim\Sample\HelloWorldRoute
+                    extraField: 'foo'
             "/hello-world-as-service-name":
                 get:
                     service: helloWorldRoute
