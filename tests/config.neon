@@ -12,6 +12,7 @@ services:
     - BrandEmbassyTest\Slim\Sample\BeforeRequestMiddleware
     - BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware
     - BrandEmbassyTest\Slim\Sample\CreateChannelUserRoute
+    - BrandEmbassyTest\Slim\Sample\UsersController
     helloWorldRoute: BrandEmbassyTest\Slim\Sample\HelloWorldRoute
 
 slimApi:
@@ -49,6 +50,14 @@ slimApi:
             '/error':
                 post:
                     service: BrandEmbassyTest\Slim\Sample\ErrorThrowingRoute
+
+    controllers:
+        app:
+            /users:
+                service: BrandEmbassyTest\Slim\Sample\UsersController
+                methods:
+                    get: getUsers
+                    post: createUser
 
     beforeRouteMiddlewares:
         - BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware
