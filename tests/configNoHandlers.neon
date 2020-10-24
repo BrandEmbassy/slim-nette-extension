@@ -1,7 +1,0 @@
-extensions:
-    slimApi: \BrandEmbassy\Slim\DI\SlimApiExtension
-
-slimApi:
-    slimConfiguration:
-        settings:
-            displayErrorDetails: true

@@ -21,13 +21,6 @@ final class SlimApplicationFactoryTest extends TestCase
     }
 
 
-    public function testShouldAllowEmptyErrorHandlers(): void
-    {
-        SlimAppTester::runSlimApp(__DIR__ . '/configNoHandlers.neon');
-        $this->expectNotToPerformAssertions();
-    }
-
-
     /**
      * @dataProvider routeResponseDataProvider
      *
