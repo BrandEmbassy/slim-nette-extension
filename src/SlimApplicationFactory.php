@@ -204,7 +204,7 @@ final class SlimApplicationFactory
     ): void {
         $app->getContainer()[$controllerDefinition->getControllerIdentifier()] = $controllerDefinition->getController();
 
-        foreach ($controllerDefinition->getMethods() as $action => $method) {
+        foreach ($controllerDefinition->getMethods() as $method => $action) {
             $callable = sprintf('%s:%s', $controllerDefinition->getControllerIdentifier(), $action);
             $middlewareMethod = sprintf('%s:middleware', $controllerDefinition->getControllerIdentifier());
 

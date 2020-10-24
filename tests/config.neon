@@ -56,8 +56,8 @@ slimApi:
             /users:
                 service: BrandEmbassyTest\Slim\Sample\UsersController
                 methods:
-                    getUsers: get
-                    createUser: post
+                    get: getUsers
+                    post: createUser
 
     beforeRouteMiddlewares:
         - BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware

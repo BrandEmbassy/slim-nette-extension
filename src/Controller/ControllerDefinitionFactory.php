@@ -5,7 +5,6 @@ namespace BrandEmbassy\Slim\Controller;
 use BrandEmbassy\Slim\DI\ServiceProvider;
 use LogicException;
 use Nette\DI\Container;
-use function array_keys;
 use function assert;
 use function method_exists;
 
@@ -31,10 +30,8 @@ final class ControllerDefinitionFactory
         $controllerIdentifier = $controllerDefinitionData[ControllerDefinition::SERVICE];
         $controller = $this->getController($controllerIdentifier);
 
-        $actions = array_keys($controllerDefinitionData[ControllerDefinition::METHODS]);
-
-        foreach ($actions as $action) {
-            assert(method_exists($controller, (string)$action));
+        foreach ($controllerDefinitionData[ControllerDefinition::METHODS] as $method => $action) {
+            assert(method_exists($controller, $action));
         }
 
         return new ControllerDefinition(
