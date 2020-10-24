@@ -9,14 +9,8 @@ use LogicException;
 
 final class ErrorThrowingRoute implements Route
 {
-    /**
-     * @param string[] $arguments
-     */
-    public function __invoke(
-        RequestInterface $request,
-        ResponseInterface $response,
-        array $arguments = []
-    ): ResponseInterface {
+    public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface
+    {
         throw new LogicException('Error or not to error, that\'s the question!');
     }
 }

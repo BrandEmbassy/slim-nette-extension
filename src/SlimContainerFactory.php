@@ -2,6 +2,7 @@
 
 namespace BrandEmbassy\Slim;
 
+use BrandEmbassy\Slim\Request\RequestFactory;
 use BrandEmbassy\Slim\Response\ResponseFactory;
 use Slim\Container;
 
@@ -12,10 +13,16 @@ final class SlimContainerFactory
      */
     private $responseFactory;
 
+    /**
+     * @var RequestFactory
+     */
+    private $requestFactory;
 
-    public function __construct(ResponseFactory $responseFactory)
+
+    public function __construct(ResponseFactory $responseFactory, RequestFactory $requestFactory)
     {
         $this->responseFactory = $responseFactory;
+        $this->requestFactory = $requestFactory;
     }
 
 
@@ -26,6 +33,9 @@ final class SlimContainerFactory
     {
         if (!isset($configuration['response'])) {
             $configuration['response'] = $this->responseFactory->create();
+        }
+        if (!isset($configuration['request'])) {
+            $configuration['request'] = $this->requestFactory->create();
         }
 
         return new Container($configuration);

@@ -6,10 +6,44 @@ use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 
 interface ResponseInterface extends PsrResponseInterface
 {
+    // // @codingStandardsIgnoreStart
     /**
-     * @param mixed[]|object $data
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
      *
-     * @return static
+     * @return bool
      */
-    public function withJson($data, ?int $status = null, int $encodingOptions = 0);
+    public function isEmpty();
+
+
+    /**
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     *
+     * @return bool
+     */
+    public function isInformational();
+
+
+    /**
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     *
+     * @return bool
+     */
+    public function isOk();
+
+
+    /**
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     *
+     * @return bool
+     */
+    public function isSuccessful();
+
+
+    /**
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     *
+     * @return bool
+     */
+    public function isRedirect();
+    // @codingStandardsIgnoreEnd
 }
