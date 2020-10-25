@@ -43,6 +43,10 @@ final class MiddlewareGroups
      */
     public function getMiddlewaresForMultipleGroups(array $groupNames): array
     {
+        if ($groupNames === []) {
+            return [];
+        }
+
         $groupsToMerge = array_map(
             function (string $groupName): array {
                 return $this->getMiddlewares($groupName);
