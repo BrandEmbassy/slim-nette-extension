@@ -142,7 +142,7 @@ final class Request extends SlimRequest implements RequestInterface
 
     public function hasQueryParam(string $key): bool
     {
-        return isset($this->getQueryParams()[$key]);
+        return array_key_exists($key, $this->getQueryParams());
     }
 
 
@@ -180,7 +180,7 @@ final class Request extends SlimRequest implements RequestInterface
      */
     public function findAttribute(string $name, $default = null)
     {
-        return $this->getAttributes()[$name] ?? $default;
+        return $this->getAttribute($name, $default);
     }
 
 
@@ -192,9 +192,29 @@ final class Request extends SlimRequest implements RequestInterface
     public function getAttributeStrict(string $name)
     {
         if ($this->hasAttribute($name)) {
-            return $this->getAttributes()[$name];
+            return $this->getAttribute($name);
         }
 
         throw RequestAttributeMissingException::create($name);
+    }
+
+
+    /**
+     * @deprecated use findAttribute or findRouteArgument
+     *
+     * @param string $name
+     * @param mixed $default
+     *
+     * @return mixed
+     */
+    public function findAttributeOrRouteArgument(string $name, $default = null)
+    {
+        $value = $this->findAttribute($name, $default);
+
+        if ($value !== $default) {
+            return $value;
+        }
+
+        return $this->findRouteArgument($name, $default);
     }
 }

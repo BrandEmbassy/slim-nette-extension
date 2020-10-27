@@ -14,9 +14,7 @@ final class MiddlewareInvocationCounter
 
     public static function invoke(string $headerName, ResponseInterface $response): ResponseInterface
     {
-        self::$counter++;
-
-        return $response->withHeader($headerName, 'invoked-' . self::$counter);
+        return $response->withHeader($headerName, 'invoked-' . self::$counter++);
     }
 
 

@@ -80,6 +80,17 @@ interface RequestInterface extends ServerRequestInterface
     public function getAttributeStrict(string $name);
 
 
+    /**
+     * @deprecated use findAttribute or findRouteArgument
+     *
+     * @param string $name
+     * @param mixed $default
+     *
+     * @return mixed
+     */
+    public function findAttributeOrRouteArgument(string $name, $default = null);
+
+
     public function hasQueryParam(string $key): bool;
 
 
