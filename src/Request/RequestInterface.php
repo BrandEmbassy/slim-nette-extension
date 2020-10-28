@@ -83,7 +83,6 @@ interface RequestInterface extends ServerRequestInterface
     /**
      * @deprecated use findAttribute or findRouteArgument
      *
-     * @param string $name
      * @param mixed $default
      *
      * @return mixed

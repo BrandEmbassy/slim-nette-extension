@@ -202,7 +202,6 @@ final class Request extends SlimRequest implements RequestInterface
     /**
      * @deprecated use findAttribute or findRouteArgument
      *
-     * @param string $name
      * @param mixed $default
      *
      * @return mixed
