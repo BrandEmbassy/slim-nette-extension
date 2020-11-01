@@ -82,12 +82,12 @@ final class RequestTest extends TestCase
     {
         $request = $this->getDispatchedRequest();
 
-        Assert::assertSame('123', $request->getRouteAttribute('channelId'));
-        Assert::assertTrue($request->hasRouteAttribute('channelId'));
-        Assert::assertFalse($request->hasRouteAttribute('non-existing'));
-        Assert::assertSame(['channelId' => '123'], $request->getRouteAttributes());
-        Assert::assertSame('123', $request->findRouteAttribute('channelId'));
-        Assert::assertSame('default', $request->findRouteAttribute('non-existing', 'default'));
+        Assert::assertSame('123', $request->getRouteArgument('channelId'));
+        Assert::assertTrue($request->hasRouteArgument('channelId'));
+        Assert::assertFalse($request->hasRouteArgument('non-existing'));
+        Assert::assertSame(['channelId' => '123'], $request->getRouteArguments());
+        Assert::assertSame('123', $request->findRouteArgument('channelId'));
+        Assert::assertSame('default', $request->findRouteArgument('non-existing', 'default'));
     }
 
 

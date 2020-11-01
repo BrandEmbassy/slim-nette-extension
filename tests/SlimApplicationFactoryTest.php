@@ -7,6 +7,8 @@ use BrandEmbassyTest\Slim\Sample\BeforeRequestMiddleware;
 use BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware;
 use BrandEmbassyTest\Slim\Sample\GoldenKeyAuthMiddleware;
 use BrandEmbassyTest\Slim\Sample\GroupMiddleware;
+use BrandEmbassyTest\Slim\Sample\InvokeCounterMiddleware;
+use BrandEmbassyTest\Slim\Sample\OnlyApiGroupMiddleware;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
@@ -18,13 +20,6 @@ final class SlimApplicationFactoryTest extends TestCase
         $settings = $app->getContainer()->get('settings');
 
         Assert::assertSame('Sample', $settings['myCustomOption']);
-    }
-
-
-    public function testShouldAllowEmptyErrorHandlers(): void
-    {
-        SlimAppTester::runSlimApp(__DIR__ . '/configNoHandlers.neon');
-        $this->expectNotToPerformAssertions();
     }
 
 
@@ -60,9 +55,9 @@ final class SlimApplicationFactoryTest extends TestCase
             '200 Hello world as class name' => [
                 'expectedResponse' => ['Hello World'],
                 'expectedResponseHeaders' => [
-                    BeforeRequestMiddleware::HEADER_NAME => 'invoked-1',
-                    BeforeRouteMiddleware::HEADER_NAME => 'invoked-2',
-                    GroupMiddleware::HEADER_NAME => 'invoked-3',
+                    BeforeRequestMiddleware::HEADER_NAME => 'invoked-0',
+                    BeforeRouteMiddleware::HEADER_NAME => 'invoked-1',
+                    GroupMiddleware::HEADER_NAME => 'invoked-2',
                 ],
                 'expectedStatusCode' => 200,
                 'httpMethod' => 'GET',
@@ -71,9 +66,9 @@ final class SlimApplicationFactoryTest extends TestCase
             '200 Hello world as service name' => [
                 'expectedResponse' => ['Hello World'],
                 'expectedResponseHeaders' => [
-                    BeforeRequestMiddleware::HEADER_NAME => 'invoked-1',
-                    BeforeRouteMiddleware::HEADER_NAME => 'invoked-2',
-                    GroupMiddleware::HEADER_NAME => 'invoked-3',
+                    BeforeRequestMiddleware::HEADER_NAME => 'invoked-0',
+                    BeforeRouteMiddleware::HEADER_NAME => 'invoked-1',
+                    GroupMiddleware::HEADER_NAME => 'invoked-2',
                 ],
                 'expectedStatusCode' => 200,
                 'httpMethod' => 'GET',
@@ -81,14 +76,14 @@ final class SlimApplicationFactoryTest extends TestCase
             ],
             '404 Not found' => [
                 'expectedResponse' => ['error' => 'Sample NotFoundHandler here!'],
-                'expectedResponseHeaders' => [BeforeRequestMiddleware::HEADER_NAME => 'invoked-1'],
+                'expectedResponseHeaders' => [BeforeRequestMiddleware::HEADER_NAME => 'invoked-0'],
                 'expectedStatusCode' => 404,
                 'httpMethod' => 'POST',
                 'requestUri' => '/tests/non-existing/path',
             ],
             '405 Not allowed' => [
                 'expectedResponse' => ['error' => 'Sample NotAllowedHandler here!'],
-                'expectedResponseHeaders' => [BeforeRequestMiddleware::HEADER_NAME => 'invoked-1'],
+                'expectedResponseHeaders' => [BeforeRequestMiddleware::HEADER_NAME => 'invoked-0'],
                 'expectedStatusCode' => 405,
                 'httpMethod' => 'PATCH',
                 'requestUri' => '/tests/api/channels',
@@ -102,7 +97,7 @@ final class SlimApplicationFactoryTest extends TestCase
             ],
             '401 Unauthorized' => [
                 'expectedResponse' => ['error' => 'YOU SHALL NOT PASS!'],
-                'expectedResponseHeaders' => [BeforeRequestMiddleware::HEADER_NAME => 'invoked-1'],
+                'expectedResponseHeaders' => [BeforeRequestMiddleware::HEADER_NAME => 'invoked-0'],
                 'expectedStatusCode' => 401,
                 'httpMethod' => 'POST',
                 'requestUri' => '/tests/api/channels',
@@ -110,8 +105,9 @@ final class SlimApplicationFactoryTest extends TestCase
             'Token authorization passed' => [
                 'expectedResponse' => ['status' => 'created'],
                 'expectedResponseHeaders' => [
-                    BeforeRequestMiddleware::HEADER_NAME => 'invoked-1',
-                    BeforeRouteMiddleware::HEADER_NAME => 'invoked-2',
+                    BeforeRequestMiddleware::HEADER_NAME => 'invoked-0',
+                    BeforeRouteMiddleware::HEADER_NAME => 'invoked-1',
+                    OnlyApiGroupMiddleware::HEADER_NAME => 'invoked-2',
                     GroupMiddleware::HEADER_NAME => 'invoked-3',
                 ],
                 'expectedStatusCode' => 201,
@@ -121,19 +117,43 @@ final class SlimApplicationFactoryTest extends TestCase
             ],
             'Controller get users' => [
                 'expectedResponse' => ['users' => []],
-                'expectedResponseHeaders' => [BeforeRequestMiddleware::HEADER_NAME => 'invoked-1'],
+                'expectedResponseHeaders' => [BeforeRequestMiddleware::HEADER_NAME => 'invoked-0'],
                 'expectedStatusCode' => 200,
                 'httpMethod' => 'GET',
                 'requestUri' => '/tests/app/users',
             ],
             'Controller create user' => [
                 'expectedResponse' => ['status' => 'created'],
-                'expectedResponseHeaders' => [BeforeRequestMiddleware::HEADER_NAME => 'invoked-1'],
+                'expectedResponseHeaders' => [BeforeRequestMiddleware::HEADER_NAME => 'invoked-0'],
                 'expectedStatusCode' => 201,
                 'httpMethod' => 'POST',
                 'requestUri' => '/tests/app/users',
             ],
         ];
+    }
+
+
+    public function testMiddlewareInvokeOrder(): void
+    {
+        $expectedHeaders = [
+            InvokeCounterMiddleware::getName('A') => 'invoked-0',
+            InvokeCounterMiddleware::getName('B') => 'invoked-1',
+            InvokeCounterMiddleware::getName('C') => 'invoked-2',
+            InvokeCounterMiddleware::getName('D') => 'invoked-3',
+            InvokeCounterMiddleware::getName('E') => 'invoked-4',
+            InvokeCounterMiddleware::getName('F') => 'invoked-5',
+            InvokeCounterMiddleware::getName('G') => 'invoked-6',
+            InvokeCounterMiddleware::getName('H') => 'invoked-7',
+            InvokeCounterMiddleware::getName('I') => 'invoked-8',
+            InvokeCounterMiddleware::getName('J') => 'invoked-9',
+            InvokeCounterMiddleware::getName('K') => 'invoked-10',
+            InvokeCounterMiddleware::getName('L') => 'invoked-11',
+        ];
+
+        $this->prepareEnvironment('POST', '/api/test');
+        $response = SlimAppTester::runSlimApp(__DIR__ . '/middlewareOrder.neon');
+
+        ResponseAssertions::assertResponseHeaders($expectedHeaders, $response);
     }
 
 

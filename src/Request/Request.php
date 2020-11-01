@@ -6,6 +6,7 @@ use BrandEmbassy\DateTime\DateTimeFromString;
 use DateTime;
 use DateTimeImmutable;
 use InvalidArgumentException;
+use Nette\Utils\Strings;
 use Slim\Http\Request as SlimRequest;
 use Slim\Route;
 use function array_key_exists;
@@ -35,7 +36,7 @@ final class Request extends SlimRequest implements RequestInterface
     /**
      * @return array<string, string>
      */
-    public function getRouteAttributes(): array
+    public function getRouteArguments(): array
     {
         $routeInfoAttribute = $this->getAttribute(self::ROUTE_INFO_ATTRIBUTE);
 
@@ -47,28 +48,28 @@ final class Request extends SlimRequest implements RequestInterface
     }
 
 
-    public function hasRouteAttribute(string $routeAttributeName): bool
+    public function hasRouteArgument(string $argument): bool
     {
-        return isset($this->getRouteAttributes()[$routeAttributeName]);
+        return isset($this->getRouteArguments()[$argument]);
     }
 
 
     /**
-     * @throws RouteAttributeMissingException
+     * @throws RouteArgumentMissingException
      */
-    public function getRouteAttribute(string $routeAttributeName): string
+    public function getRouteArgument(string $argument): string
     {
-        if ($this->hasRouteAttribute($routeAttributeName)) {
-            return $this->getRouteAttributes()[$routeAttributeName];
+        if ($this->hasRouteArgument($argument)) {
+            return $this->getRouteArguments()[$argument];
         }
 
-        throw RouteAttributeMissingException::create($routeAttributeName);
+        throw RouteArgumentMissingException::create($argument);
     }
 
 
-    public function findRouteAttribute(string $routeAttributeName, ?string $default = null): ?string
+    public function findRouteArgument(string $argument, ?string $default = null): ?string
     {
-        return $this->getRouteAttributes()[$routeAttributeName] ?? $default;
+        return $this->getRouteArguments()[$argument] ?? $default;
     }
 
 
@@ -132,7 +133,7 @@ final class Request extends SlimRequest implements RequestInterface
         $value = $this->findQueryParam($key);
 
         if ($value !== null) {
-            return $this->getQueryParams()[$key];
+            return $value;
         }
 
         throw QueryParamMissingException::create($key);
@@ -141,7 +142,7 @@ final class Request extends SlimRequest implements RequestInterface
 
     public function hasQueryParam(string $key): bool
     {
-        return isset($this->getQueryParams()[$key]);
+        return array_key_exists($key, $this->getQueryParams());
     }
 
 
@@ -155,5 +156,64 @@ final class Request extends SlimRequest implements RequestInterface
         assert(is_string($datetimeParam));
 
         return DateTimeFromString::create($format, $datetimeParam);
+    }
+
+
+    public function isHtml(): bool
+    {
+        $acceptHeader = $this->getHeaderLine('accept');
+
+        return Strings::contains($acceptHeader, 'html');
+    }
+
+
+    public function hasAttribute(string $name): bool
+    {
+        return array_key_exists($name, $this->getAttributes());
+    }
+
+
+    /**
+     * @param mixed $default
+     *
+     * @return mixed
+     */
+    public function findAttribute(string $name, $default = null)
+    {
+        return $this->getAttribute($name, $default);
+    }
+
+
+    /**
+     * @return mixed
+     *
+     * @throws RequestAttributeMissingException
+     */
+    public function getAttributeStrict(string $name)
+    {
+        if ($this->hasAttribute($name)) {
+            return $this->getAttribute($name);
+        }
+
+        throw RequestAttributeMissingException::create($name);
+    }
+
+
+    /**
+     * @deprecated use findAttribute or findRouteArgument
+     *
+     * @param mixed $default
+     *
+     * @return mixed
+     */
+    public function findAttributeOrRouteArgument(string $name, $default = null)
+    {
+        $value = $this->findAttribute($name, $default);
+
+        if ($value !== $default) {
+            return $value;
+        }
+
+        return $this->findRouteArgument($name, $default);
     }
 }

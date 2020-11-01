@@ -87,8 +87,8 @@ final class RouteRegister
 
         return array_merge_recursive(
             $routeDefinition->getMiddlewares(),
-            $versionMiddlewares,
             $middlewaresFromGroups,
+            $versionMiddlewares,
             $this->beforeRouteMiddlewares->getMiddlewares()
         );
     }

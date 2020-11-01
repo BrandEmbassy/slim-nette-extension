@@ -14,16 +14,16 @@ interface RequestInterface extends ServerRequestInterface
     /**
      * @return array<string, string>
      */
-    public function getRouteAttributes(): array;
+    public function getRouteArguments(): array;
 
 
-    public function hasRouteAttribute(string $routeAttributeName): bool;
+    public function hasRouteArgument(string $argument): bool;
 
 
-    public function getRouteAttribute(string $routeAttributeName): string;
+    public function getRouteArgument(string $argument): string;
 
 
-    public function findRouteAttribute(string $routeAttributeName, ?string $default = null): ?string;
+    public function findRouteArgument(string $argument, ?string $default = null): ?string;
 
 
     /**
@@ -63,8 +63,61 @@ interface RequestInterface extends ServerRequestInterface
     public function getQueryParamStrict(string $key);
 
 
+    public function hasAttribute(string $name): bool;
+
+
+    /**
+     * @param mixed $default
+     *
+     * @return mixed
+     */
+    public function findAttribute(string $name, $default = null);
+
+
+    /**
+     * @return mixed
+     */
+    public function getAttributeStrict(string $name);
+
+
+    /**
+     * @deprecated use findAttribute or findRouteArgument
+     *
+     * @param mixed $default
+     *
+     * @return mixed
+     */
+    public function findAttributeOrRouteArgument(string $name, $default = null);
+
+
     public function hasQueryParam(string $key): bool;
 
 
     public function getDateTimeQueryParam(string $key): DateTimeImmutable;
+
+
+    public function isHtml(): bool;
+
+
+    /**
+     * @deprecated use getAttributeStrict or findAttribute
+     *
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     *
+     * @param string $name
+     * @param mixed $default
+     *
+     * @return mixed
+     */
+    public function getAttribute($name, $default = null);
+
+
+    /**
+     * @deprecated use getQueryParamStrict or findQueryParam
+     *
+     * @param mixed|null $default
+     *
+     * @return mixed
+     */
+    public function getQueryParam(string $key, $default = null);
 }

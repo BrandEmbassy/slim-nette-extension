@@ -1,0 +1,50 @@
+extensions:
+    slimApi: BrandEmbassy\Slim\DI\SlimApiExtension
+
+
+services:
+    - BrandEmbassyTest\Slim\Sample\HelloWorldRoute
+    invokeCounterA: BrandEmbassyTest\Slim\Sample\InvokeCounterMiddleware('A')
+    invokeCounterB: BrandEmbassyTest\Slim\Sample\InvokeCounterMiddleware('B')
+    invokeCounterC: BrandEmbassyTest\Slim\Sample\InvokeCounterMiddleware('C')
+    invokeCounterD: BrandEmbassyTest\Slim\Sample\InvokeCounterMiddleware('D')
+    invokeCounterE: BrandEmbassyTest\Slim\Sample\InvokeCounterMiddleware('E')
+    invokeCounterF: BrandEmbassyTest\Slim\Sample\InvokeCounterMiddleware('F')
+    invokeCounterG: BrandEmbassyTest\Slim\Sample\InvokeCounterMiddleware('G')
+    invokeCounterH: BrandEmbassyTest\Slim\Sample\InvokeCounterMiddleware('H')
+    invokeCounterI: BrandEmbassyTest\Slim\Sample\InvokeCounterMiddleware('I')
+    invokeCounterJ: BrandEmbassyTest\Slim\Sample\InvokeCounterMiddleware('J')
+    invokeCounterK: BrandEmbassyTest\Slim\Sample\InvokeCounterMiddleware('K')
+    invokeCounterL: BrandEmbassyTest\Slim\Sample\InvokeCounterMiddleware('L')
+
+slimApi:
+    routes:
+        'api':
+            '/test':
+                post:
+                    service: BrandEmbassyTest\Slim\Sample\HelloWorldRoute
+                    middlewares:
+                        - invokeCounterL
+                        - invokeCounterK
+                    middlewareGroups:
+                        - testGroupB
+                        - testGroupA
+
+    middlewareGroups:
+        testGroupA:
+            - invokeCounterH
+            - invokeCounterG
+        testGroupB:
+            - invokeCounterJ
+            - invokeCounterI
+        api:
+            - invokeCounterF
+            - invokeCounterE
+
+    beforeRouteMiddlewares:
+        - invokeCounterD
+        - invokeCounterC
+
+    beforeRequestMiddlewares:
+        - invokeCounterB
+        - invokeCounterA
