@@ -151,9 +151,18 @@ final class SlimApplicationFactoryTest extends TestCase
         ];
 
         $this->prepareEnvironment('POST', '/api/test');
-        $response = SlimAppTester::runSlimApp(__DIR__ . '/middlewareOrder.neon');
+        $response = SlimAppTester::runSlimApp(__DIR__ . '/no-prefix-config.neon');
 
         ResponseAssertions::assertResponseHeaders($expectedHeaders, $response);
+    }
+
+
+    public function testRootRouteIsDispatched(): void
+    {
+        $this->prepareEnvironment('GET', '/');
+        $response = SlimAppTester::runSlimApp(__DIR__ . '/no-prefix-config.neon');
+
+        ResponseAssertions::assertResponseStatusCode(200, $response);
     }
 
 

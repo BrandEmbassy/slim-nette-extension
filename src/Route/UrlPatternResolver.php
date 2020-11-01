@@ -31,6 +31,12 @@ final class UrlPatternResolver
             $routeName = '/' . $routeName;
         }
 
-        return $this->apiPrefix . $version . $routeName;
+        $pattern = $this->apiPrefix . $version . $routeName;
+
+        if ($pattern === '') {
+            return '/';
+        }
+
+        return $pattern;
     }
 }

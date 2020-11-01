@@ -19,6 +19,10 @@ services:
 
 slimApi:
     routes:
+        '/':
+            '/':
+                get:
+                    service: BrandEmbassyTest\Slim\Sample\HelloWorldRoute
         'api':
             '/test':
                 post:
