@@ -16,7 +16,7 @@ use function is_string;
 
 /**
  * @method string[]|string[][] getQueryParams()
- * @method string|string[]|null getQueryParam(string $key, ?string $default = null)
+ * @method string|string[]|null getQueryParam(string $name, ?string $default = null)
  */
 final class Request extends SlimRequest implements RequestInterface
 {
@@ -117,9 +117,9 @@ final class Request extends SlimRequest implements RequestInterface
     /**
      * @return string|string[]|null
      */
-    public function findQueryParam(string $key, ?string $default = null)
+    public function findQueryParam(string $name, ?string $default = null)
     {
-        return $this->getQueryParam($key) ?? $default;
+        return $this->getQueryParam($name) ?? $default;
     }
 
 
@@ -128,21 +128,21 @@ final class Request extends SlimRequest implements RequestInterface
      *
      * @throws QueryParamMissingException
      */
-    public function getQueryParamStrict(string $key)
+    public function getQueryParamStrict(string $name)
     {
-        $value = $this->findQueryParam($key);
+        $value = $this->findQueryParam($name);
 
         if ($value !== null) {
             return $value;
         }
 
-        throw QueryParamMissingException::create($key);
+        throw QueryParamMissingException::create($name);
     }
 
 
-    public function hasQueryParam(string $key): bool
+    public function hasQueryParam(string $name): bool
     {
-        return array_key_exists($key, $this->getQueryParams());
+        return array_key_exists($name, $this->getQueryParams());
     }
 
 
@@ -155,7 +155,7 @@ final class Request extends SlimRequest implements RequestInterface
         $datetimeParam = $this->getQueryParamStrict($field);
         assert(is_string($datetimeParam));
 
-        return DateTimeFromString::create($format, $datetimeParam);
+        return DateTimeFromString::createFromFormat($format, $datetimeParam);
     }
 
 
