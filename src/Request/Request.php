@@ -197,23 +197,4 @@ final class Request extends SlimRequest implements RequestInterface
 
         throw RequestAttributeMissingException::create($name);
     }
-
-
-    /**
-     * @deprecated use findAttribute or findRouteArgument
-     *
-     * @param mixed $default
-     *
-     * @return mixed
-     */
-    public function findAttributeOrRouteArgument(string $name, $default = null)
-    {
-        $value = $this->findAttribute($name, $default);
-
-        if ($value !== $default) {
-            return $value;
-        }
-
-        return $this->findRouteArgument($name, $default);
-    }
 }
