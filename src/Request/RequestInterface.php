@@ -52,7 +52,7 @@ interface RequestInterface extends ServerRequestInterface
     /**
      * @return string|string[]|null
      */
-    public function findQueryParam(string $key, ?string $default = null);
+    public function findQueryParam(string $name, ?string $default = null);
 
 
     /**
@@ -60,7 +60,7 @@ interface RequestInterface extends ServerRequestInterface
      *
      * @throws QueryParamMissingException
      */
-    public function getQueryParamStrict(string $key);
+    public function getQueryParamStrict(string $name);
 
 
     public function hasAttribute(string $name): bool;
@@ -80,10 +80,10 @@ interface RequestInterface extends ServerRequestInterface
     public function getAttributeStrict(string $name);
 
 
-    public function hasQueryParam(string $key): bool;
+    public function hasQueryParam(string $name): bool;
 
 
-    public function getDateTimeQueryParam(string $key): DateTimeImmutable;
+    public function getDateTimeQueryParam(string $name): DateTimeImmutable;
 
 
     public function isHtml(): bool;
@@ -109,5 +109,5 @@ interface RequestInterface extends ServerRequestInterface
      *
      * @return mixed
      */
-    public function getQueryParam(string $key, $default = null);
+    public function getQueryParam(string $name, $default = null);
 }
