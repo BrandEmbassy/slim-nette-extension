@@ -36,13 +36,13 @@ final class RequestTest extends TestCase
     }
 
 
-    public function testGetParsedBodyAsArray(): void{
-
+    public function testGetParsedBodyAsArray(): void
+    {
         $request = $this->createSampleRequest();
 
         $expectedArray = [
             'thisIsNull' => null,
-            'thisIsGandalf' => 'gandalf'
+            'thisIsGandalf' => 'gandalf',
         ];
 
         Assert::assertSame($expectedArray, $request->getParsedBodyAsArray());
@@ -126,6 +126,7 @@ final class RequestTest extends TestCase
     {
         $url = new Uri('https', 'example.com');
         $slimRequest = new SlimRequest('POST', $url, new Headers(), [], [], $body);
+        $slimRequest = $slimRequest->withHeader('content-type', 'application/json');
 
         return new Request($slimRequest);
     }
