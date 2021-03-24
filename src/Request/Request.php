@@ -14,6 +14,8 @@ use Psr\Http\Message\UriInterface;
 use Slim\Route;
 use stdClass;
 use function array_key_exists;
+use function assert;
+use function is_array;
 use function is_string;
 use function sprintf;
 
@@ -355,6 +357,18 @@ final class Request implements RequestInterface
     public function getParsedBody()
     {
         return $this->request->getParsedBody();
+    }
+
+
+    /**
+     * @return mixed[]
+     */
+    public function getParsedBodyAsArray(): array
+    {
+        $parsedBody = $this->getParsedBody();
+        assert(is_array($parsedBody));
+
+        return $parsedBody;
     }
 
 

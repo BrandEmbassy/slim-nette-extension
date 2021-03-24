@@ -8,6 +8,7 @@ use DateTime;
 use LogicException;
 use Mockery;
 use Mockery\MockInterface;
+use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\StreamInterface;
 use Slim\Http\Body;
@@ -32,6 +33,19 @@ final class RequestTest extends TestCase
         self::assertTrue($request->hasField('thisIsNull'));
         self::assertFalse($request->hasField('nonExistingField'));
         self::assertTrue($request->hasField('thisIsGandalf'));
+    }
+
+
+    public function testGetParsedBodyAsArray(): void
+    {
+        $request = $this->createSampleRequest();
+
+        $expectedArray = [
+            'thisIsNull' => null,
+            'thisIsGandalf' => 'gandalf',
+        ];
+
+        Assert::assertSame($expectedArray, $request->getParsedBodyAsArray());
     }
 
 
@@ -112,6 +126,7 @@ final class RequestTest extends TestCase
     {
         $url = new Uri('https', 'example.com');
         $slimRequest = new SlimRequest('POST', $url, new Headers(), [], [], $body);
+        $slimRequest = $slimRequest->withHeader('content-type', 'application/json');
 
         return new Request($slimRequest);
     }
