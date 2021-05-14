@@ -65,6 +65,7 @@ final class RouteRegister
                 $urlPattern,
                 $routeDefinition->getRoute()
             );
+            $routeToAdd->setName($urlPattern);
 
             $middlewaresToAdd = $this->getAllMiddlewares($version, $routeDefinition);
 
