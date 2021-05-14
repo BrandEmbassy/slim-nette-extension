@@ -54,16 +54,16 @@ final class SlimApiExtension extends CompilerExtension
         $builder = $this->getContainerBuilder();
         $config = (array)$this->config;
 
-        $builder->addDefinition('slimApi.urlPatterResolver')
+        $builder->addDefinition($this->prefix('urlPatterResolver'))
             ->setFactory(UrlPatternResolver::class, [$config[SlimApplicationFactory::API_PREFIX]]);
 
-        $builder->addDefinition('slimApi.beforeRouteMiddlewares')
+        $builder->addDefinition($this->prefix('beforeRouteMiddlewares'))
             ->setFactory(BeforeRouteMiddlewares::class, [$config[SlimApplicationFactory::BEFORE_ROUTE_MIDDLEWARES]]);
 
-        $builder->addDefinition('slimApi.middlewareGroups')
+        $builder->addDefinition($this->prefix('middlewareGroups'))
             ->setFactory(MiddlewareGroups::class, [$config[SlimApplicationFactory::MIDDLEWARE_GROUPS]]);
 
-        $builder->addDefinition($this->prefix('slimApi.factory'))
+        $builder->addDefinition($this->prefix('slimAppFactory'))
             ->setFactory(SlimApplicationFactory::class, [$config]);
 
         $this->compiler->loadDefinitionsFromConfig(
