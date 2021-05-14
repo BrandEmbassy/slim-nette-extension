@@ -4,7 +4,12 @@ namespace BrandEmbassy\Slim\DI;
 
 use BrandEmbassy\Slim\Middleware\BeforeRouteMiddlewares;
 use BrandEmbassy\Slim\Middleware\MiddlewareGroups;
+use BrandEmbassy\Slim\Request\RequestFactory;
+use BrandEmbassy\Slim\Response\DefaultResponseFactory;
+use BrandEmbassy\Slim\Response\ResponseFactory;
 use BrandEmbassy\Slim\Route\RouteDefinition;
+use BrandEmbassy\Slim\Route\RouteDefinitionFactory;
+use BrandEmbassy\Slim\Route\RouteRegister;
 use BrandEmbassy\Slim\Route\UrlPatternResolver;
 use BrandEmbassy\Slim\SlimApplicationFactory;
 use Nette\DI\CompilerExtension;
@@ -65,6 +70,20 @@ final class SlimApiExtension extends CompilerExtension
 
         $builder->addDefinition($this->prefix('slimAppFactory'))
             ->setFactory(SlimApplicationFactory::class, [$config]);
+
+        $builder->addDefinition($this->prefix('routeDefinitionFactory'))
+            ->setFactory(RouteDefinitionFactory::class);
+
+        $builder->addDefinition($this->prefix('routeRegister'))
+            ->setFactory(RouteRegister::class);
+
+        $builder->addDefinition($this->prefix('requestFactory'))
+            ->setType(RequestFactory::class)
+            ->setFactory(RequestFactory::class);
+
+        $builder->addDefinition($this->prefix('responseFactory'))
+            ->setType(ResponseFactory::class)
+            ->setFactory(DefaultResponseFactory::class);
 
         $this->compiler->loadDefinitionsFromConfig(
             $this->loadFromFile(__DIR__ . '/../services.neon')['services']
