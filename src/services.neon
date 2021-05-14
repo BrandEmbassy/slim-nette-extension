@@ -3,7 +3,6 @@ services:
     requestFactory: BrandEmbassy\Slim\Request\DefaultRequestFactory
     routeDefinitionFactory: BrandEmbassy\Slim\Route\RouteDefinitionFactory
     middlewareFactory: BrandEmbassy\Slim\Middleware\MiddlewareFactory
-    controllerDefinitionFactory: BrandEmbassy\Slim\Controller\ControllerDefinitionFactory
     slimContainerFactory: BrandEmbassy\Slim\SlimContainerFactory
     router: Slim\Router
     routeRegister: BrandEmbassy\Slim\Route\RouteRegister
