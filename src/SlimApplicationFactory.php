@@ -2,12 +2,9 @@
 
 namespace BrandEmbassy\Slim;
 
-use BrandEmbassy\Slim\Controller\ControllerDefinition;
-use BrandEmbassy\Slim\Controller\ControllerDefinitionFactory;
 use BrandEmbassy\Slim\DI\ServiceProvider;
 use BrandEmbassy\Slim\Middleware\MiddlewareFactory;
 use BrandEmbassy\Slim\Route\RouteRegister;
-use BrandEmbassy\Slim\Route\UrlPatternResolver;
 use LogicException;
 use Nette\DI\Container;
 use Slim\Container as SlimContainer;
@@ -24,7 +21,6 @@ final class SlimApplicationFactory
     public const HANDLERS = 'handlers';
     public const BEFORE_REQUEST_MIDDLEWARES = 'beforeRequestMiddlewares';
     public const ROUTES = 'routes';
-    public const CONTROLLERS = 'controllers';
     public const API_PREFIX = 'apiPrefix';
     public const MIDDLEWARE_GROUPS = 'middlewareGroups';
     private const ALLOWED_HANDLERS = [
@@ -55,16 +51,6 @@ final class SlimApplicationFactory
     private $slimContainerFactory;
 
     /**
-     * @var ControllerDefinitionFactory
-     */
-    private $controllerDefinitionFactory;
-
-    /**
-     * @var UrlPatternResolver
-     */
-    private $urlPatternResolver;
-
-    /**
      * @var RouteRegister
      */
     private $routeRegister;
@@ -78,16 +64,12 @@ final class SlimApplicationFactory
         Container $container,
         MiddlewareFactory $middlewareFactory,
         SlimContainerFactory $slimContainerFactory,
-        ControllerDefinitionFactory $controllerDefinitionFactory,
-        UrlPatternResolver $urlPatternResolver,
         RouteRegister $routeRegister
     ) {
         $this->configuration = $configuration;
         $this->container = $container;
         $this->middlewareFactory = $middlewareFactory;
         $this->slimContainerFactory = $slimContainerFactory;
-        $this->controllerDefinitionFactory = $controllerDefinitionFactory;
-        $this->urlPatternResolver = $urlPatternResolver;
         $this->routeRegister = $routeRegister;
     }
 
@@ -100,10 +82,6 @@ final class SlimApplicationFactory
 
         foreach ($this->configuration[self::ROUTES] as $apiVersion => $routes) {
             $this->registerApi($apiVersion, $routes);
-        }
-
-        foreach ($this->configuration[self::CONTROLLERS] as $apiVersion => $controllers) {
-            $this->registerControllers($app, $apiVersion, $controllers);
         }
 
         $this->registerHandlers($slimContainer, $this->configuration[self::HANDLERS]);
@@ -157,36 +135,6 @@ final class SlimApplicationFactory
     {
         foreach ($routes as $routeName => $routeData) {
             $this->routeRegister->register($version, $routeName, $routeData);
-        }
-    }
-
-
-    /**
-     * @param string[][] $controllers
-     */
-    private function registerControllers(SlimApp $app, string $version, array $controllers): void
-    {
-        foreach ($controllers as $controllerName => $controllerData) {
-            $urlPattern = $this->urlPatternResolver->resolve($version, $controllerName);
-            $controllerDefinition = $this->controllerDefinitionFactory->create($controllerData);
-
-            $this->registerController($app, $controllerDefinition, $urlPattern);
-        }
-    }
-
-
-    private function registerController(
-        SlimApp $app,
-        ControllerDefinition $controllerDefinition,
-        string $urlPattern
-    ): void {
-        $app->getContainer()[$controllerDefinition->getControllerIdentifier()] = $controllerDefinition->getController();
-
-        foreach ($controllerDefinition->getMethods() as $method => $action) {
-            $callable = sprintf('%s:%s', $controllerDefinition->getControllerIdentifier(), $action);
-            $middlewareMethod = sprintf('%s:middleware', $controllerDefinition->getControllerIdentifier());
-
-            $app->map([$method], $urlPattern, $callable)->add($middlewareMethod);
         }
     }
 }

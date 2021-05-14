@@ -115,20 +115,6 @@ final class SlimApplicationFactoryTest extends TestCase
                 'requestUri' => '/tests/api/channels',
                 'headers' => ['HTTP_X_API_KEY' => GoldenKeyAuthMiddleware::ACCESS_TOKEN],
             ],
-            'Controller get users' => [
-                'expectedResponse' => ['users' => []],
-                'expectedResponseHeaders' => [BeforeRequestMiddleware::HEADER_NAME => 'invoked-0'],
-                'expectedStatusCode' => 200,
-                'httpMethod' => 'GET',
-                'requestUri' => '/tests/app/users',
-            ],
-            'Controller create user' => [
-                'expectedResponse' => ['status' => 'created'],
-                'expectedResponseHeaders' => [BeforeRequestMiddleware::HEADER_NAME => 'invoked-0'],
-                'expectedStatusCode' => 201,
-                'httpMethod' => 'POST',
-                'requestUri' => '/tests/app/users',
-            ],
         ];
     }
 

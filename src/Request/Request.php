@@ -2,7 +2,6 @@
 
 namespace BrandEmbassy\Slim\Request;
 
-use BrandEmbassy\DateTime\DateTimeFromString;
 use DateTime;
 use DateTimeImmutable;
 use InvalidArgumentException;
@@ -13,6 +12,7 @@ use function array_key_exists;
 use function assert;
 use function is_array;
 use function is_string;
+use function sprintf;
 
 /**
  * @method string[]|string[][] getQueryParams()
@@ -155,7 +155,13 @@ final class Request extends SlimRequest implements RequestInterface
         $datetimeParam = $this->getQueryParamStrict($field);
         assert(is_string($datetimeParam));
 
-        return DateTimeFromString::create($format, $datetimeParam);
+        $dateTime = DateTimeImmutable::createFromFormat($format, $datetimeParam);
+
+        if ($dateTime === false) {
+            throw new InvalidArgumentException(sprintf('Field %s is not in %s format', $field, $format));
+        }
+
+        return $dateTime;
     }
 
 
