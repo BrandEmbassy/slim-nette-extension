@@ -13,9 +13,12 @@ use BrandEmbassy\Slim\Route\RouteDefinitionFactory;
 use BrandEmbassy\Slim\Route\RouteRegister;
 use BrandEmbassy\Slim\Route\UrlPatternResolver;
 use BrandEmbassy\Slim\SlimApplicationFactory;
+use BrandEmbassy\Slim\SlimContainerFactory;
 use Nette\DI\CompilerExtension;
+use Nette\DI\Definitions\Reference;
 use Nette\Schema\Expect;
 use Nette\Schema\Schema;
+use Slim\Container;
 
 final class SlimApiExtension extends CompilerExtension
 {
@@ -71,6 +74,19 @@ final class SlimApiExtension extends CompilerExtension
 
         $builder->addDefinition($this->prefix('slimAppFactory'))
             ->setFactory(SlimApplicationFactory::class, [$config]);
+
+        $builder->addDefinition($this->prefix('slimContainerFactory'))
+            ->setFactory(SlimContainerFactory::class);
+
+        $builder->addDefinition($this->prefix('slimContainer'))
+            ->setType(Container::class)
+            ->setFactory(
+                [
+                    new Reference(SlimContainerFactory::class),
+                    'create',
+                ],
+                [$config[SlimApplicationFactory::SLIM_CONFIGURATION]]
+            );
 
         $builder->addDefinition($this->prefix('routeDefinitionFactory'))
             ->setFactory(RouteDefinitionFactory::class);

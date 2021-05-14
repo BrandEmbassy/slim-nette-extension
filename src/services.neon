@@ -1,4 +1,3 @@
 services:
     slim.middlewareFactory: BrandEmbassy\Slim\Middleware\MiddlewareFactory
-    slim.slimContainerFactory: BrandEmbassy\Slim\SlimContainerFactory
     slim.router: Slim\Router
