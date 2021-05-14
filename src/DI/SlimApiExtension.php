@@ -4,6 +4,7 @@ namespace BrandEmbassy\Slim\DI;
 
 use BrandEmbassy\Slim\Middleware\BeforeRouteMiddlewares;
 use BrandEmbassy\Slim\Middleware\MiddlewareGroups;
+use BrandEmbassy\Slim\Request\DefaultRequestFactory;
 use BrandEmbassy\Slim\Request\RequestFactory;
 use BrandEmbassy\Slim\Response\DefaultResponseFactory;
 use BrandEmbassy\Slim\Response\ResponseFactory;
@@ -79,7 +80,7 @@ final class SlimApiExtension extends CompilerExtension
 
         $builder->addDefinition($this->prefix('requestFactory'))
             ->setType(RequestFactory::class)
-            ->setFactory(RequestFactory::class);
+            ->setFactory(DefaultRequestFactory::class);
 
         $builder->addDefinition($this->prefix('responseFactory'))
             ->setType(ResponseFactory::class)
