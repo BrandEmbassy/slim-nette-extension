@@ -13,4 +13,7 @@ interface ResponseInterface extends PsrResponseInterface
      * @return static
      */
     public function withJson($data, ?int $status = null, int $encodingOptions = 0);
+
+
+    public function getParsedBodyAsArray(): array;
 }
