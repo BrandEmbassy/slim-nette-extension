@@ -3,6 +3,7 @@
 namespace BrandEmbassy\Slim\Response;
 
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
+use Psr\Http\Message\UriInterface;
 use Slim\Http\StatusCode;
 use stdClass;
 
@@ -16,8 +17,16 @@ interface ResponseInterface extends PsrResponseInterface
     public function withJson($data, ?int $status = null, int $encodingOptions = 0);
 
 
-    public function withRedirect(string $url, int $statusCode = StatusCode::HTTP_FOUND);
+    /**
+     * @param string|UriInterface $url
+     *
+     * @return static
+     */
+    public function withRedirect($url, int $statusCode = StatusCode::HTTP_FOUND);
 
 
+    /**
+     * @return mixed[]
+     */
     public function getParsedBodyAsArray(): array;
 }

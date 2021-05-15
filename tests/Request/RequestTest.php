@@ -57,11 +57,14 @@ final class RequestTest extends TestCase
         Assert::assertTrue($request->hasQueryParam('null'));
         Assert::assertFalse($request->hasQueryParam('non-existing'));
         Assert::assertSame('bar', $request->getQueryParamStrict('foo'));
+        Assert::assertSame('bar', $request->getQueryParamAsString('foo'));
+        Assert::assertSame('bar', $request->findQueryParamAsString('foo'));
         Assert::assertSame('2', $request->getQueryParamStrict('two'));
         Assert::assertSame('null', $request->getQueryParamStrict('null'));
         Assert::assertSame(['item1', 'item2'], $request->getQueryParamStrict('array'));
         Assert::assertSame('default', $request->findQueryParam('non-existing', 'default'));
         Assert::assertNull($request->findQueryParam('non-existing'));
+        Assert::assertNull($request->findQueryParamAsString('non-existing'));
 
         $this->expectException(QueryParamMissingException::class);
         $this->expectExceptionMessage('Query param "non-existing" is missing in request URI');
@@ -91,6 +94,14 @@ final class RequestTest extends TestCase
     }
 
 
+    public function testResolvingFields(): void
+    {
+        $request = $this->getDispatchedRequest();
+
+        Assert::assertSame('value', $request->getField('level-1.level-2'));
+    }
+
+
     private function getDispatchedRequest(string $queryString = ''): RequestInterface
     {
         $this->prepareEnvironment($queryString);
@@ -114,6 +125,7 @@ final class RequestTest extends TestCase
         $_POST = [
             'thisIsNull' => null,
             'thisIsGandalf' => 'gandalf',
+            'level-1' => ['level-2' => 'value'],
         ];
     }
 }
