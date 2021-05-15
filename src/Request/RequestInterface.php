@@ -63,6 +63,15 @@ interface RequestInterface extends ServerRequestInterface
     public function getQueryParamStrict(string $key);
 
 
+    public function findQueryParamAsString(string $key, ?string $default = null): ?string;
+
+
+    /**
+     * @throws QueryParamMissingException
+     */
+    public function getQueryParamAsString(string $key): string;
+
+
     public function hasAttribute(string $name): bool;
 
 

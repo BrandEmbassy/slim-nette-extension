@@ -157,6 +157,30 @@ final class Request extends SlimRequest implements RequestInterface
     }
 
 
+    public function findQueryParamAsString(string $key, ?string $default = null): ?string
+    {
+        $queryParam = $this->getQueryParam($key);
+        assert(!is_array($queryParam));
+
+        return $queryParam ?? $default;
+    }
+
+
+    /**
+     * @throws QueryParamMissingException
+     */
+    public function getQueryParamAsString(string $key): string
+    {
+        $value = $this->findQueryParamAsString($key);
+
+        if ($value !== null) {
+            return $value;
+        }
+
+        throw QueryParamMissingException::create($key);
+    }
+
+
     public function hasQueryParam(string $key): bool
     {
         return array_key_exists($key, $this->getQueryParams());
