@@ -53,21 +53,27 @@ final class RouteRegister
     /**
      * @param array<string, mixed[]> $routeData
      */
-    public function register(string $version, string $routeName, array $routeData): void
+    public function register(string $apiNamespace, string $routePattern, array $routeData): void
     {
-        $urlPattern = $this->urlPatternResolver->resolve($version, $routeName);
+        $urlPattern = $this->urlPatternResolver->resolve($apiNamespace, $routePattern);
+        $resolveRoutePath = $this->urlPatternResolver->resolveRoutePath(
+            $apiNamespace,
+            $routePattern
+        );
 
         foreach ($routeData as $method => $routeDefinitionData) {
             $routeDefinition = $this->routeDefinitionFactory->create($method, $routeDefinitionData);
+
+            $routeName = $routeDefinition->getName() ?? $resolveRoutePath;
 
             $routeToAdd = $this->router->map(
                 [$routeDefinition->getMethod()],
                 $urlPattern,
                 $routeDefinition->getRoute()
             );
-            $routeToAdd->setName($urlPattern);
+            $routeToAdd->setName($routeName);
 
-            $middlewaresToAdd = $this->getAllMiddlewares($version, $routeDefinition);
+            $middlewaresToAdd = $this->getAllMiddlewares($apiNamespace, $routeDefinition);
 
             foreach ($middlewaresToAdd as $middleware) {
                 $routeToAdd->add($middleware);

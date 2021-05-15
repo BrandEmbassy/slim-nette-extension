@@ -18,25 +18,33 @@ final class UrlPatternResolver
     }
 
 
-    public function resolve(string $version, string $routeName): string
+    public function resolve(string $apiNamespace, string $routePattern): string
     {
-        $version = trim($version, '/');
-        $routeName = trim($routeName, '/');
+        $routePath = $this->resolveRoutePath($apiNamespace, $routePattern);
 
-        if ($version !== '') {
-            $version = '/' . $version;
-        }
-
-        if ($routeName !== '') {
-            $routeName = '/' . $routeName;
-        }
-
-        $pattern = $this->apiPrefix . $version . $routeName;
+        $pattern = $this->apiPrefix . $routePath;
 
         if ($pattern === '') {
             return '/';
         }
 
         return $pattern;
+    }
+
+
+    public function resolveRoutePath(string $apiNamespace, string $routePattern): string
+    {
+        $apiNamespace = trim($apiNamespace, '/');
+        $routePattern = trim($routePattern, '/');
+
+        if ($apiNamespace !== '') {
+            $apiNamespace = '/' . $apiNamespace;
+        }
+
+        if ($routePattern !== '') {
+            $routePattern = '/' . $routePattern;
+        }
+
+        return $apiNamespace . $routePattern;
     }
 }
