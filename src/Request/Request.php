@@ -25,15 +25,15 @@ final class Request extends SlimRequest implements RequestInterface
     private const ROUTE_ATTRIBUTE = 'route';
 
     /**
-     * @var Dot|null
+     * @var Dot<string, mixed[]>|null
      */
-    protected $donAnnotatedBodyParameters;
+    protected $dotAnnotatedRequestBody;
 
 
     public function __clone()
     {
         parent::__clone();
-        $this->donAnnotatedBodyParameters = null;
+        $this->dotAnnotatedRequestBody = null;
     }
 
 
@@ -103,7 +103,7 @@ final class Request extends SlimRequest implements RequestInterface
     public function getField(string $fieldName)
     {
         if ($this->hasField($fieldName)) {
-            return $this->donAnnotatedBodyParameters->get($fieldName);
+            return $this->getDotAnnotatedRequestBody()->get($fieldName);
         }
 
         throw RequestFieldMissingException::create($fieldName);
@@ -117,17 +117,13 @@ final class Request extends SlimRequest implements RequestInterface
      */
     public function findField(string $fieldName, $default = null)
     {
-        $this->initDotAnnotation();
-
-        return $this->donAnnotatedBodyParameters->get($fieldName, $default);
+        return $this->getDotAnnotatedRequestBody()->get($fieldName, $default);
     }
 
 
     public function hasField(string $fieldName): bool
     {
-        $this->initDotAnnotation();
-
-        return $this->donAnnotatedBodyParameters->has($fieldName);
+        return $this->getDotAnnotatedRequestBody()->has($fieldName);
     }
 
 
@@ -246,10 +242,15 @@ final class Request extends SlimRequest implements RequestInterface
     }
 
 
-    private function initDotAnnotation(): void
+    /**
+     * @return Dot<string, mixed[]>
+     */
+    private function getDotAnnotatedRequestBody(): Dot
     {
-        if ($this->donAnnotatedBodyParameters === null) {
-            $this->donAnnotatedBodyParameters = new Dot($this->getParsedBodyAsArray());
+        if ($this->dotAnnotatedRequestBody === null) {
+            $this->dotAnnotatedRequestBody = new Dot($this->getParsedBodyAsArray());
         }
+
+        return $this->dotAnnotatedRequestBody;
     }
 }

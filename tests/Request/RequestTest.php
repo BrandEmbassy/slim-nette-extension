@@ -99,6 +99,7 @@ final class RequestTest extends TestCase
         $request = $this->getDispatchedRequest();
 
         Assert::assertSame('value', $request->getField('level-1.level-2'));
+        Assert::assertNull($request->getField('level-1.level-2-null'));
     }
 
 
@@ -125,7 +126,10 @@ final class RequestTest extends TestCase
         $_POST = [
             'thisIsNull' => null,
             'thisIsGandalf' => 'gandalf',
-            'level-1' => ['level-2' => 'value'],
+            'level-1' => [
+                'level-2' => 'value',
+                'level-2-null' => null,
+            ],
         ];
     }
 }
