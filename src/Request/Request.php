@@ -2,6 +2,7 @@
 
 namespace BrandEmbassy\Slim\Request;
 
+use Adbar\Dot;
 use DateTime;
 use DateTimeImmutable;
 use InvalidArgumentException;
@@ -22,6 +23,18 @@ final class Request extends SlimRequest implements RequestInterface
 {
     private const ROUTE_INFO_ATTRIBUTE = 'routeInfo';
     private const ROUTE_ATTRIBUTE = 'route';
+
+    /**
+     * @var Dot|null
+     */
+    protected $donAnnotatedBodyParameters;
+
+
+    public function __clone()
+    {
+        parent::__clone();
+        $this->donAnnotatedBodyParameters = null;
+    }
 
 
     public function getRoute(): Route
@@ -87,13 +100,13 @@ final class Request extends SlimRequest implements RequestInterface
      *
      * @throws RequestFieldMissingException
      */
-    public function getField(string $fieldFieldName)
+    public function getField(string $fieldName)
     {
-        if ($this->hasField($fieldFieldName)) {
-            return $this->getParsedBodyAsArray()[$fieldFieldName];
+        if ($this->hasField($fieldName)) {
+            return $this->donAnnotatedBodyParameters->get($fieldName);
         }
 
-        throw RequestFieldMissingException::create($fieldFieldName);
+        throw RequestFieldMissingException::create($fieldName);
     }
 
 
@@ -102,15 +115,19 @@ final class Request extends SlimRequest implements RequestInterface
      *
      * @return mixed
      */
-    public function findField(string $fieldFieldName, $default = null)
+    public function findField(string $fieldName, $default = null)
     {
-        return $this->getParsedBodyAsArray()[$fieldFieldName] ?? $default;
+        $this->initDotAnnotation();
+
+        return $this->donAnnotatedBodyParameters->get($fieldName, $default);
     }
 
 
     public function hasField(string $fieldName): bool
     {
-        return array_key_exists($fieldName, $this->getParsedBodyAsArray());
+        $this->initDotAnnotation();
+
+        return $this->donAnnotatedBodyParameters->has($fieldName);
     }
 
 
@@ -202,5 +219,13 @@ final class Request extends SlimRequest implements RequestInterface
         }
 
         throw RequestAttributeMissingException::create($name);
+    }
+
+
+    private function initDotAnnotation(): void
+    {
+        if ($this->donAnnotatedBodyParameters === null) {
+            $this->donAnnotatedBodyParameters = new Dot($this->getParsedBodyAsArray());
+        }
     }
 }

@@ -35,7 +35,7 @@ interface RequestInterface extends ServerRequestInterface
     /**
      * @return mixed
      */
-    public function getField(string $fieldName);
+    public function getField(string $name);
 
 
     /**
@@ -43,7 +43,7 @@ interface RequestInterface extends ServerRequestInterface
      *
      * @return mixed
      */
-    public function findField(string $fieldName, $default = null);
+    public function findField(string $name, $default = null);
 
 
     public function hasField(string $fieldName): bool;
