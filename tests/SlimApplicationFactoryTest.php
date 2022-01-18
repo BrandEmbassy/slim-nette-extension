@@ -11,6 +11,8 @@ use BrandEmbassyTest\Slim\Sample\InvokeCounterMiddleware;
 use BrandEmbassyTest\Slim\Sample\OnlyApiGroupMiddleware;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
+use Slim\Router;
+use function assert;
 
 final class SlimApplicationFactoryTest extends TestCase
 {
@@ -149,6 +151,23 @@ final class SlimApplicationFactoryTest extends TestCase
         $response = SlimAppTester::runSlimApp(__DIR__ . '/no-prefix-config.neon');
 
         ResponseAssertions::assertResponseStatusCode(200, $response);
+    }
+
+
+    public function testRouteNameIsResolved(): void
+    {
+        $slimApp = SlimAppTester::createSlimApp();
+        $container = $slimApp->getContainer();
+
+        $router = $container->get('router');
+        assert($router instanceof Router);
+
+        Assert::assertSame(
+            '/tests/api/channels/1234/users',
+            $router->urlFor('getChannelUsers', ['channelId' => '1234'])
+        );
+
+        Assert::assertSame('/tests/api/channels', $router->urlFor('/api/channels'));
     }
 
 

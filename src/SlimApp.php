@@ -2,12 +2,9 @@
 
 namespace BrandEmbassy\Slim;
 
-use ArrayAccess;
-use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Slim\App;
 use Throwable;
-use function assert;
 use function reset;
 
 class SlimApp extends App
@@ -35,17 +32,5 @@ class SlimApp extends App
         }
 
         return $response;
-    }
-
-
-    /**
-     * @return ContainerInterface&ArrayAccess<string, mixed>
-     */
-    public function getContainer(): ContainerInterface
-    {
-        $container = parent::getContainer();
-        assert($container instanceof ArrayAccess);
-
-        return $container;
     }
 }

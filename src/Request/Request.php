@@ -2,6 +2,7 @@
 
 namespace BrandEmbassy\Slim\Request;
 
+use Adbar\Dot;
 use DateTime;
 use DateTimeImmutable;
 use InvalidArgumentException;
@@ -22,6 +23,18 @@ final class Request extends SlimRequest implements RequestInterface
 {
     private const ROUTE_INFO_ATTRIBUTE = 'routeInfo';
     private const ROUTE_ATTRIBUTE = 'route';
+
+    /**
+     * @var Dot<string, mixed[]>|null
+     */
+    protected $dotAnnotatedRequestBody;
+
+
+    public function __clone()
+    {
+        parent::__clone();
+        $this->dotAnnotatedRequestBody = null;
+    }
 
 
     public function getRoute(): Route
@@ -87,13 +100,13 @@ final class Request extends SlimRequest implements RequestInterface
      *
      * @throws RequestFieldMissingException
      */
-    public function getField(string $fieldFieldName)
+    public function getField(string $fieldName)
     {
-        if ($this->hasField($fieldFieldName)) {
-            return $this->getParsedBodyAsArray()[$fieldFieldName];
+        if ($this->hasField($fieldName)) {
+            return $this->getDotAnnotatedRequestBody()->get($fieldName);
         }
 
-        throw RequestFieldMissingException::create($fieldFieldName);
+        throw RequestFieldMissingException::create($fieldName);
     }
 
 
@@ -102,15 +115,15 @@ final class Request extends SlimRequest implements RequestInterface
      *
      * @return mixed
      */
-    public function findField(string $fieldFieldName, $default = null)
+    public function findField(string $fieldName, $default = null)
     {
-        return $this->getParsedBodyAsArray()[$fieldFieldName] ?? $default;
+        return $this->getDotAnnotatedRequestBody()->get($fieldName, $default);
     }
 
 
     public function hasField(string $fieldName): bool
     {
-        return array_key_exists($fieldName, $this->getParsedBodyAsArray());
+        return $this->getDotAnnotatedRequestBody()->has($fieldName);
     }
 
 
@@ -131,6 +144,30 @@ final class Request extends SlimRequest implements RequestInterface
     public function getQueryParamStrict(string $key)
     {
         $value = $this->findQueryParam($key);
+
+        if ($value !== null) {
+            return $value;
+        }
+
+        throw QueryParamMissingException::create($key);
+    }
+
+
+    public function findQueryParamAsString(string $key, ?string $default = null): ?string
+    {
+        $queryParam = $this->getQueryParam($key);
+        assert(!is_array($queryParam));
+
+        return $queryParam ?? $default;
+    }
+
+
+    /**
+     * @throws QueryParamMissingException
+     */
+    public function getQueryParamAsString(string $key): string
+    {
+        $value = $this->findQueryParamAsString($key);
 
         if ($value !== null) {
             return $value;
@@ -202,5 +239,18 @@ final class Request extends SlimRequest implements RequestInterface
         }
 
         throw RequestAttributeMissingException::create($name);
+    }
+
+
+    /**
+     * @return Dot<string, mixed[]>
+     */
+    private function getDotAnnotatedRequestBody(): Dot
+    {
+        if ($this->dotAnnotatedRequestBody === null) {
+            $this->dotAnnotatedRequestBody = new Dot($this->getParsedBodyAsArray());
+        }
+
+        return $this->dotAnnotatedRequestBody;
     }
 }

@@ -80,8 +80,8 @@ final class SlimApplicationFactory
 
         $app = new SlimApp($slimContainer);
 
-        foreach ($this->configuration[self::ROUTES] as $apiVersion => $routes) {
-            $this->registerApi($apiVersion, $routes);
+        foreach ($this->configuration[self::ROUTES] as $apiNamespace => $routes) {
+            $this->registerApi($apiNamespace, $routes);
         }
 
         $this->registerHandlers($slimContainer, $this->configuration[self::HANDLERS]);
@@ -131,10 +131,10 @@ final class SlimApplicationFactory
     /**
      * @param mixed[] $routes
      */
-    private function registerApi(string $version, array $routes): void
+    private function registerApi(string $apiNamespace, array $routes): void
     {
-        foreach ($routes as $routeName => $routeData) {
-            $this->routeRegister->register($version, $routeName, $routeData);
+        foreach ($routes as $routePattern => $routeData) {
+            $this->routeRegister->register($apiNamespace, $routePattern, $routeData);
         }
     }
 }

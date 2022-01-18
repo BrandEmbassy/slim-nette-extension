@@ -35,7 +35,7 @@ interface RequestInterface extends ServerRequestInterface
     /**
      * @return mixed
      */
-    public function getField(string $fieldName);
+    public function getField(string $name);
 
 
     /**
@@ -61,6 +61,15 @@ interface RequestInterface extends ServerRequestInterface
      * @throws QueryParamMissingException
      */
     public function getQueryParamStrict(string $key);
+
+
+    public function findQueryParamAsString(string $key, ?string $default = null): ?string;
+
+
+    /**
+     * @throws QueryParamMissingException
+     */
+    public function getQueryParamAsString(string $key): string;
 
 
     public function hasAttribute(string $name): bool;

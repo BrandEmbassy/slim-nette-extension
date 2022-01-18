@@ -1,8 +1,0 @@
-services:
-    responseFactory: BrandEmbassy\Slim\Response\DefaultResponseFactory
-    requestFactory: BrandEmbassy\Slim\Request\DefaultRequestFactory
-    routeDefinitionFactory: BrandEmbassy\Slim\Route\RouteDefinitionFactory
-    middlewareFactory: BrandEmbassy\Slim\Middleware\MiddlewareFactory
-    slimContainerFactory: BrandEmbassy\Slim\SlimContainerFactory
-    router: Slim\Router
-    routeRegister: BrandEmbassy\Slim\Route\RouteRegister

@@ -53,6 +53,7 @@ slimApi:
 
             '/channels/{channelId}/users':
                 post:
+                    name: getChannelUsers
                     service: BrandEmbassyTest\Slim\Sample\CreateChannelUserRoute
                     middlewareGroups:
                         - testGroup

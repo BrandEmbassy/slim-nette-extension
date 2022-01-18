@@ -43,7 +43,8 @@ final class RouteDefinitionFactory
             $method,
             $route,
             $middlewares,
-            $routeDefinitionData[RouteDefinition::MIDDLEWARE_GROUPS]
+            $routeDefinitionData[RouteDefinition::MIDDLEWARE_GROUPS],
+            $routeDefinitionData[RouteDefinition::NAME]
         );
     }
 
