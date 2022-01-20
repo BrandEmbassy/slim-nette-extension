@@ -10,8 +10,6 @@ use function class_exists;
 final class ServiceProvider
 {
     /**
-     * @param class-string<mixed>|string $serviceIdentifier
-     *
      * @return object
      */
     public static function getService(Container $container, string $serviceIdentifier)
