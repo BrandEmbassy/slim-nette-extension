@@ -44,7 +44,8 @@ final class RouteDefinitionFactory
             $route,
             $middlewares,
             $routeDefinitionData[RouteDefinition::MIDDLEWARE_GROUPS],
-            $routeDefinitionData[RouteDefinition::NAME]
+            $routeDefinitionData[RouteDefinition::NAME],
+            $routeDefinitionData[RouteDefinition::IGNORE_VERSION_MIDDLEWARE_GROUP]
         );
     }
 

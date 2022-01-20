@@ -145,6 +145,24 @@ final class SlimApplicationFactoryTest extends TestCase
     }
 
 
+    public function testVersionMiddlewareGroupIsIgnored(): void
+    {
+        $expectedHeaders = [
+            InvokeCounterMiddleware::getName('A') => 'invoked-0',
+            InvokeCounterMiddleware::getName('B') => 'invoked-1',
+            InvokeCounterMiddleware::getName('C') => 'invoked-2',
+            InvokeCounterMiddleware::getName('D') => 'invoked-3',
+            InvokeCounterMiddleware::getName('G') => 'invoked-4',
+            InvokeCounterMiddleware::getName('H') => 'invoked-5',
+        ];
+
+        $this->prepareEnvironment('POST', '/api/ignore-version-middlewares');
+        $response = SlimAppTester::runSlimApp(__DIR__ . '/no-prefix-config.neon');
+
+        ResponseAssertions::assertResponseHeaders($expectedHeaders, $response);
+    }
+
+
     public function testRootRouteIsDispatched(): void
     {
         $this->prepareEnvironment('GET', '/');

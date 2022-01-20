@@ -33,6 +33,12 @@ slimApi:
                     middlewareGroups:
                         - testGroupB
                         - testGroupA
+            '/ignore-version-middlewares':
+                post:
+                    service: BrandEmbassyTest\Slim\Sample\HelloWorldRoute
+                    ignoreVersionMiddlewareGroup: true
+                    middlewareGroups:
+                        - testGroupA
 
     middlewareGroups:
         testGroupA:
