@@ -20,6 +20,7 @@ final class ServiceProvider
             return $container->getByName($serviceIdentifier);
         } catch (MissingServiceException $exception) {
             assert(class_exists($serviceIdentifier));
+
             return $container->getByType($serviceIdentifier);
         }
     }

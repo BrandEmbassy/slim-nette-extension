@@ -51,14 +51,14 @@ final class RouteDefinition
         array $middlewares,
         array $middlewareGroups,
         ?string $name,
-        bool $ignoreApiVersionMiddlewareGroup
+        bool $ignoreVersionMiddlewareGroup
     ) {
         $this->method = $method;
         $this->route = $route;
         $this->middlewares = $middlewares;
         $this->middlewareGroups = $middlewareGroups;
         $this->name = $name;
-        $this->ignoreVersionMiddlewareGroup = $ignoreApiVersionMiddlewareGroup;
+        $this->ignoreVersionMiddlewareGroup = $ignoreVersionMiddlewareGroup;
     }
 
 
