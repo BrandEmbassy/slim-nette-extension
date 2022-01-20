@@ -87,7 +87,10 @@ final class RouteRegister
      */
     private function getAllMiddlewares(string $version, RouteDefinition $routeDefinition): array
     {
-        $versionMiddlewares = $this->middlewareGroups->getMiddlewares($version);
+        $versionMiddlewares = $routeDefinition->shouldIgnoreVersionMiddlewareGroup()
+            ? []
+            : $this->middlewareGroups->getMiddlewares($version);
+
         $middlewaresFromGroups = $this->middlewareGroups->getMiddlewaresForMultipleGroups(
             $routeDefinition->getMiddlewareGroups()
         );

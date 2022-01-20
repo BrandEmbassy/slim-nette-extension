@@ -31,6 +31,7 @@ final class SlimApiExtension extends CompilerExtension
             RouteDefinition::MIDDLEWARES => Expect::arrayOf($this->createServiceExpect())
                 ->default([]),
             RouteDefinition::MIDDLEWARE_GROUPS => Expect::listOf('string')->default([]),
+            RouteDefinition::IGNORE_VERSION_MIDDLEWARE_GROUP => Expect::bool(false),
             RouteDefinition::NAME => Expect::type('string')->default(null),
         ];
 

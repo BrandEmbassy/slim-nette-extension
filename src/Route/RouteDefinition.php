@@ -7,6 +7,7 @@ final class RouteDefinition
     public const SERVICE = 'service';
     public const MIDDLEWARES = 'middlewares';
     public const MIDDLEWARE_GROUPS = 'middlewareGroups';
+    public const IGNORE_VERSION_MIDDLEWARE_GROUP = 'ignoreVersionMiddlewareGroup';
     public const NAME = 'name';
 
     /**
@@ -34,6 +35,11 @@ final class RouteDefinition
      */
     private $name;
 
+    /**
+     * @var bool
+     */
+    private $ignoreVersionMiddlewareGroup;
+
 
     /**
      * @param callable[] $middlewares
@@ -44,13 +50,15 @@ final class RouteDefinition
         Route $route,
         array $middlewares,
         array $middlewareGroups,
-        ?string $name
+        ?string $name,
+        bool $ignoreVersionMiddlewareGroup
     ) {
         $this->method = $method;
         $this->route = $route;
         $this->middlewares = $middlewares;
         $this->middlewareGroups = $middlewareGroups;
         $this->name = $name;
+        $this->ignoreVersionMiddlewareGroup = $ignoreVersionMiddlewareGroup;
     }
 
 
@@ -87,5 +95,11 @@ final class RouteDefinition
     public function getName(): ?string
     {
         return $this->name;
+    }
+
+
+    public function shouldIgnoreVersionMiddlewareGroup(): bool
+    {
+        return $this->ignoreVersionMiddlewareGroup;
     }
 }
