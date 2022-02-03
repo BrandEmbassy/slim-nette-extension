@@ -51,37 +51,35 @@ You need to define in `parameters.api` section in `config.neon`.
 > **Both services and middlewares must be registered services in DI Container.**
 
 ```yaml
-parameters:
-    api:
-        handlers:
-            notFound: App\NotFoundHandler # Called when not route isn't matched by URL
-            notAllowed: App\NotAllowedHandler # Called when route isn't matched by method
-            error: App\ApiErrorHandler # Called when unhandled exception bubbles out
+slimApi:
+    handlers:
+        notFound: App\NotFoundHandler # Called when not route isn't matched by URL
+        notAllowed: App\NotAllowedHandler # Called when route isn't matched by method
+        error: App\ApiErrorHandler # Called when unhandled exception bubbles out
 
-        routes:
-            new-api: # This is name of your API
-                "2.0": # Version of your API
-                    '/channels': # Matched URL will be "your-domain.org/new-api/2.0/channels"
-                        post:
-                            # This is service will be invoked to handle the request
-                            service: App\CreateChannelAction
-                            
-                            # Here middleware stack is defined. It's evaluated from bottom to top. 
-                            middleware:
-                                - App\SomeOtherMiddleware # last in row
-                                - App\UsuallyRequestDataValidationMiddleware # second in row
-                                - App\SomeAuthMiddleware # this one is called first 
+    routes:
+        "2.0": # Version of your API
+            "channels": # Matched URL will be "your-domain.org/2.0/channels"
+                post:
+                    # This is service will be invoked to handle the request
+                    service: App\CreateChannelAction
+                    
+                    # Here middleware stack is defined. It's evaluated from bottom to top. 
+                    middlewares:
+                        - App\SomeOtherMiddleware # last in row
+                        - App\UsuallyRequestDataValidationMiddleware # second in row
+                        - App\SomeAuthMiddleware # this one is called first 
 
-        beforeRouteMiddlewares:
-            # this is called for each route, before route middlewares
-            - App\SomeBeforeRequestMiddleware 
-            
-        beforeRequestMiddlewares:
-            # this is called for each request, even when route does NOT exist (404 requests)
-            - App\SomeBeforeRouteMiddleware tests/Dummy/BeforeRequestMiddleware.php
+    beforeRouteMiddlewares:
+        # this is called for each route, before route middlewares
+        - App\SomeBeforeRouteMiddleware 
+        
+    beforeRequestMiddlewares:
+        # this is called for each request, even when route does NOT exist (404 requests)
+        - App\SomeBeforeRequestMiddleware
 ```
 
-You can also reference the named service by it's name.
+You can also reference the named service by its name.
 
 See `tests/SlimApplicationFactoryTest.php` and `tests/config.neon` for more examples.
 
