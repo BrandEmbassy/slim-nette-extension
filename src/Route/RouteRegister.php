@@ -68,10 +68,7 @@ final class RouteRegister
                 continue;
             }
 
-            $this->detectTyposInRouteConfiguration(
-                [$apiNamespace, $routePattern, $method],
-                $routeDefinitionData
-            );
+            $this->detectTyposInRouteConfiguration([$apiNamespace, $routePattern, $method], $routeDefinitionData);
 
             $routeDefinition = $this->routeDefinitionFactory->create($method, $routeDefinitionData);
 
