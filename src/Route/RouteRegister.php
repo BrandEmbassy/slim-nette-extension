@@ -62,6 +62,10 @@ final class RouteRegister
         );
 
         foreach ($routeData as $method => $routeDefinitionData) {
+            if ($routeDefinitionData === $this->getEmptyRouteDefinitionData()) {
+                continue;
+            }
+
             $routeDefinition = $this->routeDefinitionFactory->create($method, $routeDefinitionData);
 
             $routeName = $routeDefinition->getName() ?? $resolveRoutePath;
@@ -101,5 +105,20 @@ final class RouteRegister
             $versionMiddlewares,
             $this->beforeRouteMiddlewares->getMiddlewares()
         );
+    }
+
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function getEmptyRouteDefinitionData(): array
+    {
+        return [
+            RouteDefinition::SERVICE => null,
+            RouteDefinition::MIDDLEWARES => [],
+            RouteDefinition::MIDDLEWARE_GROUPS => [],
+            RouteDefinition::IGNORE_VERSION_MIDDLEWARE_GROUP => false,
+            RouteDefinition::NAME => null,
+        ];
     }
 }

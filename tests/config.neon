@@ -8,6 +8,7 @@ services:
     - BrandEmbassyTest\Slim\Sample\ApiErrorHandler
     - BrandEmbassyTest\Slim\Sample\GoldenKeyAuthMiddleware
     - BrandEmbassyTest\Slim\Sample\CreateChannelRoute
+    - BrandEmbassyTest\Slim\Sample\ListChannelsRoute
     - BrandEmbassyTest\Slim\Sample\ErrorThrowingRoute
     - BrandEmbassyTest\Slim\Sample\BeforeRequestMiddleware
     - BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware
@@ -43,6 +44,10 @@ slimApi:
 
         "api":
             '/channels':
+                get:
+                    service: BrandEmbassyTest\Slim\Sample\ListChannelsRoute
+                    middlewareGroups:
+                        - testGroup
                 post:
                     service: BrandEmbassyTest\Slim\Sample\CreateChannelRoute
                     middlewares:
