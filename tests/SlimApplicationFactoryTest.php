@@ -13,6 +13,7 @@ use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Slim\Router;
 use function assert;
+use function count;
 
 final class SlimApplicationFactoryTest extends TestCase
 {
@@ -117,6 +118,18 @@ final class SlimApplicationFactoryTest extends TestCase
                 'requestUri' => '/tests/api/channels',
                 'headers' => ['HTTP_X_API_KEY' => GoldenKeyAuthMiddleware::ACCESS_TOKEN],
             ],
+            'Get channel list' => [
+                'expectedResponse' => [['id' => 1, 'name' => 'First channel'], ['id' => 2, 'name' => 'Second channel']],
+                'expectedResponseHeaders' => [
+                    BeforeRequestMiddleware::HEADER_NAME => 'invoked-0',
+                    BeforeRouteMiddleware::HEADER_NAME => 'invoked-1',
+                    OnlyApiGroupMiddleware::HEADER_NAME => 'invoked-2',
+                    GroupMiddleware::HEADER_NAME => 'invoked-3',
+                ],
+                'expectedStatusCode' => 200,
+                'httpMethod' => 'GET',
+                'requestUri' => '/tests/api/channels',
+            ],
         ];
     }
 
@@ -160,6 +173,22 @@ final class SlimApplicationFactoryTest extends TestCase
         $response = SlimAppTester::runSlimApp(__DIR__ . '/no-prefix-config.neon');
 
         ResponseAssertions::assertResponseHeaders($expectedHeaders, $response);
+    }
+
+
+    public function testRouteCanBeUnregistered(): void
+    {
+        $slimAppWithAllRoutes = SlimAppTester::createSlimApp(__DIR__ . '/config.neon');
+        $routerWithAllRoutes = $slimAppWithAllRoutes->getContainer()->get('router');
+        assert($routerWithAllRoutes instanceof Router);
+
+        $slimAppWithUnregisteredRoute = SlimAppTester::createSlimApp(__DIR__ . '/unregister-route-config.neon');
+        $routerWithUnregisteredRoute = $slimAppWithUnregisteredRoute->getContainer()->get('router');
+        assert($routerWithUnregisteredRoute instanceof Router);
+
+        $expectedRouteCount = count($routerWithAllRoutes->getRoutes()) - 1;
+
+        Assert::assertCount($expectedRouteCount, $routerWithUnregisteredRoute->getRoutes());
     }
 
 
