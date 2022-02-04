@@ -3,12 +3,13 @@
 namespace BrandEmbassy\Slim\Route;
 
 use RuntimeException;
+use function implode;
+use function sprintf;
 
 final class InvalidRouteDefinitionException extends RuntimeException
 {
     /**
      * @param string[] $path
-     * @param string $hint
      */
     public function __construct(array $path, string $hint)
     {

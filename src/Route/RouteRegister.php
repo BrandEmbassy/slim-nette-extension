@@ -5,7 +5,9 @@ namespace BrandEmbassy\Slim\Route;
 use BrandEmbassy\Slim\Middleware\BeforeRouteMiddlewares;
 use BrandEmbassy\Slim\Middleware\MiddlewareGroups;
 use Slim\Interfaces\RouterInterface;
+use function array_keys;
 use function array_merge_recursive;
+use function levenshtein;
 
 final class RouteRegister
 {
