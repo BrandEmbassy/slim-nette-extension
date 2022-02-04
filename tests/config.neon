@@ -34,6 +34,7 @@ slimApi:
             "/hello-world-as-class-name":
                 get:
                     service: BrandEmbassyTest\Slim\Sample\HelloWorldRoute
+                    extraField: 'foo'
                     middlewareGroups:
                         - testGroup
             "/hello-world-as-service-name":
