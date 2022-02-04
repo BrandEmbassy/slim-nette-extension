@@ -42,7 +42,6 @@ final class SlimApiExtension extends CompilerExtension
                         Expect::arrayOf(
                             Expect::structure($routeSchema)
                                 ->castTo('array')
-                                ->otherItems()
                         )
                     )
                 ),
