@@ -1,0 +1,21 @@
+extensions:
+    slimApi: \BrandEmbassy\Slim\DI\SlimApiExtension
+
+
+services:
+    - BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware
+    - BrandEmbassyTest\Slim\Sample\HelloWorldRoute
+
+slimApi:
+    apiPrefix: '/tests'
+    slimConfiguration:
+        settings:
+            removeDefaultHandlers: true
+
+    routes:
+        "app":
+            "/hello-world":
+                get:
+                    service: BrandEmbassyTest\Slim\Sample\HelloWorldRoute
+                    middleware:
+                        - BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware

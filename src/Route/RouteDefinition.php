@@ -10,6 +10,14 @@ final class RouteDefinition
     public const IGNORE_VERSION_MIDDLEWARE_GROUP = 'ignoreVersionMiddlewareGroup';
     public const NAME = 'name';
 
+    public const ALL_DEFINED_KEYS = [
+        self::SERVICE,
+        self::MIDDLEWARES,
+        self::MIDDLEWARE_GROUPS,
+        self::IGNORE_VERSION_MIDDLEWARE_GROUP,
+        self::NAME,
+    ];
+
     /**
      * @var string
      */

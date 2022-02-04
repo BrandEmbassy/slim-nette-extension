@@ -233,4 +233,14 @@ final class SlimApplicationFactoryTest extends TestCase
             $_SERVER[$name] = $value;
         }
     }
+
+
+    public function testRouteConfigWillFailWhenMisconfigured(): void
+    {
+        $this->expectExceptionMessage(
+            'Unexpected route definition key in "app › /hello-world › get › middleware", did you mean "middlewares"?'
+        );
+
+        SlimAppTester::createSlimApp(__DIR__ . '/typo-in-config.neon');
+    }
 }
