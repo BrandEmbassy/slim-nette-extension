@@ -117,6 +117,18 @@ final class SlimApplicationFactoryTest extends TestCase
                 'requestUri' => '/tests/api/channels',
                 'headers' => ['HTTP_X_API_KEY' => GoldenKeyAuthMiddleware::ACCESS_TOKEN],
             ],
+            'Get channel list' => [
+                'expectedResponse' => [['id' => 1, 'name' => 'First channel'], ['id' => 2, 'name' => 'Second channel']],
+                'expectedResponseHeaders' => [
+                    BeforeRequestMiddleware::HEADER_NAME => 'invoked-0',
+                    BeforeRouteMiddleware::HEADER_NAME => 'invoked-1',
+                    OnlyApiGroupMiddleware::HEADER_NAME => 'invoked-2',
+                    GroupMiddleware::HEADER_NAME => 'invoked-3',
+                ],
+                'expectedStatusCode' => 200,
+                'httpMethod' => 'GET',
+                'requestUri' => '/tests/api/channels',
+            ],
         ];
     }
 
