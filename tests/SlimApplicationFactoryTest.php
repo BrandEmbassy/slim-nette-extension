@@ -9,7 +9,6 @@ use BrandEmbassyTest\Slim\Sample\GoldenKeyAuthMiddleware;
 use BrandEmbassyTest\Slim\Sample\GroupMiddleware;
 use BrandEmbassyTest\Slim\Sample\InvokeCounterMiddleware;
 use BrandEmbassyTest\Slim\Sample\OnlyApiGroupMiddleware;
-use Nette\Utils\Strings;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Slim\Router;
@@ -238,12 +237,9 @@ final class SlimApplicationFactoryTest extends TestCase
 
     public function testRouteConfigWillFailWhenMisconfigured(): void
     {
-        $exceptionMessage = "Unexpected item 'slimApi › routes › app › /hello-world › get › middleware', did you mean 'middlewares'?";
-
-        // The exception message uses NBSP characters, see \Nette\Schema\Message
-        $exceptionMessageWithNbsp = Strings::replace($exceptionMessage, '~ › ~', ' › ');
-
-        $this->expectExceptionMessage($exceptionMessageWithNbsp);
+        $this->expectExceptionMessage(
+            'Unexpected route definition key in "app › /hello-world › get › middleware", did you mean "middlewares"?'
+        );
 
         SlimAppTester::createSlimApp(__DIR__ . '/typo-in-config.neon');
     }

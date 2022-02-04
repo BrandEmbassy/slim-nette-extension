@@ -66,6 +66,13 @@ final class RouteRegister
                 continue;
             }
 
+            if (array_key_exists('middleware', $routeDefinitionData)) {
+                throw new InvalidRouteDefinitionException(
+                    [$apiNamespace, $routePattern, $method, 'middleware'],
+                    RouteDefinition::MIDDLEWARES
+                );
+            }
+
             $routeDefinition = $this->routeDefinitionFactory->create($method, $routeDefinitionData);
 
             $routeName = $routeDefinition->getName() ?? $resolveRoutePath;
