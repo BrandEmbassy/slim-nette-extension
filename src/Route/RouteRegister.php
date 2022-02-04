@@ -62,6 +62,10 @@ final class RouteRegister
         );
 
         foreach ($routeData as $method => $routeDefinitionData) {
+            if ($routeDefinitionData === []) {
+                continue;
+            }
+
             $routeDefinition = $this->routeDefinitionFactory->create($method, $routeDefinitionData);
 
             $routeName = $routeDefinition->getName() ?? $resolveRoutePath;
