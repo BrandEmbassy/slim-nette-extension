@@ -66,12 +66,10 @@ final class RouteRegister
                 continue;
             }
 
-            if (array_key_exists('middleware', $routeDefinitionData)) {
-                throw new InvalidRouteDefinitionException(
-                    [$apiNamespace, $routePattern, $method, 'middleware'],
-                    RouteDefinition::MIDDLEWARES
-                );
-            }
+            $this->detectTyposInRouteConfiguration(
+                [$apiNamespace, $routePattern, $method],
+                $routeDefinitionData
+            );
 
             $routeDefinition = $this->routeDefinitionFactory->create($method, $routeDefinitionData);
 
@@ -127,5 +125,25 @@ final class RouteRegister
             RouteDefinition::IGNORE_VERSION_MIDDLEWARE_GROUP => false,
             RouteDefinition::NAME => null,
         ];
+    }
+
+
+    /**
+     * @param string[] $path
+     * @param mixed[] $routeDefinitionData
+     */
+    private function detectTyposInRouteConfiguration(array $path, array $routeDefinitionData): void
+    {
+        $usedKeys = array_keys($routeDefinitionData);
+        foreach ($usedKeys as $usedKey) {
+            foreach (RouteDefinition::ALL_DEFINED_KEYS as $definedKey) {
+                $levenshteinDistance = levenshtein($usedKey, $definedKey);
+                if ($levenshteinDistance > 0 && $levenshteinDistance < 2) {
+                    $path[] = $usedKey;
+
+                    throw new InvalidRouteDefinitionException($path, $definedKey);
+                }
+            }
+        }
     }
 }
