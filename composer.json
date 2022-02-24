@@ -29,8 +29,8 @@
         "roave/security-advisories": "dev-master"
     },
     "scripts": {
-        "phpcs": "vendor/bin/phpcs --standard=BrandEmbassyCodingStandard src tests --ignore=tests/temp",
-        "phpcbf": "./vendor/bin/phpcbf --standard=BrandEmbassyCodingStandard src tests --ignore=tests/temp",
+        "phpcs": "vendor/bin/phpcs --standard=BrandEmbassyCodingStandard src tests --ignore=tests/temp --runtime-set php_version 70200",
+        "phpcbf": "./vendor/bin/phpcbf --standard=BrandEmbassyCodingStandard src tests --ignore=tests/temp --runtime-set php_version 70200",
         "phpstan": "./vendor/bin/phpstan analyse -c phpstan.neon src",
         "phpunit": "./vendor/bin/phpunit tests --no-coverage"
     },
