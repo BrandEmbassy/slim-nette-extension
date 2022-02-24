@@ -18,7 +18,7 @@ class SlimApp extends App
      */
     public function run($silent = false): ResponseInterface
     {
-        $response = parent::run($silent);
+        $response = parent::run(true);
 
         $contentTypes = $response->getHeader('Content-Type');
         $contentType = reset($contentTypes);
