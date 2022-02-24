@@ -22,8 +22,8 @@
         "slim/slim": "^3.12"
     },
     "require-dev": {
-        "brandembassy/coding-standard": "^8.1",
-        "brandembassy/mockery-tools": "^2.14",
+        "brandembassy/coding-standard": "^8.6",
+        "brandembassy/mockery-tools": "^3.8",
         "mockery/mockery": "^1.2",
         "phpunit/phpunit": "^8.5",
         "roave/security-advisories": "dev-master"
