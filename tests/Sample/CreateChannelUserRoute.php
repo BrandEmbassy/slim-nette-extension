@@ -7,7 +7,10 @@ use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassy\Slim\Route\Route;
 use function assert;
 
-final class CreateChannelUserRoute implements Route
+/**
+ * @final
+ */
+class CreateChannelUserRoute implements Route
 {
     /**
      * @var RequestInterface

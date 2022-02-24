@@ -7,7 +7,10 @@ use BrandEmbassy\Slim\Response\ResponseFactory;
 use Slim\Container;
 use Slim\Interfaces\RouterInterface;
 
-final class SlimContainerFactory
+/**
+ * @final
+ */
+class SlimContainerFactory
 {
     /**
      * @var ResponseFactory

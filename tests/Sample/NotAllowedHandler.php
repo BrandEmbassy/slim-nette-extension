@@ -7,8 +7,10 @@ use BrandEmbassy\Slim\Response\ResponseInterface;
 
 /**
  * Intentionally not extending ErrorHandler. Slim does not call this with 3rd param at __invoke method.
+ *
+ * @final
  */
-final class NotAllowedHandler
+class NotAllowedHandler
 {
     public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {

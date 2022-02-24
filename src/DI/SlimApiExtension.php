@@ -22,7 +22,10 @@ use Nette\Schema\Schema;
 use Slim\Container;
 use Slim\Router;
 
-final class SlimApiExtension extends CompilerExtension
+/**
+ * @final
+ */
+class SlimApiExtension extends CompilerExtension
 {
     public function getConfigSchema(): Schema
     {

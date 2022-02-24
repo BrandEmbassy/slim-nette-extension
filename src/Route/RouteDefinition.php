@@ -2,7 +2,10 @@
 
 namespace BrandEmbassy\Slim\Route;
 
-final class RouteDefinition
+/**
+ * @final
+ */
+class RouteDefinition
 {
     public const SERVICE = 'service';
     public const MIDDLEWARES = 'middlewares';

@@ -4,7 +4,10 @@ namespace BrandEmbassy\Slim\Route;
 
 use function trim;
 
-final class UrlPatternResolver
+/**
+ * @final
+ */
+class UrlPatternResolver
 {
     /**
      * @var string

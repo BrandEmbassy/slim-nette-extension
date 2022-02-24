@@ -4,7 +4,10 @@ namespace BrandEmbassy\Slim\Request;
 
 use function sprintf;
 
-final class RequestFieldMissingException extends RequestException
+/**
+ * @final
+ */
+class RequestFieldMissingException extends RequestException
 {
     public static function create(string $fieldName): self
     {

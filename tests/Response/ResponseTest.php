@@ -6,7 +6,10 @@ use BrandEmbassy\Slim\Response\Response;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
-final class ResponseTest extends TestCase
+/**
+ * @final
+ */
+class ResponseTest extends TestCase
 {
     public function testGetParsedBodyAsArray(): void
     {

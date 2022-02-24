@@ -7,7 +7,10 @@ use Nette\DI\MissingServiceException;
 use function assert;
 use function class_exists;
 
-final class ServiceProvider
+/**
+ * @final
+ */
+class ServiceProvider
 {
     /**
      * @return object

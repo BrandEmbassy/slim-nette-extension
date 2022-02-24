@@ -7,7 +7,10 @@ use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use Throwable;
 
-final class ApiErrorHandler implements ErrorHandler
+/**
+ * @final
+ */
+class ApiErrorHandler implements ErrorHandler
 {
     public function __invoke(
         RequestInterface $request,
