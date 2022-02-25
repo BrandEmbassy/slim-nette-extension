@@ -7,7 +7,10 @@ use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassyTest\Slim\MiddlewareInvocationCounter;
 
-final class InvokeCounterMiddleware implements Middleware
+/**
+ * @final
+ */
+class InvokeCounterMiddleware implements Middleware
 {
     public const HEADER_NAME_PREFIX = 'invoke-counter-';
 

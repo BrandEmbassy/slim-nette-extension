@@ -12,7 +12,10 @@ use Psr\Http\Message\ResponseInterface;
 use function assert;
 use function md5;
 
-final class SlimAppTester
+/**
+ * @final
+ */
+class SlimAppTester
 {
     public static function createSlimApp(string $configPath = __DIR__ . '/config.neon'): SlimApp
     {

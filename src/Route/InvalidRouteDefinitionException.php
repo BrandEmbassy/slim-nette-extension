@@ -6,7 +6,10 @@ use RuntimeException;
 use function implode;
 use function sprintf;
 
-final class InvalidRouteDefinitionException extends RuntimeException
+/**
+ * @final
+ */
+class InvalidRouteDefinitionException extends RuntimeException
 {
     /**
      * @param string[] $path

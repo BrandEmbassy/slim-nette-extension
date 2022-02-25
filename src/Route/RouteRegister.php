@@ -9,7 +9,10 @@ use function array_keys;
 use function array_merge_recursive;
 use function levenshtein;
 
-final class RouteRegister
+/**
+ * @final
+ */
+class RouteRegister
 {
     /**
      * @var RouterInterface

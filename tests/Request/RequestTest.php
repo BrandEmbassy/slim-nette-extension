@@ -13,7 +13,10 @@ use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use function urlencode;
 
-final class RequestTest extends TestCase
+/**
+ * @final
+ */
+class RequestTest extends TestCase
 {
     private const PARAM_NAME = 'dateFrom';
     private const DATE_TIME_STRING = '2017-06-10T01:00:00+01:00';

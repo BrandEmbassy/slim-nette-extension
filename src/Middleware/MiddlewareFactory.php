@@ -8,7 +8,10 @@ use function array_map;
 use function assert;
 use function is_callable;
 
-final class MiddlewareFactory
+/**
+ * @final
+ */
+class MiddlewareFactory
 {
     /**
      * @var Container

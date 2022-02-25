@@ -2,7 +2,10 @@
 
 namespace BrandEmbassy\Slim\Response;
 
-final class DefaultResponseFactory implements ResponseFactory
+/**
+ * @final
+ */
+class DefaultResponseFactory implements ResponseFactory
 {
     public function create(): ResponseInterface
     {

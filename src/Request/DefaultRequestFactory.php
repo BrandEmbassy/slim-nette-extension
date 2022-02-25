@@ -4,7 +4,10 @@ namespace BrandEmbassy\Slim\Request;
 
 use Slim\Http\Environment;
 
-final class DefaultRequestFactory implements RequestFactory
+/**
+ * @final
+ */
+class DefaultRequestFactory implements RequestFactory
 {
     public function create(): RequestInterface
     {

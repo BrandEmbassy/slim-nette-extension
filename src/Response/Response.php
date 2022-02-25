@@ -8,7 +8,10 @@ use Slim\Http\Response as SlimResponse;
 use function assert;
 use function is_array;
 
-final class Response extends SlimResponse implements ResponseInterface
+/**
+ * @final
+ */
+class Response extends SlimResponse implements ResponseInterface
 {
     /**
      * @return mixed[]

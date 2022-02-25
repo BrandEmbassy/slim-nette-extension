@@ -7,7 +7,10 @@ use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassy\Slim\Route\Route;
 use LogicException;
 
-final class ErrorThrowingRoute implements Route
+/**
+ * @final
+ */
+class ErrorThrowingRoute implements Route
 {
     public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {

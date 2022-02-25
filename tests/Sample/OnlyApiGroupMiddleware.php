@@ -7,7 +7,10 @@ use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassyTest\Slim\MiddlewareInvocationCounter;
 
-final class OnlyApiGroupMiddleware implements Middleware
+/**
+ * @final
+ */
+class OnlyApiGroupMiddleware implements Middleware
 {
     public const HEADER_NAME = 'only-api-group-middleware';
 

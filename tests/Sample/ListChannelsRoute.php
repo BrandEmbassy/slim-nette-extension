@@ -6,7 +6,10 @@ use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassy\Slim\Route\Route;
 
-final class ListChannelsRoute implements Route
+/**
+ * @final
+ */
+class ListChannelsRoute implements Route
 {
     /**
      * @param string[] $arguments

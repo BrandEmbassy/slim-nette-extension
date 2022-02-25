@@ -7,7 +7,10 @@ use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use Throwable;
 
-final class NotFoundHandler implements ErrorHandler
+/**
+ * @final
+ */
+class NotFoundHandler implements ErrorHandler
 {
     public function __invoke(
         RequestInterface $request,

@@ -2,7 +2,10 @@
 
 namespace BrandEmbassy\Slim\Middleware;
 
-final class BeforeRouteMiddlewares
+/**
+ * @final
+ */
+class BeforeRouteMiddlewares
 {
     /**
      * @var callable[]

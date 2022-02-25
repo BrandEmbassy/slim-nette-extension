@@ -14,7 +14,10 @@ use function in_array;
 use function is_callable;
 use function sprintf;
 
-final class SlimApplicationFactory
+/**
+ * @final
+ */
+class SlimApplicationFactory
 {
     public const SLIM_CONFIGURATION = 'slimConfiguration';
     public const BEFORE_ROUTE_MIDDLEWARES = 'beforeRouteMiddlewares';

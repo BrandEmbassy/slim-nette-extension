@@ -4,7 +4,10 @@ namespace BrandEmbassy\Slim\Request;
 
 use function sprintf;
 
-final class QueryParamMissingException extends RequestException
+/**
+ * @final
+ */
+class QueryParamMissingException extends RequestException
 {
     public static function create(string $key): self
     {

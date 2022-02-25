@@ -4,7 +4,10 @@ namespace BrandEmbassy\Slim\Request;
 
 use function sprintf;
 
-final class RequestAttributeMissingException extends RequestException
+/**
+ * @final
+ */
+class RequestAttributeMissingException extends RequestException
 {
     public static function create(string $requestAttributeName): self
     {

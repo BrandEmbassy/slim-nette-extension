@@ -4,7 +4,10 @@ namespace BrandEmbassyTest\Slim;
 
 use BrandEmbassy\Slim\Response\ResponseInterface;
 
-final class MiddlewareInvocationCounter
+/**
+ * @final
+ */
+class MiddlewareInvocationCounter
 {
     /**
      * @var int

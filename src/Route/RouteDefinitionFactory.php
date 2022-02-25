@@ -7,7 +7,10 @@ use BrandEmbassy\Slim\Middleware\MiddlewareFactory;
 use LogicException;
 use Nette\DI\Container;
 
-final class RouteDefinitionFactory
+/**
+ * @final
+ */
+class RouteDefinitionFactory
 {
     /**
      * @var Container

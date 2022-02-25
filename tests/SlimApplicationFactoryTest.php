@@ -15,7 +15,10 @@ use Slim\Router;
 use function assert;
 use function count;
 
-final class SlimApplicationFactoryTest extends TestCase
+/**
+ * @final
+ */
+class SlimApplicationFactoryTest extends TestCase
 {
     public function testShouldPassSettingsToSlimContainer(): void
     {
