@@ -27,7 +27,7 @@ class RouteDefinition
     private $method;
 
     /**
-     * @var Route
+     * @var callable
      */
     private $route;
 
@@ -58,7 +58,7 @@ class RouteDefinition
      */
     public function __construct(
         string $method,
-        Route $route,
+        callable $route,
         array $middlewares,
         array $middlewareGroups,
         ?string $name,
@@ -79,7 +79,7 @@ class RouteDefinition
     }
 
 
-    public function getRoute(): Route
+    public function getRoute(): callable
     {
         return $this->route;
     }
