@@ -1,0 +1,69 @@
+{
+    "custom-components": {
+        "endpoints": {
+            "get": {
+                "service": "api.route.endpoints",
+                "middlewares": [],
+                "middlewareGroups": [],
+                "ignoreVersionMiddlewareGroup": false,
+                "name": null
+            }
+        }
+    },
+    "1.0": {
+        "endpoints": {
+            "get": {
+                "service": "api.route.endpoints",
+                "middlewares": [],
+                "middlewareGroups": [],
+                "ignoreVersionMiddlewareGroup": false,
+                "name": null
+            }
+        },
+        "brand\/{brandId}\/channel\/{channelPlatformId}": {
+            "get": {
+                "service": "channelInfo.route",
+                "middlewares": [
+                    "channelInfo.cache.cachedChannelInfoMiddleware",
+                    "api.middleware.corsHeadersResolver"
+                ],
+                "middlewareGroups": [],
+                "ignoreVersionMiddlewareGroup": false,
+                "name": null
+            },
+            "options": {
+                "service": "api.route.preflightRequest",
+                "middlewares": [
+                    "api.middleware.corsHeadersResolver"
+                ],
+                "middlewareGroups": [],
+                "ignoreVersionMiddlewareGroup": false,
+                "name": null
+            }
+        }
+    },
+    "2.0": {
+        "channel\/{channelPlatformId}\/outbound": {
+            "post": {
+                "service": "outboundFlow.v2.outboundMessageRoute",
+                "middlewares": [
+                    "thirdParty.message.afterOutboundMessageCreatedMiddleware",
+                    "outboundFlow.validation.outboundMessageRequestValidatorMiddleware",
+                    "outboundFlow.validation.outboundMessageRequestMessageContentFallbackValidator",
+                    "outboundFlow.outboundMessageRequestExceptionFallbackMiddleware",
+                    "api.middleware.platform.outbound.outboundMessageRequestResolver",
+                    "outboundFlow.v2.chat.threadIdOnExternalPlatformMiddleware",
+                    "outboundFlow.validation.recipientValidatorMiddleware",
+                    "api.middleware.platform.outbound.outboundChannelResolver",
+                    "api.middleware.platform.outbound.outboundBrandResolver",
+                    "outboundFlow.validation.outboundMessageValidatorMiddleware",
+                    "api.middleware.platform.outbound.outboundErrorResponseHandler",
+                    "authorization.api.apiAuthorizationMiddleware"
+                ],
+                "middlewareGroups": [],
+                "ignoreVersionMiddlewareGroup": false,
+                "name": null
+            }
+        }
+    }
+}

@@ -4,10 +4,13 @@ namespace BrandEmbassy\Slim;
 
 use BrandEmbassy\Slim\DI\ServiceProvider;
 use BrandEmbassy\Slim\Middleware\MiddlewareFactory;
+use BrandEmbassy\Slim\Request\Request;
+use BrandEmbassy\Slim\Route\OnlyNecessaryRoutesProvider;
 use BrandEmbassy\Slim\Route\RouteRegister;
 use LogicException;
 use Nette\DI\Container;
 use Slim\Container as SlimContainer;
+use function apcu_enabled;
 use function assert;
 use function implode;
 use function in_array;
@@ -20,6 +23,7 @@ use function sprintf;
 class SlimApplicationFactory
 {
     public const SLIM_CONFIGURATION = 'slimConfiguration';
+    public const SETTINGS = 'settings';
     public const BEFORE_ROUTE_MIDDLEWARES = 'beforeRouteMiddlewares';
     public const HANDLERS = 'handlers';
     public const BEFORE_REQUEST_MIDDLEWARES = 'beforeRequestMiddlewares';
@@ -58,6 +62,11 @@ class SlimApplicationFactory
      */
     private $routeRegister;
 
+    /**
+     * @var OnlyNecessaryRoutesProvider
+     */
+    private $onlyNecessaryRoutesProvider;
+
 
     /**
      * @param mixed[] $configuration
@@ -67,24 +76,57 @@ class SlimApplicationFactory
         Container $container,
         MiddlewareFactory $middlewareFactory,
         SlimContainerFactory $slimContainerFactory,
-        RouteRegister $routeRegister
+        RouteRegister $routeRegister,
+        OnlyNecessaryRoutesProvider $onlyNecessaryRoutesProvider
     ) {
         $this->configuration = $configuration;
         $this->container = $container;
         $this->middlewareFactory = $middlewareFactory;
         $this->slimContainerFactory = $slimContainerFactory;
         $this->routeRegister = $routeRegister;
+        $this->onlyNecessaryRoutesProvider = $onlyNecessaryRoutesProvider;
     }
 
 
     public function create(): SlimApp
     {
-        $slimContainer = $this->slimContainerFactory->create($this->configuration[self::SLIM_CONFIGURATION]);
+        /** @var array<string, mixed> $slimConfiguration */
+        $slimConfiguration = $this->configuration[self::SLIM_CONFIGURATION];
+        $detectTyposInRouteConfiguration = (bool)$this->getSlimSettings(
+            SlimSettings::DETECT_TYPOS_IN_ROUTE_CONFIGURATION,
+            true
+        );
+        $registerOnlyNecessaryRoutes = (bool)$this->getSlimSettings(
+            SlimSettings::REGISTER_ONLY_NECESSARY_ROUTES,
+            false
+        );
+        $useApcuCache = (bool)$this->getSlimSettings(
+            SlimSettings::USE_APCU_CACHE,
+            false
+        );
+        if ($useApcuCache && !apcu_enabled()) {
+            throw new LogicException('APCU cache is not enabled');
+        }
+
+        $slimContainer = $this->slimContainerFactory->create($slimConfiguration);
 
         $app = new SlimApp($slimContainer);
 
-        foreach ($this->configuration[self::ROUTES] as $apiNamespace => $routes) {
-            $this->registerApi($apiNamespace, $routes);
+        $routesToRegister = $this->configuration[self::ROUTES];
+        if ($registerOnlyNecessaryRoutes) {
+            /** @var Request $request */
+            $request = $slimContainer->get('request');
+            $requestUri = $request->getServerParam('REQUEST_URI');
+
+            $routesToRegister = $this->onlyNecessaryRoutesProvider->getRoutes(
+                $requestUri,
+                $routesToRegister,
+                $useApcuCache
+            );
+        }
+
+        foreach ($routesToRegister as $apiNamespace => $routes) {
+            $this->registerApi($apiNamespace, $routes, $detectTyposInRouteConfiguration);
         }
 
         $this->registerHandlers($slimContainer, $this->configuration[self::HANDLERS]);
@@ -134,10 +176,21 @@ class SlimApplicationFactory
     /**
      * @param mixed[] $routes
      */
-    private function registerApi(string $apiNamespace, array $routes): void
+    private function registerApi(string $apiNamespace, array $routes, bool $detectTyposInRouteConfiguration): void
     {
         foreach ($routes as $routePattern => $routeData) {
-            $this->routeRegister->register($apiNamespace, $routePattern, $routeData);
+            $this->routeRegister->register($apiNamespace, $routePattern, $routeData, $detectTyposInRouteConfiguration);
         }
+    }
+
+
+    /**
+     * @param mixed $defaultValue
+     *
+     * @return mixed
+     */
+    private function getSlimSettings(string $key, $defaultValue)
+    {
+        return $this->configuration[self::SLIM_CONFIGURATION][self::SETTINGS][$key] ?? $defaultValue;
     }
 }
