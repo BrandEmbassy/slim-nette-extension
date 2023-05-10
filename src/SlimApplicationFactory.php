@@ -2,6 +2,7 @@
 
 namespace BrandEmbassy\Slim;
 
+use ArrayAccess;
 use BrandEmbassy\Slim\DI\ServiceProvider;
 use BrandEmbassy\Slim\Middleware\MiddlewareFactory;
 use BrandEmbassy\Slim\Request\Request;
@@ -9,6 +10,8 @@ use BrandEmbassy\Slim\Route\OnlyNecessaryRoutesProvider;
 use BrandEmbassy\Slim\Route\RouteRegister;
 use LogicException;
 use Nette\DI\Container;
+use Psr\Container\ContainerInterface;
+use Slim\CallableResolver;
 use Slim\Container as SlimContainer;
 use function apcu_enabled;
 use function assert;
@@ -104,13 +107,29 @@ class SlimApplicationFactory
             SlimSettings::USE_APCU_CACHE,
             false
         );
+        $disableUsingSlimContainer = (bool)$this->getSlimSettings(
+            SlimSettings::DISABLE_USING_SLIM_CONTAINER,
+            false
+        );
+
         if ($useApcuCache && !apcu_enabled()) {
             throw new LogicException('APCU cache is not enabled');
         }
 
+        if ($disableUsingSlimContainer && !($this->container instanceof ContainerInterface)) {
+            throw new LogicException('Container must be instance of \Psr\Container\ContainerInterface');
+        }
+
         $slimContainer = $this->slimContainerFactory->create($slimConfiguration);
 
-        $app = new SlimApp($slimContainer);
+        if ($disableUsingSlimContainer) {
+            /** @var Container&ContainerInterface $netteContainer */
+            $netteContainer = $this->container;
+            $this->copyServicesFromSlimContainerToNetteContainer($netteContainer, $slimContainer);
+            $app = new SlimApp($netteContainer);
+        } else {
+            $app = new SlimApp($slimContainer);
+        }
 
         $routesToRegister = $this->configuration[self::ROUTES];
         if ($registerOnlyNecessaryRoutes) {
@@ -129,7 +148,12 @@ class SlimApplicationFactory
             $this->registerApi($apiNamespace, $routes, $detectTyposInRouteConfiguration);
         }
 
-        $this->registerHandlers($slimContainer, $this->configuration[self::HANDLERS]);
+        $this->registerHandlers(
+            $this->container,
+            $slimContainer,
+            $this->configuration[self::HANDLERS],
+            $disableUsingSlimContainer
+        );
 
         foreach ($this->configuration[self::BEFORE_REQUEST_MIDDLEWARES] as $middleware) {
             $middlewareService = $this->middlewareFactory->createFromIdentifier($middleware);
@@ -143,16 +167,26 @@ class SlimApplicationFactory
     /**
      * @param array<string, string> $handlers
      */
-    private function registerHandlers(SlimContainer $slimContainer, array $handlers): void
-    {
+    private function registerHandlers(
+        Container $netteContainer,
+        SlimContainer $slimContainer,
+        array $handlers,
+        bool $disableUsingSlimContainer
+    ): void {
         foreach ($handlers as $handlerName => $handlerClass) {
             $this->validateHandlerName($handlerName);
             $handlerService = ServiceProvider::getService($this->container, $handlerClass);
             assert(is_callable($handlerService));
 
-            $slimContainer[$handlerName] = static function () use ($handlerService) {
-                return $handlerService;
-            };
+            if ($disableUsingSlimContainer) {
+                /** @var Container&ContainerInterface&ArrayAccess<mixed, mixed> $netteContainer */
+                unset($netteContainer[$handlerName]);
+                $netteContainer[$handlerName] = ServiceProvider::getService($netteContainer, $handlerClass);
+            } else {
+                $slimContainer[$handlerName] = static function () use ($handlerService) {
+                    return $handlerService;
+                };
+            }
         }
     }
 
@@ -192,5 +226,31 @@ class SlimApplicationFactory
     private function getSlimSettings(string $key, $defaultValue)
     {
         return $this->configuration[self::SLIM_CONFIGURATION][self::SETTINGS][$key] ?? $defaultValue;
+    }
+
+
+    /**
+     * @param Container&ContainerInterface $netteContainer
+     */
+    private function copyServicesFromSlimContainerToNetteContainer(
+        $netteContainer,
+        SlimContainer $slimContainer
+    ): void {
+        $netteContainer->removeService('request');
+        $netteContainer->removeService('response');
+        $netteContainer->addService('request', $slimContainer->get('request'));
+        $netteContainer->addService('response', $slimContainer->get('response'));
+
+        if (!$netteContainer->hasService('settings')) {
+            $netteContainer->addService('settings', $slimContainer->get('settings'));
+            $netteContainer->addService('environment', $slimContainer->get('environment'));
+            $netteContainer->addService('router', $slimContainer->get('router'));
+            $netteContainer->addService('foundHandler', $slimContainer->get('foundHandler'));
+            $netteContainer->addService('phpErrorHandler', $slimContainer->get('phpErrorHandler'));
+            $netteContainer->addService('errorHandler', $slimContainer->get('errorHandler'));
+            $netteContainer->addService('notFoundHandler', $slimContainer->get('notFoundHandler'));
+            $netteContainer->addService('notAllowedHandler', $slimContainer->get('notAllowedHandler'));
+            $netteContainer->addService('callableResolver', new CallableResolver($netteContainer));
+        }
     }
 }
