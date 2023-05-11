@@ -9,6 +9,7 @@ use BrandEmbassy\Slim\Request\DefaultRequestFactory;
 use BrandEmbassy\Slim\Request\RequestFactory;
 use BrandEmbassy\Slim\Response\DefaultResponseFactory;
 use BrandEmbassy\Slim\Response\ResponseFactory;
+use BrandEmbassy\Slim\Route\OnlyNecessaryRoutesProvider;
 use BrandEmbassy\Slim\Route\RouteDefinition;
 use BrandEmbassy\Slim\Route\RouteDefinitionFactory;
 use BrandEmbassy\Slim\Route\RouteRegister;
@@ -114,6 +115,9 @@ class SlimApiExtension extends CompilerExtension
 
         $builder->addDefinition($this->prefix('slimRouter'))
             ->setFactory(Router::class);
+
+        $builder->addDefinition($this->prefix('onlyNecessaryRoutesProvider'))
+            ->setFactory(OnlyNecessaryRoutesProvider::class);
     }
 
 

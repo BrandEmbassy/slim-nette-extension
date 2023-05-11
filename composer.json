@@ -14,6 +14,7 @@
     },
     "require": {
         "php": ">=7.2",
+        "ext-apcu": "*",
         "adbario/php-dot-notation": "^2.2",
         "nette/di": "^3.0",
         "nette/neon": "^3.0",
@@ -38,6 +39,9 @@
     "prefer-stable": true,
     "config": {
         "sort-packages": true,
-        "process-timeout": 600
+        "process-timeout": 600,
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
     }
 }

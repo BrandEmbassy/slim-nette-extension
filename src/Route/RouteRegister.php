@@ -58,8 +58,12 @@ class RouteRegister
     /**
      * @param array<string, mixed[]> $routeData
      */
-    public function register(string $apiNamespace, string $routePattern, array $routeData): void
-    {
+    public function register(
+        string $apiNamespace,
+        string $routePattern,
+        array $routeData,
+        bool $detectTyposInRouteConfiguration = true
+    ): void {
         $urlPattern = $this->urlPatternResolver->resolve($apiNamespace, $routePattern);
         $resolveRoutePath = $this->urlPatternResolver->resolveRoutePath(
             $apiNamespace,
@@ -71,7 +75,9 @@ class RouteRegister
                 continue;
             }
 
-            $this->detectTyposInRouteConfiguration([$apiNamespace, $routePattern, $method], $routeDefinitionData);
+            if ($detectTyposInRouteConfiguration) {
+                $this->detectTyposInRouteConfiguration([$apiNamespace, $routePattern, $method], $routeDefinitionData);
+            }
 
             $routeDefinition = $this->routeDefinitionFactory->create($method, $routeDefinitionData);
 
