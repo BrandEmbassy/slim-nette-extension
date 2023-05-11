@@ -29,14 +29,17 @@ class MiddlewareFactory
 
     public function createFromIdentifier(string $middlewareIdentifier): callable
     {
+        $container = $this->container;
+
         return function (
             RequestInterface $request,
             ResponseInterface $response,
             callable $next
         ) use (
-            $middlewareIdentifier
+            $middlewareIdentifier,
+            $container
         ): ResponseInterface {
-            $middleware = ServiceProvider::getService($this->container, $middlewareIdentifier);
+            $middleware = ServiceProvider::getService($container, $middlewareIdentifier);
             assert(is_callable($middleware));
 
             return $middleware($request, $response, $next);
