@@ -112,6 +112,11 @@ class SlimApplicationFactory
             false
         );
 
+        $routeApiNamesAlwaysInclude = (array)$this->getSlimSettings(
+            SlimSettings::ROUTE_API_NAMES_ALWAYS_INCLUDE,
+            []
+        );
+
         if ($useApcuCache && !apcu_enabled()) {
             throw new LogicException('APCU cache is not enabled');
         }
@@ -140,7 +145,8 @@ class SlimApplicationFactory
             $routesToRegister = $this->onlyNecessaryRoutesProvider->getRoutes(
                 $requestUri,
                 $routesToRegister,
-                $useApcuCache
+                $useApcuCache,
+                $routeApiNamesAlwaysInclude
             );
         }
 

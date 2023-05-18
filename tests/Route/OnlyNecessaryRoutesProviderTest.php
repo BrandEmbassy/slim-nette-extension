@@ -27,6 +27,23 @@ class OnlyNecessaryRoutesProviderTest extends TestCase
     }
 
 
+    public function testGetRoutesReturnsFilteredRoutesWithAlwaysIncludeApp(): void
+    {
+        $sampleRequestUri = '/chat/1.0/brand/1000/channel/chat_f00189ec-6a4b-4c76-b504-03c7ebcadb9c?parameter=12345';
+
+        $sampleRoutes = FileLoader::loadArrayFromJsonFile(__DIR__ . '/__fixtures__/all_routes.json');
+        $expectedRoutes = FileLoader::loadArrayFromJsonFile(
+            __DIR__ . '/__fixtures__/expected_routes_with_custom_components.json'
+        );
+
+        $provider = new OnlyNecessaryRoutesProvider();
+
+        $routes = $provider->getRoutes($sampleRequestUri, $sampleRoutes, false, ['custom-components']);
+
+        Assert::assertSame($expectedRoutes, $routes);
+    }
+
+
     public function testGetRoutesReturnsAllRoutesWhenRequestUriIsNull(): void
     {
         $sampleRoutes = FileLoader::loadArrayFromJsonFile(__DIR__ . '/__fixtures__/all_routes.json');
