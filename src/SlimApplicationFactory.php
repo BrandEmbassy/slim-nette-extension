@@ -118,7 +118,8 @@ class SlimApplicationFactory
         );
 
         if ($useApcuCache && !apcu_enabled()) {
-            throw new LogicException('APCU cache is not enabled');
+            // @intentionally For cli scripts is APCU disabled by default
+            $useApcuCache = false;
         }
 
         if ($disableUsingSlimContainer && !($this->container instanceof ContainerInterface)) {
