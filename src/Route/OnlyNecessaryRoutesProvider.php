@@ -35,12 +35,14 @@ class OnlyNecessaryRoutesProvider
         $filteredRoutes = [];
 
         foreach ($allRoutes as $apiName => $apiRoutes) {
-            if (strpos($url, '/' . $apiName) === false && !in_array($apiName, $apiNamesAlwaysInclude, true)) {
+            $apiNameIsCurrentFromRequest = strpos($url, '/' . $apiName . '/') !== false;
+
+            if (!$apiNameIsCurrentFromRequest && !in_array($apiName, $apiNamesAlwaysInclude, true)) {
                 continue;
             }
 
             $cacheKey = sprintf('filtered_routes.%s', $apiName);
-            if ($useApcuCache && apcu_exists($cacheKey)) {
+            if ($apiNameIsCurrentFromRequest && $useApcuCache && apcu_exists($cacheKey)) {
                 return apcu_fetch($cacheKey);
             }
 
@@ -50,7 +52,7 @@ class OnlyNecessaryRoutesProvider
                 }
             }
 
-            if ($useApcuCache) {
+            if ($apiNameIsCurrentFromRequest && $useApcuCache) {
                 apcu_store($cacheKey, $filteredRoutes);
             }
         }
