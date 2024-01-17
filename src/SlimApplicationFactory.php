@@ -105,7 +105,7 @@ class SlimApplicationFactory
         );
         $useApcuCache = (bool)$this->getSlimSettings(
             SlimSettings::USE_APCU_CACHE,
-            false
+            true
         );
         $disableUsingSlimContainer = (bool)$this->getSlimSettings(
             SlimSettings::DISABLE_USING_SLIM_CONTAINER,
