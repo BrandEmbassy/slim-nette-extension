@@ -40,3 +40,13 @@ jobs:
       - name: Run phpunit
         run: composer phpunit
 
+      - name: Run tests with coverage
+        run: composer test-with-coverage
+        if: matrix.php-version == '7.2' && matrix.composer-arg == 'install'
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@master
+        if: matrix.php-version == '7.2' && matrix.composer-arg == 'install'
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: "https://sonar.nice.com"
