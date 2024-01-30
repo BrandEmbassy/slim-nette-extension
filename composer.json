@@ -30,7 +30,9 @@
         "phpcs": "vendor/bin/phpcs --standard=BrandEmbassyCodingStandard src tests --ignore=tests/temp",
         "phpcbf": "./vendor/bin/phpcbf --standard=BrandEmbassyCodingStandard src tests --ignore=tests/temp",
         "phpstan": "./vendor/bin/phpstan analyse -c phpstan.neon src",
-        "phpunit": "./vendor/bin/phpunit tests --no-coverage"
+        "phpunit": "./vendor/bin/phpunit tests --no-coverage",
+	"test": "./vendor/bin/phpunit tests",
+	"test-with-coverage": "php -dxdebug.mode=coverage ./vendor/bin/phpunit tests --coverage-clover=coverage.xml --log-junit=test-report.xml"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
