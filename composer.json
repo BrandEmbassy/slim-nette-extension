@@ -16,6 +16,7 @@
         "php": ">=7.2",
         "ext-apcu": "*",
         "adbario/php-dot-notation": "^2.2 || ^3.0",
+        "dflydev/fig-cookies": "^3.1",
         "nette/di": "^3.0",
         "nette/neon": "^3.0",
         "nette/utils": "^3.0",
@@ -26,6 +27,7 @@
         "brandembassy/coding-standard": "^8.6",
         "brandembassy/mockery-tools": "^3.8",
         "mockery/mockery": "^1.2",
+        "openswoole/ide-helper": "^22.1",
         "phpunit/phpunit": "^8.5",
         "roave/security-advisories": "dev-master"
     },
