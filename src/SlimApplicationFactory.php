@@ -130,6 +130,8 @@ final class SlimApplicationFactory
 
 
     /**
+     * @param class-string $serviceName
+     *
      * @return Closure
      */
     private function getServiceProvider(string $serviceName): callable
@@ -168,6 +170,9 @@ final class SlimApplicationFactory
     }
 
 
+    /**
+     * @param class-string $serviceName
+     */
     private function registerServiceIntoContainer(SlimApp $app, string $serviceName): void
     {
         if (!$app->getContainer()->has($serviceName)) {
@@ -272,6 +277,9 @@ final class SlimApplicationFactory
     }
 
 
+    /**
+     * @param class-string $middleware
+     */
     private function registerBeforeRequestMiddleware(SlimApp $app, string $middleware): void
     {
         $this->registerServiceIntoContainer($app, $middleware);
