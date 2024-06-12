@@ -12,6 +12,7 @@ services:
     - BrandEmbassyTest\Slim\Sample\ErroringAction
     - BrandEmbassyTest\Slim\Sample\BeforeRequestMiddleware
     - BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware
+    - BrandEmbassyTest\Slim\Sample\AfterRouteMiddleware
 
 parameters:
     api:
@@ -39,6 +40,9 @@ parameters:
                     '/error':
                         post:
                             service: BrandEmbassyTest\Slim\Sample\ErroringAction
+
+        afterRouteMiddlewares:
+            - BrandEmbassyTest\Slim\Sample\AfterRouteMiddleware
 
         beforeRouteMiddlewares:
             - BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware

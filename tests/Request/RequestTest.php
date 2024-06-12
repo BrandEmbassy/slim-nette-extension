@@ -30,9 +30,9 @@ final class RequestTest extends TestCase
     {
         $request = $this->createSampleRequest();
 
-        self::assertTrue($request->hasField('thisIsNull'));
-        self::assertFalse($request->hasField('nonExistingField'));
-        self::assertTrue($request->hasField('thisIsGandalf'));
+        Assert::assertTrue($request->hasField('thisIsNull'));
+        Assert::assertFalse($request->hasField('nonExistingField'));
+        Assert::assertTrue($request->hasField('thisIsGandalf'));
     }
 
 
@@ -53,7 +53,7 @@ final class RequestTest extends TestCase
     {
         $request = $this->createSampleRequest();
 
-        self::assertEquals('gandalf', $request->getField('thisIsGandalf'));
+        Assert::assertEquals('gandalf', $request->getField('thisIsGandalf'));
         $this->expectException(MissingApiArgumentException::class);
         $request->getField('nonExistingField');
     }
@@ -67,7 +67,7 @@ final class RequestTest extends TestCase
         $request = new Request($slimRequest);
         $dateTime = $request->getDateTimeQueryParam(self::PARAM_NAME);
 
-        self::assertSame(self::DATE_TIME_STRING, $dateTime->format(DateTime::ATOM));
+        Assert::assertSame(self::DATE_TIME_STRING, $dateTime->format(DateTime::ATOM));
     }
 
 
