@@ -72,6 +72,10 @@ parameters:
                                 - App\UsuallyRequestDataValidationMiddleware # second in row
                                 - App\SomeAuthMiddleware # this one is called first 
 
+        afterRouteMiddlewares:
+            # this is called for each route, after the route middlewares
+            - App\SomeAfterRequestMiddleware 
+
         beforeRouteMiddlewares:
             # this is called for each route, before route middlewares
             - App\SomeBeforeRequestMiddleware 
