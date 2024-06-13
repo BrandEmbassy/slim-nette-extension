@@ -16,6 +16,7 @@ services:
     - BrandEmbassyTest\Slim\Sample\GroupMiddleware
     - BrandEmbassyTest\Slim\Sample\OnlyApiGroupMiddleware
     helloWorldRoute: BrandEmbassyTest\Slim\Sample\HelloWorldRoute
+    - BrandEmbassyTest\Slim\Sample\AfterRouteMiddleware
 
 slimApi:
     apiPrefix: '/tests'
@@ -75,8 +76,11 @@ slimApi:
         api:
             - BrandEmbassyTest\Slim\Sample\OnlyApiGroupMiddleware
 
-    beforeRouteMiddlewares:
-        - BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware
+        afterRouteMiddlewares:
+            - BrandEmbassyTest\Slim\Sample\AfterRouteMiddleware
+
+        beforeRouteMiddlewares:
+            - BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware
 
     beforeRequestMiddlewares:
         - BrandEmbassyTest\Slim\Sample\BeforeRequestMiddleware

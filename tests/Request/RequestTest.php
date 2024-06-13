@@ -20,13 +20,23 @@ use function urlencode;
 class RequestTest extends TestCase
 {
     private const PARAM_NAME = 'dateFrom';
-    
+
     private const DATE_TIME_STRING = '2017-06-10T01:00:00+01:00';
-    
+
     private const CHANNEL_ID = '123';
 
 
     public function testShouldDistinguishBetweenNullAndEmptyOption(): void
+    {
+        $request = $this->getDispatchedRequest();
+
+        Assert::assertTrue($request->hasField('thisIsNull'));
+        Assert::assertFalse($request->hasField('nonExistingField'));
+        Assert::assertTrue($request->hasField('thisIsGandalf'));
+    }
+
+
+    public function testGetParsedBodyAsArray(): void
     {
         $request = $this->getDispatchedRequest();
 

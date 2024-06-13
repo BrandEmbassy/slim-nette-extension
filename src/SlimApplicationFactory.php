@@ -63,6 +63,11 @@ class SlimApplicationFactory
 
     private OnlyNecessaryRoutesProvider $onlyNecessaryRoutesProvider;
 
+    /**
+     * @var array<Middleware>
+     */
+    private array $afterRoutesMiddlewares = [];
+
 
     /**
      * @param mixed[] $configuration
@@ -109,6 +114,8 @@ class SlimApplicationFactory
             SlimSettings::ROUTE_API_NAMES_ALWAYS_INCLUDE,
             [],
         );
+
+        $this->registerAfterRouteMiddlewares($app, $configuration);
 
         if ($useApcuCache && !apcu_enabled()) {
             // @intentionally For cli scripts is APCU disabled by default

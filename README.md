@@ -70,13 +70,17 @@ slimApi:
                         - App\UsuallyRequestDataValidationMiddleware # second in row
                         - App\SomeAuthMiddleware # this one is called first 
 
-    beforeRouteMiddlewares:
-        # this is called for each route, before route middlewares
-        - App\SomeBeforeRouteMiddleware 
-        
-    beforeRequestMiddlewares:
-        # this is called for each request, even when route does NOT exist (404 requests)
-        - App\SomeBeforeRequestMiddleware
+        afterRouteMiddlewares:
+            # this is called for each route, after the route middlewares
+            - App\SomeAfterRequestMiddleware 
+
+        beforeRouteMiddlewares:
+            # this is called for each route, before route middlewares
+            - App\SomeBeforeRequestMiddleware 
+            
+        beforeRequestMiddlewares:
+            # this is called for each request, even when route does NOT exist (404 requests)
+            - App\SomeBeforeRouteMiddleware tests/Dummy/BeforeRequestMiddleware.php
 ```
 
 You can also reference the named service by its name.
