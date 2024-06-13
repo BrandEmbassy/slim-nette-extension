@@ -104,7 +104,11 @@ final class SlimApplicationFactoryTest extends TestCase
 
     public function testShouldProcessBothGlobalMiddlewares(): void
     {
-        $request = $this->createRequest('POST', '/new-api/2.0/channels');
+        $request = $this->createRequest(
+            'POST',
+            '/new-api/2.0/channels',
+            ['goldenKey' => GoldenKeyAuthMiddleware::ACCESS_TOKEN]
+        );
 
         /** @var ResponseInterface $response */
         $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
@@ -117,6 +121,11 @@ final class SlimApplicationFactoryTest extends TestCase
         Assert::assertSame(
             ['proof-for-before-route'],
             $response->getHeader('processed-by-before-route-middlewares')
+        );
+
+        Assert::assertSame(
+            ['changed-value'],
+            $response->getHeader('header-to-be-changed-by-after-route-middleware')
         );
     }
 
