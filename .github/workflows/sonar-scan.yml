@@ -9,6 +9,8 @@ jobs:
   phpunit-with-sonar-qube:
     name: PHP Unit with Sonar Qube
     runs-on: ubuntu-latest
+
+    steps:
       - name: Checkout
         uses: actions/checkout@v2
 
