@@ -2,8 +2,8 @@ name: SonarQube-Scanning
 
 on:
   push:
-    branches-ignore: [master]
-  workflow_dispatch:
+    branches:
+    - master
 
 jobs:
   phpunit-with-sonar-qube:
