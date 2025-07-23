@@ -31,7 +31,6 @@ jobs:
       - name: Install dependencies
         run: |
           composer config github-oauth.github.com ${{ secrets.COMPOSER_TOKEN }}
-          composer config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
           composer install --prefer-dist
 
       - name: Run phpstan
