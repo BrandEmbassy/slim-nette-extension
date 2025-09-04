@@ -10,7 +10,7 @@ final class SlimApiExtension extends CompilerExtension
     /**
      * @var mixed[]
      */
-    private $defaults = [
+    private array $defaults = [
         'apiDefinitionKey'  => 'api',
         'slimConfiguration' => [],
     ];

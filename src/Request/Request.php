@@ -21,15 +21,9 @@ use function sprintf;
 
 final class Request implements RequestInterface
 {
-    /**
-     * @var stdClass|null
-     */
-    private $decodedJsonFromBody;
+    private ?stdClass $decodedJsonFromBody = null;
 
-    /**
-     * @var ServerRequestInterface
-     */
-    private $request;
+    private ServerRequestInterface $request;
 
 
     public function __construct(ServerRequestInterface $request)

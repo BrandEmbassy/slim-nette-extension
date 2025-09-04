@@ -7,10 +7,7 @@ use Slim\Http\Response as SlimResponse;
 
 final class Response implements ResponseInterface
 {
-    /**
-     * @var SlimResponse
-     */
-    private $slimResponse;
+    private SlimResponse $slimResponse;
 
 
     public function __construct(SlimResponse $slimResponse)
