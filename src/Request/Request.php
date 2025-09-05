@@ -22,14 +22,11 @@ use function sprintf;
 final class Request implements RequestInterface
 {
     /**
-     * @var stdClass|null
+     * @var array<mixed>|stdClass|null
      */
-    private $decodedJsonFromBody;
+    private mixed $decodedJsonFromBody = null;
 
-    /**
-     * @var ServerRequestInterface
-     */
-    private $request;
+    private ServerRequestInterface $request;
 
 
     public function __construct(ServerRequestInterface $request)

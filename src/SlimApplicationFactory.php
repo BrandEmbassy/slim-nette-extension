@@ -19,22 +19,19 @@ final class SlimApplicationFactory
     /**
      * @var mixed[]
      */
-    private $configuration;
+    private array $configuration;
 
-    /**
-     * @var Container
-     */
-    private $container;
+    private Container $container;
 
     /**
      * @var array<Middleware>
      */
-    private $beforeRoutesMiddlewares;
+    private array $beforeRoutesMiddlewares;
 
     /**
      * @var array<Middleware>
      */
-    private $afterRoutesMiddlewares;
+    private array $afterRoutesMiddlewares;
 
 
     /**
