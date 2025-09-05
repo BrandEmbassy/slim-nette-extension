@@ -21,7 +21,10 @@ use function sprintf;
 
 final class Request implements RequestInterface
 {
-    private ?stdClass $decodedJsonFromBody = null;
+    /**
+     * @var array<mixed>|stdClass|null
+     */
+    private mixed $decodedJsonFromBody = null;
 
     private ServerRequestInterface $request;
 
