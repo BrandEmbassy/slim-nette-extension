@@ -3,6 +3,9 @@
 namespace BrandEmbassyTest\Slim;
 
 use BrandEmbassy\MockeryTools\Http\ResponseAssertions;
+use BrandEmbassy\Slim\Request\Request;
+use BrandEmbassy\Slim\Response\Response;
+use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassyTest\Slim\Sample\BeforeRequestMiddleware;
 use BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware;
 use BrandEmbassyTest\Slim\Sample\GoldenKeyAuthMiddleware;
@@ -11,6 +14,9 @@ use BrandEmbassyTest\Slim\Sample\InvokeCounterMiddleware;
 use BrandEmbassyTest\Slim\Sample\OnlyApiGroupMiddleware;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
+use Slim\Http\Body;
+use Slim\Http\Headers;
+use Slim\Http\Uri;
 use Slim\Router;
 use function assert;
 use function count;
@@ -221,6 +227,49 @@ class SlimApplicationFactoryTest extends TestCase
     }
 
 
+    public function testShouldProcessBothGlobalMiddlewares(): void
+    {
+        $request = $this->createRequest(
+            'POST',
+            '/new-api/2.0/channels',
+            ['goldenKey' => GoldenKeyAuthMiddleware::ACCESS_TOKEN]
+        );
+
+        $slimApp = SlimAppTester::createSlimApp();
+
+        /** @var ResponseInterface $response */
+        $response = $slimApp->process($request, new Response(new \Slim\Http\Response()));
+
+        Assert::assertSame(
+            ['proof-for-before-request'],
+            $response->getHeader('processed-by-before-request-middleware')
+        );
+
+        Assert::assertSame(
+            ['proof-for-before-route'],
+            $response->getHeader('processed-by-before-route-middlewares')
+        );
+
+        Assert::assertSame(
+            ['changed-value'],
+            $response->getHeader('header-to-be-changed-by-after-route-middleware')
+        );
+    }
+
+
+    public function testShouldProcessBeforeRequestMiddleware(): void
+    {
+        $request = $this->createRequest('POST', '/non-existing/path');
+
+        /** @var ResponseInterface $response */
+        $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
+
+        Assert::assertSame(
+            ['proof-for-before-request'],
+            $response->getHeader('processed-by-before-request-middleware')
+        );
+    }
+
     /**
      * @param array<string> $headers
      */
@@ -246,4 +295,24 @@ class SlimApplicationFactoryTest extends TestCase
 
         SlimAppTester::createSlimApp(__DIR__ . '/typo-in-config.neon');
     }
+
+    /**
+     * @param array<string> $headers
+     */
+    private function createRequest(string $requestMethod, string $requestUrlPath, array $headers = []): Request
+    {
+        $body = fopen('php://temp', 'rb+');
+        assert(is_resource($body));
+        $slimRequest = new Request(
+            $requestMethod,
+            new Uri('http', 'api.be.com', 80, $requestUrlPath),
+            new Headers($headers),
+            [],
+            [],
+            new Body($body)
+        );
+
+        return new $slimRequest;
+    }
+
 }

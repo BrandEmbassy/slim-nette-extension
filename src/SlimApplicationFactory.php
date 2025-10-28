@@ -43,12 +43,14 @@ class SlimApplicationFactory
     /**
      * @var mixed[]
      */
-    private $configuration;
+    private array $configuration;
+
+    private Container $container;
 
     /**
-     * @var Container
+     * @var array<Middleware>
      */
-    private $container;
+    private array $beforeRoutesMiddlewares;
 
     /**
      * @var MiddlewareFactory
@@ -167,6 +169,11 @@ class SlimApplicationFactory
             $app->add($middlewareService);
         }
 
+        foreach ($this->configuration[self::AFTER_REQUEST_MIDDLEWARES] as $middleware) {
+            $middlewareService = $this->middlewareFactory->createFromIdentifier($middleware);
+            $app->add($middlewareService);
+        }
+
         return $app;
     }
 
@@ -230,6 +237,9 @@ class SlimApplicationFactory
      *
      * @return mixed
      */
+    /**
+     * @param class-string $middleware
+     */
     private function getSlimSettings(string $key, $defaultValue)
     {
         return $this->configuration[self::SLIM_CONFIGURATION][self::SETTINGS][$key] ?? $defaultValue;
@@ -260,4 +270,6 @@ class SlimApplicationFactory
             $netteContainer->addService('callableResolver', new CallableResolver($netteContainer));
         }
     }
+
+
 }

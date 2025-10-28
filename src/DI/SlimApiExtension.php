@@ -16,6 +16,7 @@ use BrandEmbassy\Slim\Route\RouteRegister;
 use BrandEmbassy\Slim\Route\UrlPatternResolver;
 use BrandEmbassy\Slim\SlimApplicationFactory;
 use BrandEmbassy\Slim\SlimContainerFactory;
+use BrandEmbassyTest\Slim\Sample\AfterRouteMiddleware;
 use Nette\DI\CompilerExtension;
 use Nette\DI\Definitions\Reference;
 use Nette\Schema\Expect;
@@ -55,6 +56,8 @@ class SlimApiExtension extends CompilerExtension
                     ->default([]),
                 SlimApplicationFactory::BEFORE_ROUTE_MIDDLEWARES => Expect::arrayOf($this->createServiceExpect())
                     ->default([]),
+                SlimApplicationFactory::AFTER_ROUTE_MIDDLEWARES => Expect::arrayOf($this->createServiceExpect())
+                    ->default([]),
                 SlimApplicationFactory::SLIM_CONFIGURATION => Expect::array()->default([]),
                 SlimApplicationFactory::API_PREFIX => Expect::string()->default(''),
                 SlimApplicationFactory::MIDDLEWARE_GROUPS => Expect::arrayOf(
@@ -76,6 +79,9 @@ class SlimApiExtension extends CompilerExtension
 
         $builder->addDefinition($this->prefix('beforeRouteMiddlewares'))
             ->setFactory(BeforeRouteMiddlewares::class, [$config[SlimApplicationFactory::BEFORE_ROUTE_MIDDLEWARES]]);
+
+        $builder->addDefinition($this->prefix('AfterRouteMiddlewares'))
+            ->setFactory(AfterRouteMiddleware::class, [$config[SlimApplicationFactory::AFTER_ROUTE_MIDDLEWARES]]);
 
         $builder->addDefinition($this->prefix('middlewareGroups'))
             ->setFactory(MiddlewareGroups::class, [$config[SlimApplicationFactory::MIDDLEWARE_GROUPS]]);
