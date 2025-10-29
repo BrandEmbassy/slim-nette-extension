@@ -2,23 +2,28 @@
 
 namespace BrandEmbassyTest\Slim\Request;
 
-use BrandEmbassy\Slim\MissingApiArgumentException;
-use BrandEmbassy\Slim\Request\Request;
-use DateTime;
-use LogicException;
-use Mockery;
-use Mockery\MockInterface;
-use PHPUnit\Framework\Assert;
-use BrandEmbassy\MockeryTools\DateTime\DateTimeAssertions;
 use BrandEmbassy\Slim\Request\QueryParamMissingException;
+use BrandEmbassy\Slim\Request\Request;
 use BrandEmbassy\Slim\Request\RequestFieldMissingException;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\Response;
 use BrandEmbassy\Slim\SlimApplicationFactory;
 use BrandEmbassyTest\Slim\Sample\CreateChannelUserRoute;
 use BrandEmbassyTest\Slim\SlimAppTester;
+use DateTime;
+use LogicException;
+use Mockery;
+use Mockery\MockInterface;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\StreamInterface;
+use Slim\Http\Body;
+use Slim\Http\Headers;
+use Slim\Http\Uri;
+use function assert;
+use function fopen;
+use function is_resource;
+use function sprintf;
 use function urlencode;
 
 /**
@@ -73,6 +78,7 @@ class RequestTest extends TestCase
 
         Assert::assertSame(self::DATE_TIME_STRING, $dateTime->format(DateTime::ATOM));
     }
+
 
     public function testQueryParamResolving(): void
     {
@@ -161,7 +167,7 @@ class RequestTest extends TestCase
             ],
         ];
     }
-}
+
 
     /**
      * @dataProvider getDataForInvalidDateTimeArgument
@@ -172,8 +178,8 @@ class RequestTest extends TestCase
         string $logicExceptionMessage,
         array $arguments
     ): void {
-        $slimRequest = $this->createMockSlimRequest($arguments);
-        $request = new Request($slimRequest);
+        $slimRequest = $this->createMockRequest($arguments);
+        $request = $slimRequest;
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage($logicExceptionMessage);
 
@@ -202,12 +208,12 @@ class RequestTest extends TestCase
     /**
      * @param mixed[] $arguments
      *
-     * @return MockInterface&SlimRequest
+     * @return Request&MockInterface
      */
-    private function createMockSlimRequest(array $arguments): MockInterface
+    private function createMockRequest(array $arguments): MockInterface
     {
-        /** @var MockInterface&SlimRequest $mock */
-        $mock = Mockery::mock(SlimRequest::class);
+        /** @var MockInterface&Request $mock */
+        $mock = Mockery::mock(Request::class)->makePartial();
         $mock->shouldReceive('getQueryParams')->andReturn($arguments);
 
         return $mock;
@@ -217,10 +223,9 @@ class RequestTest extends TestCase
     private function createRequest(StreamInterface $body): Request
     {
         $url = new Uri('https', 'example.com');
-        $slimRequest = new SlimRequest('POST', $url, new Headers(), [], [], $body);
-        $slimRequest = $slimRequest->withHeader('content-type', 'application/json');
+        $slimRequest = new Request('POST', $url, new Headers(), [], [], $body);
 
-        return new Request($slimRequest);
+        return $slimRequest->withHeader('content-type', 'application/json');
     }
 
 

@@ -2,9 +2,11 @@
 
 namespace BrandEmbassy\Slim\Route;
 
+use BrandEmbassy\Slim\Middleware\AfterRouteMiddlewares;
 use BrandEmbassy\Slim\Middleware\BeforeRouteMiddlewares;
 use BrandEmbassy\Slim\Middleware\MiddlewareGroups;
 use Slim\Interfaces\RouterInterface;
+use function array_key_exists;
 use function array_keys;
 use function array_merge_recursive;
 use function levenshtein;
@@ -39,19 +41,26 @@ class RouteRegister
      */
     private $middlewareGroups;
 
+    /**
+     * @var AfterRouteMiddlewares
+     */
+    private $afterRouteMiddlewares;
+
 
     public function __construct(
         RouterInterface $router,
         RouteDefinitionFactory $routeDefinitionFactory,
         UrlPatternResolver $urlPatternResolver,
         BeforeRouteMiddlewares $beforeRouteMiddlewares,
-        MiddlewareGroups $middlewareGroups
+        MiddlewareGroups $middlewareGroups,
+        AfterRouteMiddlewares $afterRouteMiddlewares
     ) {
         $this->router = $router;
         $this->routeDefinitionFactory = $routeDefinitionFactory;
         $this->urlPatternResolver = $urlPatternResolver;
         $this->beforeRouteMiddlewares = $beforeRouteMiddlewares;
         $this->middlewareGroups = $middlewareGroups;
+        $this->afterRouteMiddlewares = $afterRouteMiddlewares;
     }
 
 
@@ -71,7 +80,11 @@ class RouteRegister
         );
 
         foreach ($routeData as $method => $routeDefinitionData) {
-            if ($routeDefinitionData === $this->getEmptyRouteDefinitionData()) {
+            // Skip unregistered/disabled routes or incomplete definitions (e.g., method => [])
+            if ($routeDefinitionData === $this->getEmptyRouteDefinitionData()
+                || $routeDefinitionData === []
+                || !array_key_exists(RouteDefinition::SERVICE, $routeDefinitionData)
+            ) {
                 continue;
             }
 
@@ -116,7 +129,7 @@ class RouteRegister
             $routeDefinition->getMiddlewares(),
             $middlewaresFromGroups,
             $versionMiddlewares,
-            $this->beforeRouteMiddlewares->getMiddlewares()
+            $this->afterRouteMiddlewares->getMiddlewares()
         );
     }
 

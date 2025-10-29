@@ -20,6 +20,8 @@ use Slim\Http\Uri;
 use Slim\Router;
 use function assert;
 use function count;
+use function fopen;
+use function is_resource;
 
 /**
  * @final
@@ -262,13 +264,14 @@ class SlimApplicationFactoryTest extends TestCase
         $request = $this->createRequest('POST', '/non-existing/path');
 
         /** @var ResponseInterface $response */
-        $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
+        $response = SlimAppTester::createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
 
         Assert::assertSame(
             ['proof-for-before-request'],
             $response->getHeader('processed-by-before-request-middleware')
         );
     }
+
 
     /**
      * @param array<string> $headers
@@ -296,6 +299,7 @@ class SlimApplicationFactoryTest extends TestCase
         SlimAppTester::createSlimApp(__DIR__ . '/typo-in-config.neon');
     }
 
+
     /**
      * @param array<string> $headers
      */
@@ -312,7 +316,6 @@ class SlimApplicationFactoryTest extends TestCase
             new Body($body)
         );
 
-        return new $slimRequest;
+        return $slimRequest;
     }
-
 }

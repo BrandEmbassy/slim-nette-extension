@@ -53,6 +53,11 @@ class SlimContainerFactory
         if (!isset($configuration['router'])) {
             $configuration['router'] = $this->router;
         }
+        // Prevent Slim from throwing on unexpected output buffer contents during finalize
+        // by defaulting addContentLengthHeader to false unless explicitly provided.
+        if (!isset($configuration['settings']['addContentLengthHeader'])) {
+            $configuration['settings']['addContentLengthHeader'] = false;
+        }
 
         return new Container($configuration);
     }

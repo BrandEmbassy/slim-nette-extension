@@ -15,6 +15,7 @@ use Slim\CallableResolver;
 use Slim\Container as SlimContainer;
 use function apcu_enabled;
 use function assert;
+use function function_exists;
 use function implode;
 use function in_array;
 use function is_callable;
@@ -28,8 +29,10 @@ class SlimApplicationFactory
     public const SLIM_CONFIGURATION = 'slimConfiguration';
     public const SETTINGS = 'settings';
     public const BEFORE_ROUTE_MIDDLEWARES = 'beforeRouteMiddlewares';
+    public const AFTER_ROUTE_MIDDLEWARES = 'afterRouteMiddlewares';
     public const HANDLERS = 'handlers';
     public const BEFORE_REQUEST_MIDDLEWARES = 'beforeRequestMiddlewares';
+    public const AFTER_REQUEST_MIDDLEWARES = 'afterRequestMiddlewares';
     public const ROUTES = 'routes';
     public const API_PREFIX = 'apiPrefix';
     public const MIDDLEWARE_GROUPS = 'middlewareGroups';
@@ -46,11 +49,6 @@ class SlimApplicationFactory
     private array $configuration;
 
     private Container $container;
-
-    /**
-     * @var array<Middleware>
-     */
-    private array $beforeRoutesMiddlewares;
 
     /**
      * @var MiddlewareFactory
@@ -119,8 +117,8 @@ class SlimApplicationFactory
             []
         );
 
-        if ($useApcuCache && !apcu_enabled()) {
-            // @intentionally For cli scripts is APCU disabled by default
+        if ($useApcuCache && (!function_exists('apcu_enabled') || !apcu_enabled())) {
+            // @intentionally For cli scripts is APCU disabled by default, or when APCu extension is missing
             $useApcuCache = false;
         }
 
@@ -164,12 +162,27 @@ class SlimApplicationFactory
             $disableUsingSlimContainer
         );
 
+        // Register global middlewares in order so that execution matches tests.
+        // Slim runs middlewares LIFO: last added is executed first.
+        // We want BeforeRequest to run before BeforeRoute, so add BeforeRoute first, then BeforeRequest.
+        foreach ($this->configuration[self::BEFORE_ROUTE_MIDDLEWARES] as $middleware) {
+            $middlewareService = $this->middlewareFactory->createFromIdentifier($middleware);
+            $app->add($middlewareService);
+        }
+
         foreach ($this->configuration[self::BEFORE_REQUEST_MIDDLEWARES] as $middleware) {
             $middlewareService = $this->middlewareFactory->createFromIdentifier($middleware);
             $app->add($middlewareService);
         }
 
+        // After-request middlewares (global)
         foreach ($this->configuration[self::AFTER_REQUEST_MIDDLEWARES] as $middleware) {
+            $middlewareService = $this->middlewareFactory->createFromIdentifier($middleware);
+            $app->add($middlewareService);
+        }
+
+        // After-route middlewares as global to ensure they run even for unmatched routes (per tests)
+        foreach ($this->configuration[self::AFTER_ROUTE_MIDDLEWARES] as $middleware) {
             $middlewareService = $this->middlewareFactory->createFromIdentifier($middleware);
             $app->add($middlewareService);
         }
@@ -232,15 +245,7 @@ class SlimApplicationFactory
     }
 
 
-    /**
-     * @param mixed $defaultValue
-     *
-     * @return mixed
-     */
-    /**
-     * @param class-string $middleware
-     */
-    private function getSlimSettings(string $key, $defaultValue)
+    private function getSlimSettings(string $key, mixed $defaultValue): mixed
     {
         return $this->configuration[self::SLIM_CONFIGURATION][self::SETTINGS][$key] ?? $defaultValue;
     }
@@ -270,6 +275,4 @@ class SlimApplicationFactory
             $netteContainer->addService('callableResolver', new CallableResolver($netteContainer));
         }
     }
-
-
 }

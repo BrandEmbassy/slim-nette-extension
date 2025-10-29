@@ -72,7 +72,7 @@ parameters:
             - BrandEmbassyTest\Slim\Sample\OnlyApiGroupMiddleware
 
     afterRouteMiddlewares:
-        - BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware
+        - BrandEmbassyTest\Slim\Sample\AfterRouteMiddleware
 
     beforeRouteMiddlewares:
         - BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware
