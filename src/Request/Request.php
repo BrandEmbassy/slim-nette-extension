@@ -244,6 +244,28 @@ class Request extends SlimRequest implements RequestInterface
 
 
     /**
+     * @param string $name
+     * @param mixed $default
+     *
+     * @return mixed|string|null
+     */
+    public function getAttribute($name, $default = null)
+    {
+        $value = parent::getAttribute($name, $default);
+
+        if ($value === $default) {
+            $route = parent::getAttribute('route', $default);
+
+            if ($route instanceof Route) {
+                $value = $route->getArgument($name, $default);
+            }
+        }
+
+        return $value;
+    }
+
+
+    /**
      * @return mixed
      *
      * @throws RequestAttributeMissingException
