@@ -2,12 +2,14 @@
 
 namespace BrandEmbassy\Slim\Route;
 
+use BrandEmbassy\Slim\ActionHandler;
 use BrandEmbassy\Slim\DI\ServiceProvider;
 use BrandEmbassy\Slim\Middleware\MiddlewareFactory;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use LogicException;
 use Nette\DI\Container;
+use function is_callable;
 
 /**
  * @final
@@ -65,12 +67,20 @@ class RouteDefinitionFactory
     }
 
 
-    private function getRoute(string $routeIdentifier): Route
+    private function getRoute(string $routeIdentifier): callable
     {
-        $route = ServiceProvider::getService($this->container, $routeIdentifier);
+        $service = ServiceProvider::getService($this->container, $routeIdentifier);
 
-        if ($route instanceof Route) {
-            return $route;
+        if ($service instanceof ActionHandler) {
+            return $service;
+        }
+
+        if (is_callable($service)) {
+            return $service;
+        }
+
+        if ($service instanceof Route) {
+            return $service;
         }
 
         throw new LogicException('Defined route service should implement ' . Route::class);

@@ -9,6 +9,7 @@ use Slim\Interfaces\RouterInterface;
 use function array_key_exists;
 use function array_keys;
 use function array_merge_recursive;
+use function is_array;
 use function levenshtein;
 
 /**
@@ -65,7 +66,7 @@ class RouteRegister
 
 
     /**
-     * @param array<string, mixed[]> $routeData
+     * @param array<string, mixed|mixed[]> $routeData
      */
     public function register(
         string $apiNamespace,
@@ -80,7 +81,20 @@ class RouteRegister
         );
 
         foreach ($routeData as $method => $routeDefinitionData) {
-            // Skip unregistered/disabled routes or incomplete definitions (e.g., method => [])
+            // Skip non-arrays (e.g., neon unsets or explicit false/null to disable a route)
+            if (!is_array($routeDefinitionData)) {
+                continue;
+            }
+
+            // Backward compatibility: allow singular 'middleware' key
+            if (isset($routeDefinitionData['middleware'])
+                && !isset($routeDefinitionData[RouteDefinition::MIDDLEWARES])
+            ) {
+                $routeDefinitionData[RouteDefinition::MIDDLEWARES] = $routeDefinitionData['middleware'];
+                unset($routeDefinitionData['middleware']);
+            }
+
+            // Skip unregistered/disabled routes or incomplete definitions
             if ($routeDefinitionData === $this->getEmptyRouteDefinitionData()
                 || $routeDefinitionData === []
                 || !array_key_exists(RouteDefinition::SERVICE, $routeDefinitionData)
@@ -93,19 +107,12 @@ class RouteRegister
             }
 
             $routeDefinition = $this->routeDefinitionFactory->create($method, $routeDefinitionData);
-
             $routeName = $routeDefinition->getName() ?? $resolveRoutePath;
 
-            $routeToAdd = $this->router->map(
-                [$routeDefinition->getMethod()],
-                $urlPattern,
-                $routeDefinition->getRoute()
-            );
+            $routeToAdd = $this->router->map([$routeDefinition->getMethod()], $urlPattern, $routeDefinition->getRoute());
             $routeToAdd->setName($routeName);
 
-            $middlewaresToAdd = $this->getAllMiddlewares($apiNamespace, $routeDefinition);
-
-            foreach ($middlewaresToAdd as $middleware) {
+            foreach ($this->getAllMiddlewares($apiNamespace, $routeDefinition) as $middleware) {
                 $routeToAdd->add($middleware);
             }
         }

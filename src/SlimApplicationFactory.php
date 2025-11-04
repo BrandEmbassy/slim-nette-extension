@@ -14,12 +14,15 @@ use Psr\Container\ContainerInterface;
 use Slim\CallableResolver;
 use Slim\Container as SlimContainer;
 use function apcu_enabled;
+use function array_key_exists;
 use function assert;
 use function function_exists;
 use function implode;
 use function in_array;
+use function is_array;
 use function is_callable;
 use function sprintf;
+use function trim;
 
 /**
  * @final
@@ -42,6 +45,7 @@ class SlimApplicationFactory
         'errorHandler',
         'phpErrorHandler',
     ];
+    const EXISTING_METHODS = ['get','post','put','patch','delete','options','head'];
 
     /**
      * @var mixed[]
@@ -239,9 +243,36 @@ class SlimApplicationFactory
      */
     private function registerApi(string $apiNamespace, array $routes, bool $detectTyposInRouteConfiguration): void
     {
-        foreach ($routes as $routePattern => $routeData) {
-            $this->routeRegister->register($apiNamespace, $routePattern, $routeData, $detectTyposInRouteConfiguration);
+        foreach ($routes as $routePatternOrSubNs => $routeDataOrPaths) {
+            // Leaf case: directly a methods map (e.g., '/authorization' => ['get' => {...}])
+            if (is_array($routeDataOrPaths) && $this->isMethodsMap($routeDataOrPaths)) {
+                $this->routeRegister->register($apiNamespace, (string)$routePatternOrSubNs, $routeDataOrPaths, $detectTyposInRouteConfiguration);
+                continue;
+            }
+
+            // Middle level case: sub-namespace/version (e.g., '' or '2.0') mapping to paths
+            $subNamespace = trim((string)$routePatternOrSubNs, '/');
+            $effectiveNamespace = $apiNamespace . ($subNamespace !== '' ? '/' . $subNamespace : '');
+
+            foreach ((array)$routeDataOrPaths as $routePattern => $methodsMap) {
+                $this->routeRegister->register($effectiveNamespace, (string)$routePattern, (array)$methodsMap, $detectTyposInRouteConfiguration);
+            }
         }
+    }
+
+
+    /**
+     * @param string[] $routeMethods
+     */
+    private function isMethodsMap(array $routeMethods): bool
+    {
+        foreach (self::EXISTING_METHODS as $existingMethod) {
+            if (array_key_exists($existingMethod, $routeMethods)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 
