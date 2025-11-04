@@ -17,10 +17,6 @@ use BrandEmbassy\Slim\Route\RouteRegister;
 use BrandEmbassy\Slim\Route\UrlPatternResolver;
 use BrandEmbassy\Slim\SlimApplicationFactory;
 use BrandEmbassy\Slim\SlimContainerFactory;
-use function array_merge;
-use function array_unique;
-use function array_values;
-use function class_exists;
 use Nette\DI\CompilerExtension;
 use Nette\DI\Definitions\Reference;
 use Nette\DI\Definitions\ServiceDefinition;
@@ -29,9 +25,18 @@ use Nette\Schema\Expect;
 use Nette\Schema\Schema;
 use Slim\Container;
 use Slim\Router;
+use function array_key_exists;
+use function array_merge;
+use function array_pop;
 use function array_replace_recursive;
+use function array_unique;
+use function array_values;
+use function class_exists;
 use function is_array;
 use function is_string;
+use function ltrim;
+use function md5;
+use function strpos;
 
 /**
  * @final
@@ -160,6 +165,7 @@ class SlimApiExtension extends CompilerExtension
             ->setFactory(OnlyNecessaryRoutesProvider::class);
     }
 
+
     /**
      * Run after all application services are defined so we can respect explicitly wired middlewares.
      * Auto-register middlewares referenced by FQCN in routes and global lists, but only when there is
@@ -170,7 +176,7 @@ class SlimApiExtension extends CompilerExtension
         $builder = $this->getContainerBuilder();
 
         // Reconstruct effective config similarly to loadConfiguration(), using container params as fallback
-        $config = (array) $this->config;
+        $config = (array)$this->config;
         $parameters = $builder->parameters;
 
         $baseRoutes = $parameters['routes'] ?? [];
@@ -215,6 +221,7 @@ class SlimApiExtension extends CompilerExtension
         }
     }
 
+
     /**
      * Recursively remove keys from $target when $overrides explicitly sets them to null.
      * This mirrors Neon `key!: null` semantics used in tests to unregister a route.
@@ -241,11 +248,13 @@ class SlimApiExtension extends CompilerExtension
         return Expect::anyOf(Expect::string('string'));
     }
 
+
     /**
      * Recursively collects middleware identifiers from the routes map. Supports both
      * singular 'middleware' and plural 'middlewares' keys to keep BC with configs.
      *
      * @param array<string, mixed> $node
+     *
      * @return string[]
      */
     private function collectMiddlewareIdentifiersFromRoutes(array $node): array
@@ -256,10 +265,10 @@ class SlimApiExtension extends CompilerExtension
                 continue;
             }
 
-            if (array_key_exists(\BrandEmbassy\Slim\Route\RouteDefinition::MIDDLEWARES, $value)) {
+            if (array_key_exists(RouteDefinition::MIDDLEWARES, $value)) {
                 $found = array_merge(
                     $found,
-                    $this->normalizeToStringList($value[\BrandEmbassy\Slim\Route\RouteDefinition::MIDDLEWARES])
+                    $this->normalizeToStringList($value[RouteDefinition::MIDDLEWARES])
                 );
             }
 
@@ -275,11 +284,13 @@ class SlimApiExtension extends CompilerExtension
         return $found;
     }
 
+
     /**
      * Normalizes a mixed value (string|list|nested lists) into a flat list of strings.
      * Non-string values are ignored.
      *
      * @param mixed $value
+     *
      * @return string[]
      */
     private function normalizeToStringList($value): array
@@ -310,6 +321,7 @@ class SlimApiExtension extends CompilerExtension
         return $out;
     }
 
+
     /**
      * Checks whether a service of given type is already defined in the builder.
      */
@@ -321,8 +333,10 @@ class SlimApiExtension extends CompilerExtension
                 return true;
             }
         }
+
         return false;
     }
+
 
     /**
      * True if the definition effectively produces the given FQCN.
@@ -330,9 +344,8 @@ class SlimApiExtension extends CompilerExtension
      */
     private function isDefinitionOfType($def, string $fqcn): bool
     {
-
-               if (!$def instanceof ServiceDefinition) {
-                    return false;
+        if (!$def instanceof ServiceDefinition) {
+             return false;
         }
         $fqcn = ltrim($fqcn, '\\');
 
@@ -346,7 +359,7 @@ class SlimApiExtension extends CompilerExtension
             return false;
         }
         $entity = $factory->getEntity();
-        
+
         if (is_string($entity) && ltrim($entity, '\\') === $fqcn) {
             return true;
         }
