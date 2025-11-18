@@ -213,8 +213,7 @@ class SlimApiExtension extends CompilerExtension
                 continue; // skip unknown classes
             }
             // Skip if there is already a service of this type (explicitly wired by the app)
-//            if ($this->hasServiceByType($id) || $builder->hasDefinition($id)) {
-            if ($builder->hasDefinition($id)) {
+            if ($this->hasServiceByType($id) || $builder->hasDefinition($id)) {
                 continue;
             }
             $builder->addDefinition($this->prefix(md5($id)))
@@ -323,71 +322,71 @@ class SlimApiExtension extends CompilerExtension
     }
 
 
-//    /**
-//     * Checks whether a service of given type is already defined in the builder.
-//     */
-//    private function hasServiceByType(string $fqcn): bool
-//    {
-//        $builder = $this->getContainerBuilder();
-//        foreach ($builder->getDefinitions() as $def) {
-//            if ($this->isDefinitionOfType($def, $fqcn)) {
-//                return true;
-//            }
-//        }
-//
-//        return false;
-//    }
+    /**
+     * Checks whether a service of given type is already defined in the builder.
+     */
+    private function hasServiceByType(string $fqcn): bool
+    {
+        $builder = $this->getContainerBuilder();
+        foreach ($builder->getDefinitions() as $def) {
+            if ($this->isDefinitionOfType($def, $fqcn)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
 
-//    /**
-//     * True if the definition effectively produces the given FQCN.
-//     * Covers both direct type and anonymous `- FQCN` services via factory entity.
-//     */
-//    private function isDefinitionOfType($def, string $fqcn): bool
-//    {
-//        if (!$def instanceof ServiceDefinition) {
-//             return false;
-//        }
-//        $fqcn = ltrim($fqcn, '\\');
-//
-//        $type = $def->getType();
-//        if (is_string($type) && ltrim($type, '\\') === $fqcn) {
-//            return true;
-//        }
-//
-//        $factory = $def->getFactory();
-//        if (!$factory instanceof Statement) {
-//            return false;
-//        }
-//        $entity = $factory->getEntity();
-//
-//        if (is_string($entity) && ltrim($entity, '\\') === $fqcn) {
-//            return true;
-//        }
-//        if (is_array($entity) && isset($entity[0])) {
-//            $first = $entity[0];
-//            // Case: first item is a class string
-//            if (is_string($first) && ltrim($first, '\\') === $fqcn) {
-//                return true;
-//            }
-//            // Case: first item is a service Reference
-//            if ($first instanceof Reference) {
-//                $refName = $first->getValue();
-//                if (is_string($refName)
-//                    && $refName !== ''
-//                    && $this->getContainerBuilder()->hasDefinition($refName)
-//                ) {
-//                    $refDef = $this->getContainerBuilder()->getDefinition($refName);
-//                    if ($refDef instanceof ServiceDefinition) {
-//                        $refType = $refDef->getType();
-//                        if (is_string($refType) && ltrim($refType, '\\') === $fqcn) {
-//                            return true;
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//
-//        return false;
-//    }
+    /**
+     * True if the definition effectively produces the given FQCN.
+     * Covers both direct type and anonymous `- FQCN` services via factory entity.
+     */
+    private function isDefinitionOfType($def, string $fqcn): bool
+    {
+        if (!$def instanceof ServiceDefinition) {
+             return false;
+        }
+        $fqcn = ltrim($fqcn, '\\');
+
+        $type = $def->getType();
+        if (is_string($type) && ltrim($type, '\\') === $fqcn) {
+            return true;
+        }
+
+        $factory = $def->getFactory();
+        if (!$factory instanceof Statement) {
+            return false;
+        }
+        $entity = $factory->getEntity();
+
+        if (is_string($entity) && ltrim($entity, '\\') === $fqcn) {
+            return true;
+        }
+        if (is_array($entity) && isset($entity[0])) {
+            $first = $entity[0];
+            // Case: first item is a class string
+            if (is_string($first) && ltrim($first, '\\') === $fqcn) {
+                return true;
+            }
+            // Case: first item is a service Reference
+            if ($first instanceof Reference) {
+                $refName = $first->getValue();
+                if (is_string($refName)
+                    && $refName !== ''
+                    && $this->getContainerBuilder()->hasDefinition($refName)
+                ) {
+                    $refDef = $this->getContainerBuilder()->getDefinition($refName);
+                    if ($refDef instanceof ServiceDefinition) {
+                        $refType = $refDef->getType();
+                        if (is_string($refType) && ltrim($refType, '\\') === $fqcn) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
 }
