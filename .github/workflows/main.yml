@@ -1,52 +1,75 @@
 name: CI
 
-on: [pull_request]
+on: [pull_request, workflow_dispatch]
 
 jobs:
-  checks:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: 8.2
-          extensions: mbstring
-          coverage: xdebug
-
-      - name: Get composer cache directory
-        id: composercache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-      - name: Cache composer dependencies
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.composercache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-
-      - name: Install dependencies
-        run: composer install --prefer-dist
-
-      - name: Run phpstan
-        run: composer phpstan
-
-      - name: Run code-sniffer
-        run: composer phpcs
-
-      - name: Run phpunit
-        run: composer phpunit
-
-  tests:
-    runs-on: ubuntu-latest
-
+  phpstan:
     strategy:
       matrix:
-        php-version: ['8.2', '8.3' ]
+        php-version:
+          - 8.2
+          - 8.3
+    uses: BrandEmbassy/github-actions/.github/workflows/php-phpstan.yml@master
+    secrets:
+      COMPOSER_TOKEN: ${{ secrets.COMPOSER_TOKEN }}
+    with:
+      PHP_VERSION: ${{ matrix.php-version }}
 
+  ecs:
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version:
+          - 8.2
+          - 8.3
+    uses: BrandEmbassy/github-actions/.github/workflows/php-ecs.yml@master
+    secrets:
+      COMPOSER_TOKEN: ${{ secrets.COMPOSER_TOKEN }}
+    with:
+      PHP_VERSION: ${{ matrix.php-version }}
+
+  rector:
+    uses: BrandEmbassy/github-actions/.github/workflows/php-rector.yml@master
+    secrets:
+      COMPOSER_TOKEN: ${{ secrets.COMPOSER_TOKEN }}
+    with:
+      PHP_VERSION: '8.2'
+      RECTOR_CACHE_PATH: './var/rector'
+
+  phpunit:
+    strategy:
+      matrix:
+        composer-arg:
+          - "install"
+          - "update --prefer-lowest"
+        php-version:
+          - 8.2
+          - 8.3
+    uses: BrandEmbassy/github-actions/.github/workflows/php-phpunit.yml@master
+    secrets:
+      COMPOSER_TOKEN: ${{ secrets.COMPOSER_TOKEN }}
+    with:
+      COMPOSER_ARG: ${{ matrix.composer-arg }}
+      PHP_VERSION: ${{ matrix.php-version }}
+
+  phpunit-with-sonar-qube:
+    uses: BrandEmbassy/github-actions/.github/workflows/php-phpunit-with-sonar-qube.yml@master
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      COMPOSER_TOKEN: ${{ secrets.COMPOSER_TOKEN }}
+    with:
+      PHP_VERSION: '8.2'
+
+  regenerate-json-schemas:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version:
+          - 8.2
+          - 8.3
+        composer-arg:
+          - install
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -55,12 +78,10 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
-          extensions: mbstring
-          coverage: xdebug
 
       - name: Get composer cache directory
         id: composercache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
       - name: Cache composer dependencies
         uses: actions/cache@v4
@@ -70,7 +91,15 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
 
       - name: Install dependencies
-        run: composer install --prefer-dist
+        run: |
+          composer config github-oauth.github.com ${{ secrets.COMPOSER_TOKEN }}
+          composer ${{ matrix.composer-arg }} --prefer-dist
 
-      - name: Run phpunit
-        run: composer phpunit
+      - name: Regenerate JSON schemas
+        run: bin/run.php json-schema:regenerate
+
+      - name: Remove auth.json
+        run: rm auth.json
+
+      - name: Check Git changes
+        uses: multani/git-changes-action@v1
