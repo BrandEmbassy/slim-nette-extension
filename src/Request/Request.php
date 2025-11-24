@@ -7,6 +7,7 @@ use DateTime;
 use DateTimeImmutable;
 use InvalidArgumentException;
 use Nette\Utils\Strings;
+use Psr\Http\Message\ServerRequestInterface;
 use Slim\Http\Request as SlimRequest;
 use Slim\Route;
 use function array_key_exists;
@@ -14,7 +15,6 @@ use function assert;
 use function is_array;
 use function is_string;
 use function sprintf;
-
 /**
  * @method string[]|string[][] getQueryParams()
  * @method string|string[]|null getQueryParam(string $key, ?string $default = null)
@@ -23,8 +23,10 @@ use function sprintf;
  */
 class Request extends SlimRequest implements RequestInterface
 {
+
     private const ROUTE_INFO_ATTRIBUTE = 'routeInfo';
     private const ROUTE_ATTRIBUTE = 'route';
+
 
     /**
      * @var Dot<string, mixed[]>|null
@@ -82,11 +84,20 @@ class Request extends SlimRequest implements RequestInterface
     }
 
 
+    /**
+     * @param mixed[]|object|null $data
+     *
+     * @return static
+     */
+    public function withParsedBody($data): self
+    {
+        return new static($this->request->withParsedBody($data));
+    }
+
     public function findRouteArgument(string $argument, ?string $default = null): ?string
     {
         return $this->getRouteArguments()[$argument] ?? $default;
     }
-
 
     /**
      * @return mixed[]
