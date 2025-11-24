@@ -86,7 +86,6 @@ jobs:
       matrix:
         composer-arg:
           - "install"
-          - "update --prefer-lowest"
         php-version:
           - 8.2
           - 8.3
