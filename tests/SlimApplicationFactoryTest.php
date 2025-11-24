@@ -55,7 +55,7 @@ class SlimApplicationFactoryTest extends TestCase
     /**
      * @return mixed[][]
      */
-    public function routeResponseDataProvider(): array
+    public static function routeResponseDataProvider(): array
     {
         return [
             '200 Hello world as class name' => [
