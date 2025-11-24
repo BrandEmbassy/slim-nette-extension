@@ -13,8 +13,6 @@ return static function (ECSConfig $ecsConfig) use ($defaultEcsConfigurationSetup
 
     $ecsConfig->paths([
         __DIR__ . '/src',
-        __DIR__ . '/default-ecs.php',
-        __DIR__ . '/ecs.php',
     ]);
 
     $skipList = [

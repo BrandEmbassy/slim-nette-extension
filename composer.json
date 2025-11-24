@@ -39,11 +39,7 @@
         "fix-cs": "vendor/bin/ecs check --fix --ansi",
         "phpstan": "php -dxdebug.mode=off vendor/bin/phpstan analyse --memory-limit=-1",
         "phpstan-generate-baseline": "php -dxdebug.mode=off vendor/bin/phpstan analyse --memory-limit=-1 --generate-baseline",
-        "phpunit": [
-            "vendor/bin/phpunit -c phpunit.xml --no-coverage --testsuite rector --no-coverage",
-            "vendor/bin/phpunit -c phpunit.xml --no-coverage --testsuite phpstan --no-coverage",
-            "vendor/bin/phpunit -c phpunit.xml --no-coverage --testsuite sniffs --no-coverage"
-        ],
+        "phpunit": "vendor/bin/phpunit -c phpunit.xml --no-coverage",
         "phpunit-cc": [
             "php -dxdebug.mode=coverage vendor/bin/phpunit --testsuite rector --coverage-php=coverage/coverage-rector.cov --log-junit=test-report-rector.xml",
             "php -dxdebug.mode=coverage vendor/bin/phpunit --testsuite phpstan --coverage-php=coverage/coverage-phpstan.cov --log-junit=test-report-phpstan.xml",
