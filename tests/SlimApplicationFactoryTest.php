@@ -59,7 +59,7 @@ class SlimApplicationFactoryTest extends TestCase
     {
         return [
             '200 Hello world as class name' => [
-                'expectedResponse' => ['Hello World'],
+                'expectedResponseBody' => ['Hello World'],
                 'expectedResponseHeaders' => [
                     BeforeRequestMiddleware::HEADER_NAME => 'invoked-0',
                     BeforeRouteMiddleware::HEADER_NAME => 'invoked-1',
@@ -70,7 +70,7 @@ class SlimApplicationFactoryTest extends TestCase
                 'requestUri' => '/tests/app/hello-world-as-class-name',
             ],
             '200 Hello world as service name' => [
-                'expectedResponse' => ['Hello World'],
+                'expectedResponseBody' => ['Hello World'],
                 'expectedResponseHeaders' => [
                     BeforeRequestMiddleware::HEADER_NAME => 'invoked-0',
                     BeforeRouteMiddleware::HEADER_NAME => 'invoked-1',
@@ -81,35 +81,35 @@ class SlimApplicationFactoryTest extends TestCase
                 'requestUri' => '/tests/app/hello-world-as-service-name',
             ],
             '404 Not found' => [
-                'expectedResponse' => ['error' => 'Sample NotFoundHandler here!'],
+                'expectedResponseBody' => ['error' => 'Sample NotFoundHandler here!'],
                 'expectedResponseHeaders' => [BeforeRequestMiddleware::HEADER_NAME => 'invoked-0'],
                 'expectedStatusCode' => 404,
                 'httpMethod' => 'POST',
                 'requestUri' => '/tests/non-existing/path',
             ],
             '405 Not allowed' => [
-                'expectedResponse' => ['error' => 'Sample NotAllowedHandler here!'],
+                'expectedResponseBody' => ['error' => 'Sample NotAllowedHandler here!'],
                 'expectedResponseHeaders' => [BeforeRequestMiddleware::HEADER_NAME => 'invoked-0'],
                 'expectedStatusCode' => 405,
                 'httpMethod' => 'PATCH',
                 'requestUri' => '/tests/api/channels',
             ],
             '500 is 500' => [
-                'expectedResponse' => ['error' => "Error or not to error, that's the question!"],
+                'expectedResponseBody' => ['error' => "Error or not to error, that's the question!"],
                 'expectedResponseHeaders' => [],
                 'expectedStatusCode' => 500,
                 'httpMethod' => 'POST',
                 'requestUri' => '/tests/api/error',
             ],
             '401 Unauthorized' => [
-                'expectedResponse' => ['error' => 'YOU SHALL NOT PASS!'],
+                'expectedResponseBody' => ['error' => 'YOU SHALL NOT PASS!'],
                 'expectedResponseHeaders' => [BeforeRequestMiddleware::HEADER_NAME => 'invoked-0'],
                 'expectedStatusCode' => 401,
                 'httpMethod' => 'POST',
                 'requestUri' => '/tests/api/channels',
             ],
             'Token authorization passed' => [
-                'expectedResponse' => ['status' => 'created'],
+                'expectedResponseBody' => ['status' => 'created'],
                 'expectedResponseHeaders' => [
                     BeforeRequestMiddleware::HEADER_NAME => 'invoked-0',
                     BeforeRouteMiddleware::HEADER_NAME => 'invoked-1',
@@ -122,7 +122,7 @@ class SlimApplicationFactoryTest extends TestCase
                 'headers' => ['HTTP_X_API_KEY' => GoldenKeyAuthMiddleware::ACCESS_TOKEN],
             ],
             'Get channel list' => [
-                'expectedResponse' => [['id' => 1, 'name' => 'First channel'], ['id' => 2, 'name' => 'Second channel']],
+                'expectedResponseBody' => [['id' => 1, 'name' => 'First channel'], ['id' => 2, 'name' => 'Second channel']],
                 'expectedResponseHeaders' => [
                     BeforeRequestMiddleware::HEADER_NAME => 'invoked-0',
                     BeforeRouteMiddleware::HEADER_NAME => 'invoked-1',
