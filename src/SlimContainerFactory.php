@@ -47,9 +47,11 @@ class SlimContainerFactory
         if (!isset($configuration['response'])) {
             $configuration['response'] = $this->responseFactory->create();
         }
+
         if (!isset($configuration['request'])) {
             $configuration['request'] = $this->requestFactory->create();
         }
+
         if (!isset($configuration['router'])) {
             $configuration['router'] = $this->router;
         }

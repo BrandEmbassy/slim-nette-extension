@@ -95,7 +95,7 @@ class SlimApplicationFactoryTest extends TestCase
                 'requestUri' => '/tests/api/channels',
             ],
             '500 is 500' => [
-                'expectedResponse' => ['error' => 'Error or not to error, that\'s the question!'],
+                'expectedResponse' => ['error' => "Error or not to error, that's the question!"],
                 'expectedResponseHeaders' => [],
                 'expectedStatusCode' => 500,
                 'httpMethod' => 'POST',

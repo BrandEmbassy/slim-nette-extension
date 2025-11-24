@@ -67,7 +67,7 @@ class RouteRegister
         $urlPattern = $this->urlPatternResolver->resolve($apiNamespace, $routePattern);
         $resolveRoutePath = $this->urlPatternResolver->resolveRoutePath(
             $apiNamespace,
-            $routePattern
+            $routePattern,
         );
 
         foreach ($routeData as $method => $routeDefinitionData) {
@@ -86,7 +86,7 @@ class RouteRegister
             $routeToAdd = $this->router->map(
                 [$routeDefinition->getMethod()],
                 $urlPattern,
-                $routeDefinition->getRoute()
+                $routeDefinition->getRoute(),
             );
             $routeToAdd->setName($routeName);
 
@@ -109,14 +109,14 @@ class RouteRegister
             : $this->middlewareGroups->getMiddlewares($version);
 
         $middlewaresFromGroups = $this->middlewareGroups->getMiddlewaresForMultipleGroups(
-            $routeDefinition->getMiddlewareGroups()
+            $routeDefinition->getMiddlewareGroups(),
         );
 
         return array_merge_recursive(
             $routeDefinition->getMiddlewares(),
             $middlewaresFromGroups,
             $versionMiddlewares,
-            $this->beforeRouteMiddlewares->getMiddlewares()
+            $this->beforeRouteMiddlewares->getMiddlewares(),
         );
     }
 

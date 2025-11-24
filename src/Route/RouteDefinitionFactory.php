@@ -51,7 +51,7 @@ class RouteDefinitionFactory
         };
 
         $middlewares = $this->middlewareFactory->createFromIdentifiers(
-            $routeDefinitionData[RouteDefinition::MIDDLEWARES]
+            $routeDefinitionData[RouteDefinition::MIDDLEWARES],
         );
 
         return new RouteDefinition(
@@ -60,7 +60,7 @@ class RouteDefinitionFactory
             $middlewares,
             $routeDefinitionData[RouteDefinition::MIDDLEWARE_GROUPS],
             $routeDefinitionData[RouteDefinition::NAME],
-            $routeDefinitionData[RouteDefinition::IGNORE_VERSION_MIDDLEWARE_GROUP]
+            $routeDefinitionData[RouteDefinition::IGNORE_VERSION_MIDDLEWARE_GROUP],
         );
     }
 

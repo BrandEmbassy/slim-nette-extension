@@ -22,10 +22,8 @@ class MiddlewareGroups
     public function __construct(array $middlewareGroups, MiddlewareFactory $middlewareFactory)
     {
         $this->groups = array_map(
-            static function (array $middlewares) use ($middlewareFactory): array {
-                return $middlewareFactory->createFromIdentifiers($middlewares);
-            },
-            $middlewareGroups
+            static fn(array $middlewares): array => $middlewareFactory->createFromIdentifiers($middlewares),
+            $middlewareGroups,
         );
     }
 
@@ -51,10 +49,8 @@ class MiddlewareGroups
         }
 
         $groupsToMerge = array_map(
-            function (string $groupName): array {
-                return $this->getMiddlewares($groupName);
-            },
-            $groupNames
+            fn(string $groupName): array => $this->getMiddlewares($groupName),
+            $groupNames,
         );
 
         return array_merge_recursive(...$groupsToMerge);

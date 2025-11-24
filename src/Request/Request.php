@@ -24,6 +24,7 @@ use function sprintf;
 class Request extends SlimRequest implements RequestInterface
 {
     private const ROUTE_INFO_ATTRIBUTE = 'routeInfo';
+
     private const ROUTE_ATTRIBUTE = 'route';
 
     /**
@@ -208,7 +209,7 @@ class Request extends SlimRequest implements RequestInterface
     {
         $acceptHeader = $this->getHeaderLine('accept');
 
-        return Strings::contains($acceptHeader, 'html');
+        return str_contains($acceptHeader, 'html');
     }
 
 
