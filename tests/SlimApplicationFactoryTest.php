@@ -2,13 +2,13 @@
 
 namespace BrandEmbassyTest\Slim;
 
-use BrandEmbassy\MockeryTools\Http\ResponseAssertions;
 use BrandEmbassyTest\Slim\Sample\BeforeRequestMiddleware;
 use BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware;
 use BrandEmbassyTest\Slim\Sample\GoldenKeyAuthMiddleware;
 use BrandEmbassyTest\Slim\Sample\GroupMiddleware;
 use BrandEmbassyTest\Slim\Sample\InvokeCounterMiddleware;
 use BrandEmbassyTest\Slim\Sample\OnlyApiGroupMiddleware;
+use BrandEmbassyTest\Slim\Tools\ResponseAssertions;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Slim\Router;

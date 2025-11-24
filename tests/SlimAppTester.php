@@ -20,7 +20,6 @@ class SlimAppTester
     public static function createSlimApp(string $configPath = __DIR__ . '/config.neon'): SlimApp
     {
         $factory = self::createContainer($configPath)->getByType(SlimApplicationFactory::class);
-        assert($factory instanceof SlimApplicationFactory);
 
         return $factory->create();
     }
@@ -44,7 +43,9 @@ class SlimAppTester
             },
             md5($configPath)
         );
+        /** @var Container $container */
+        $container = new $class();
 
-        return new $class();
+        return $container;
     }
 }

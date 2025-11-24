@@ -8,10 +8,18 @@ parameters:
     excludePaths:
         - %rootDir%/../../../tests/temp/*
 
-    level: 9
+    level: 8
     paths:
         - src
         - tests
+
+    ignoreErrors:
+        -
+            # Ignore cognitive complexity for OnlyNecessaryRoutesProvider::getRoutes() only
+            message: '#Cognitive complexity for "BrandEmbassy\\Slim\\Route\\OnlyNecessaryRoutesProvider::getRoutes\(\)"#'
+            identifier: complexity.functionLike
+            count: 1
+            path: src/Route/OnlyNecessaryRoutesProvider.php
 
     tmpDir: temp/phpstan
 

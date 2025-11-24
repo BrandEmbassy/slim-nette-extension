@@ -9,10 +9,7 @@ use BrandEmbassy\Slim\Response\ResponseInterface;
  */
 class MiddlewareInvocationCounter
 {
-    /**
-     * @var int
-     */
-    private static $counter = 0;
+    private static int $counter = 0;
 
 
     public static function invoke(string $headerName, ResponseInterface $response): ResponseInterface

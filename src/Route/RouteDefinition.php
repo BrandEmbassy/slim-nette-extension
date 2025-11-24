@@ -25,10 +25,7 @@ class RouteDefinition
         self::NAME,
     ];
 
-    /**
-     * @var string
-     */
-    private $method;
+    private string $method;
 
     /**
      * @var callable
@@ -38,22 +35,16 @@ class RouteDefinition
     /**
      * @var callable[]
      */
-    private $middlewares;
+    private array $middlewares;
 
     /**
      * @var string[]
      */
-    private $middlewareGroups;
+    private array $middlewareGroups;
 
-    /**
-     * @var string|null
-     */
-    private $name;
+    private ?string $name;
 
-    /**
-     * @var bool
-     */
-    private $ignoreVersionMiddlewareGroup;
+    private bool $ignoreVersionMiddlewareGroup;
 
 
     /**

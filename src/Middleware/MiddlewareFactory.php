@@ -15,10 +15,7 @@ use function is_callable;
  */
 class MiddlewareFactory
 {
-    /**
-     * @var Container
-     */
-    private $container;
+    private Container $container;
 
 
     public function __construct(Container $container)

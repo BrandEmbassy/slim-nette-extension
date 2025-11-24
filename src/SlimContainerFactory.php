@@ -12,20 +12,11 @@ use Slim\Interfaces\RouterInterface;
  */
 class SlimContainerFactory
 {
-    /**
-     * @var ResponseFactory
-     */
-    private $responseFactory;
+    private ResponseFactory $responseFactory;
 
-    /**
-     * @var RequestFactory
-     */
-    private $requestFactory;
+    private RequestFactory $requestFactory;
 
-    /**
-     * @var RouterInterface
-     */
-    private $router;
+    private RouterInterface $router;
 
 
     public function __construct(

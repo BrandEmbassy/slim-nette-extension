@@ -13,7 +13,7 @@ class MiddlewareGroups
     /**
      * @var array<string, callable[]>
      */
-    private $groups;
+    private array $groups;
 
 
     /**
