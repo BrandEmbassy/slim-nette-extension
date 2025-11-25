@@ -13,7 +13,7 @@
     <testsuites>
         <testsuite name="default">
             <directory>tests</directory>
-            <exclude>tests/temp</exclude>
+            <exclude>temp</exclude>
         </testsuite>
     </testsuites>
     <coverage>
