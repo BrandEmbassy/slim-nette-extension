@@ -2,12 +2,12 @@
 
 namespace BrandEmbassyTest\Slim;
 
-use BrandEmbassy\MockeryTools\Http\ResponseAssertions;
 use BrandEmbassy\Slim\Request\Request;
 use BrandEmbassy\Slim\Response\Response;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassy\Slim\SlimApplicationFactory;
 use BrandEmbassyTest\Slim\Sample\GoldenKeyAuthMiddleware;
+use BrandEmbassyTest\Slim\Tools\ResponseAssertions;
 use Nette\DI\Compiler;
 use Nette\DI\Container;
 use Nette\DI\ContainerLoader;
@@ -61,38 +61,38 @@ final class SlimApplicationFactoryTest extends TestCase
     /**
      * @return mixed[][]
      */
-    public function routeResponseDataProvider(): array
+    public static function routeResponseDataProvider(): array
     {
         return [
             '200 Hello world' => [
-                'expectedResponse' => ['Hello World'],
+                'expectedResponseBody' => ['Hello World'],
                 'expectedStatusCode' => 200,
-                'request' => $this->createRequest('GET', '/app'),
+                'request' => self::createRequest('GET', '/app'),
             ],
             '404 Not found' => [
-                'expectedResponse' => ['error' => 'Sample NotFoundHandler here!'],
+                'expectedResponseBody' => ['error' => 'Sample NotFoundHandler here!'],
                 'expectedStatusCode' => 404,
-                'request' => $this->createRequest('POST', '/non-existing/path'),
+                'request' => self::createRequest('POST', '/non-existing/path'),
             ],
             '405 Not allowed' => [
-                'expectedResponse' => ['error' => 'Sample NotAllowedHandler here!'],
+                'expectedResponseBody' => ['error' => 'Sample NotAllowedHandler here!'],
                 'expectedStatusCode' => 405,
-                'request' => $this->createRequest('PATCH', '/new-api/2.0/channels'),
+                'request' => self::createRequest('PATCH', '/new-api/2.0/channels'),
             ],
             '500 is 500' => [
-                'expectedResponse' => ['error' => 'Error or not to error, that\'s the question!'],
+                'expectedResponseBody' => ['error' => "Error or not to error, that's the question!"],
                 'expectedStatusCode' => 500,
-                'request' => $this->createRequest('POST', '/new-api/2.0/error'),
+                'request' => self::createRequest('POST', '/new-api/2.0/error'),
             ],
             '401 Unauthorized' => [
-                'expectedResponse' => ['error' => 'YOU SHALL NOT PASS!'],
+                'expectedResponseBody' => ['error' => 'YOU SHALL NOT PASS!'],
                 'expectedStatusCode' => 401,
-                'request' => $this->createRequest('POST', '/new-api/2.0/channels'),
+                'request' => self::createRequest('POST', '/new-api/2.0/channels'),
             ],
             'Token authorization passed' => [
-                'expectedResponse' => ['status' => 'created'],
+                'expectedResponseBody' => ['status' => 'created'],
                 'expectedStatusCode' => 201,
-                'request' => $this->createRequest(
+                'request' => self::createRequest(
                     'POST',
                     '/new-api/2.0/channels',
                     ['goldenKey' => GoldenKeyAuthMiddleware::ACCESS_TOKEN]
@@ -104,7 +104,7 @@ final class SlimApplicationFactoryTest extends TestCase
 
     public function testShouldProcessBothGlobalMiddlewares(): void
     {
-        $request = $this->createRequest('POST', '/new-api/2.0/channels');
+        $request = self::createRequest('POST', '/new-api/2.0/channels');
 
         /** @var ResponseInterface $response */
         $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
@@ -123,7 +123,7 @@ final class SlimApplicationFactoryTest extends TestCase
 
     public function testShouldProcessBeforeRequestMiddleware(): void
     {
-        $request = $this->createRequest('POST', '/non-existing/path');
+        $request = self::createRequest('POST', '/non-existing/path');
 
         /** @var ResponseInterface $response */
         $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
@@ -137,7 +137,7 @@ final class SlimApplicationFactoryTest extends TestCase
 
     private function createContainer(string $configPath = __DIR__ . '/config.neon'): Container
     {
-        $loader = new ContainerLoader(__DIR__ . '/temp', true);
+        $loader = new ContainerLoader(__DIR__ . '/../temp', true);
         $class = $loader->load(
             static function (Compiler $compiler) use ($configPath): void {
                 $compiler->loadConfig($configPath);
@@ -146,14 +146,17 @@ final class SlimApplicationFactoryTest extends TestCase
             md5($configPath)
         );
 
-        return new $class();
+        /** @var Container $container */
+        $container = new $class();
+
+        return $container;
     }
 
 
     /**
      * @param array<string> $headers
      */
-    private function createRequest(string $requestMethod, string $requestUrlPath, array $headers = []): Request
+    private static function createRequest(string $requestMethod, string $requestUrlPath, array $headers = []): Request
     {
         $body = fopen('php://temp', 'rb+');
         assert(is_resource($body));

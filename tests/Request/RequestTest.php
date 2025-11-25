@@ -23,6 +23,7 @@ use function sprintf;
 final class RequestTest extends TestCase
 {
     private const PARAM_NAME = 'dateFrom';
+    
     private const DATE_TIME_STRING = '2017-06-10T01:00:00+01:00';
 
 
@@ -92,11 +93,11 @@ final class RequestTest extends TestCase
     /**
      * @return mixed[]
      */
-    public function getDataForInvalidDateTimeArgument(): array
+    public static function getDataForInvalidDateTimeArgument(): array
     {
         return [
             'Missing from' => [
-                sprintf('Could not find %s in request\'s params', self::PARAM_NAME),
+                sprintf("Could not find %s in request's params", self::PARAM_NAME),
                 [],
             ],
             'Invalid from' => [

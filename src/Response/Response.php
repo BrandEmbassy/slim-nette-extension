@@ -5,12 +5,12 @@ namespace BrandEmbassy\Slim\Response;
 use Psr\Http\Message\StreamInterface;
 use Slim\Http\Response as SlimResponse;
 
-final class Response implements ResponseInterface
+/**
+ * @final
+ */
+class Response implements ResponseInterface
 {
-    /**
-     * @var SlimResponse
-     */
-    private $slimResponse;
+    private SlimResponse $slimResponse;
 
 
     public function __construct(SlimResponse $slimResponse)
@@ -26,15 +26,11 @@ final class Response implements ResponseInterface
 
 
     /**
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
-     *
      * @param string $version
-     *
-     * @return static
      */
     public function withProtocolVersion($version): self
     {
-        return new static($this->slimResponse->withProtocolVersion($version));
+        return new self($this->slimResponse->withProtocolVersion($version));
     }
 
 
@@ -83,43 +79,31 @@ final class Response implements ResponseInterface
 
 
     /**
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
-     *
      * @param string $name
      * @param string|string[] $value
-     *
-     * @return static
      */
     public function withHeader($name, $value): self
     {
-        return new static($this->slimResponse->withHeader($name, $value));
+        return new self($this->slimResponse->withHeader($name, $value));
     }
 
 
     /**
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
-     *
      * @param string $name
      * @param string|string[] $value
-     *
-     * @return static
      */
     public function withAddedHeader($name, $value): self
     {
-        return new static($this->slimResponse->withAddedHeader($name, $value));
+        return new self($this->slimResponse->withAddedHeader($name, $value));
     }
 
 
     /**
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
-     *
      * @param string $name
-     *
-     * @return static
      */
     public function withoutHeader($name): self
     {
-        return new static($this->slimResponse->withoutHeader($name));
+        return new self($this->slimResponse->withoutHeader($name));
     }
 
 
@@ -129,12 +113,9 @@ final class Response implements ResponseInterface
     }
 
 
-    /**
-     * @return static
-     */
     public function withBody(StreamInterface $body): self
     {
-        return new static($this->slimResponse->withBody($body));
+        return new self($this->slimResponse->withBody($body));
     }
 
 
@@ -145,27 +126,21 @@ final class Response implements ResponseInterface
 
 
     /**
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
-     *
      * @param int $code
      * @param string $reasonPhrase
-     *
-     * @return static
      */
     public function withStatus($code, $reasonPhrase = ''): self
     {
-        return new static($this->slimResponse->withStatus($code, $reasonPhrase));
+        return new self($this->slimResponse->withStatus($code, $reasonPhrase));
     }
 
 
     /**
      * @param mixed[]|object $data
-     *
-     * @return static
      */
     public function withJson($data, ?int $status = null, int $encodingOptions = 0): self
     {
-        return new static($this->slimResponse->withJson($data, $status, $encodingOptions));
+        return new self($this->slimResponse->withJson($data, $status, $encodingOptions));
     }
 
 

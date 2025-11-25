@@ -1,5 +1,6 @@
 {
     "name": "brandembassy/slim-nette-extension",
+    "description": "",
     "license": "MIT",
     "autoload": {
         "psr-4": {
@@ -12,30 +13,48 @@
         }
     },
     "require": {
-        "php": ">=7.2",
-        "nette/neon": "^3.0",
-        "slim/slim": "^3.12",
-        "nette/utils": "^3.0",
+        "php": ">=8.2",
+        "ext-apcu": "*",
+        "adbario/php-dot-notation": "^2.2 || ^3.0",
         "nette/di": "^3.0",
-        "psr/http-message": "^1.0"
+        "nette/neon": "^3.0",
+        "nette/utils": ">=3.2",
+        "psr/http-message": "^1.0",
+        "slim/slim": "^3.12"
     },
     "require-dev": {
-        "brandembassy/coding-standard": "^8.1",
-        "brandembassy/mockery-tools": "^2.14",
+        "brandembassy/coding-standard": "^14.3",
+        "marc-mabe/php-enum-phpstan": "^3.0",
         "mockery/mockery": "^1.2",
-        "phpunit/phpunit": "^8.5",
-        "roave/security-advisories": "dev-master"
+        "phpunit/phpunit": "^11.5",
+        "rector/rector": "^2.1",
+        "roave/security-advisories": "dev-master",
+        "spaze/phpstan-disallowed-calls": "^4.7"
     },
     "scripts": {
-        "phpcs": "vendor/bin/phpcs --standard=BrandEmbassyCodingStandard src tests --ignore=tests/temp",
-        "phpcbf": "./vendor/bin/phpcbf --standard=BrandEmbassyCodingStandard src tests --ignore=tests/temp",
-        "phpstan": "./vendor/bin/phpstan analyse -c phpstan.neon src",
-        "phpunit": "./vendor/bin/phpunit tests --no-coverage"
+        "check-cs": "vendor/bin/ecs check --ansi",
+        "fix-cs": "vendor/bin/ecs check --fix --ansi",
+        "phpstan": "php -dxdebug.mode=off vendor/bin/phpstan analyse --memory-limit=-1",
+        "phpstan-generate-baseline": "php -dxdebug.mode=off vendor/bin/phpstan analyse --memory-limit=-1 --generate-baseline",
+        "phpunit": "vendor/bin/phpunit -c phpunit.xml --no-coverage",
+        "phpunit-cc": [
+            "php -dxdebug.mode=coverage vendor/bin/phpunit --testsuite rector --coverage-php=coverage/coverage-rector.cov --log-junit=test-report-rector.xml",
+            "php -dxdebug.mode=coverage vendor/bin/phpunit --testsuite phpstan --coverage-php=coverage/coverage-phpstan.cov --log-junit=test-report-phpstan.xml",
+            "php -dxdebug.mode=coverage vendor/bin/phpunit --testsuite sniffs --coverage-php=coverage/coverage-sniffs.cov --log-junit=test-report-sniffs.xml",
+            "vendor/bin/junit-merger merge:files --output-file=test-report.xml test-report-rector.xml test-report-phpstan.xml test-report-sniffs.xml",
+            "vendor/bin/phpcov merge --clover coverage.xml coverage"
+        ],
+
+        "check-rector": "vendor/bin/rector process --dry-run --ansi",
+        "fix-rector": "vendor/bin/rector process --ansi"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
     "config": {
         "sort-packages": true,
-        "process-timeout": 600
+        "process-timeout": 600,
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
     }
 }

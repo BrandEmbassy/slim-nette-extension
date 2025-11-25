@@ -19,17 +19,17 @@ use function is_array;
 use function is_string;
 use function sprintf;
 
-final class Request implements RequestInterface
+/**
+ * @final
+ */
+class Request implements RequestInterface
 {
     /**
      * @var stdClass|null
      */
     private $decodedJsonFromBody;
 
-    /**
-     * @var ServerRequestInterface
-     */
-    private $request;
+    private ServerRequestInterface $request;
 
 
     public function __construct(ServerRequestInterface $request)
@@ -46,20 +46,12 @@ final class Request implements RequestInterface
     public function getQueryParam(string $key, $default = null)
     {
         $getParams = $this->getQueryParams();
-        $result = $default;
 
-        if (isset($getParams[$key])) {
-            $result = $getParams[$key];
-        }
-
-        return $result;
+        return $getParams[$key] ?? $default;
     }
 
 
-    /**
-     * @return string|integer
-     */
-    public function getRequiredArgument(string $name)
+    public function getRequiredArgument(string $name): string
     {
         $arguments = $this->request->getAttributes();
 
@@ -118,12 +110,10 @@ final class Request implements RequestInterface
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
      *
      * @param string $version
-     *
-     * @return static
      */
     public function withProtocolVersion($version): self
     {
-        return new static($this->request->withProtocolVersion($version));
+        return new self($this->request->withProtocolVersion($version));
     }
 
 
@@ -176,12 +166,10 @@ final class Request implements RequestInterface
      *
      * @param string $name
      * @param string|string[] $value
-     *
-     * @return static
      */
     public function withHeader($name, $value): self
     {
-        return new static($this->request->withHeader($name, $value));
+        return new self($this->request->withHeader($name, $value));
     }
 
 
@@ -190,12 +178,10 @@ final class Request implements RequestInterface
      *
      * @param string $name
      * @param string|string[] $value
-     *
-     * @return static
      */
     public function withAddedHeader($name, $value): self
     {
-        return new static($this->request->withAddedHeader($name, $value));
+        return new self($this->request->withAddedHeader($name, $value));
     }
 
 
@@ -203,12 +189,10 @@ final class Request implements RequestInterface
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
      *
      * @param string $name
-     *
-     * @return static
      */
     public function withoutHeader($name): self
     {
-        return new static($this->request->withoutHeader($name));
+        return new self($this->request->withoutHeader($name));
     }
 
 
@@ -218,12 +202,9 @@ final class Request implements RequestInterface
     }
 
 
-    /**
-     * @return static
-     */
     public function withBody(StreamInterface $body): self
     {
-        return new static($this->request->withBody($body));
+        return new self($this->request->withBody($body));
     }
 
 
@@ -235,12 +216,10 @@ final class Request implements RequestInterface
 
     /**
      * @param mixed $requestTarget
-     *
-     * @return static
      */
     public function withRequestTarget($requestTarget): self
     {
-        return new static($this->request->withRequestTarget($requestTarget));
+        return new self($this->request->withRequestTarget($requestTarget));
     }
 
 
@@ -254,12 +233,10 @@ final class Request implements RequestInterface
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
      *
      * @param string $method
-     *
-     * @return static
      */
     public function withMethod($method): self
     {
-        return new static($this->request->withMethod($method));
+        return new self($this->request->withMethod($method));
     }
 
 
@@ -273,12 +250,10 @@ final class Request implements RequestInterface
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
      *
      * @param bool $preserveHost
-     *
-     * @return static
      */
     public function withUri(UriInterface $uri, $preserveHost = false): self
     {
-        return new static($this->request->withUri($uri, $preserveHost));
+        return new self($this->request->withUri($uri, $preserveHost));
     }
 
 
@@ -302,12 +277,10 @@ final class Request implements RequestInterface
 
     /**
      * @param mixed[] $cookies
-     *
-     * @return static
      */
     public function withCookieParams(array $cookies): self
     {
-        return new static($this->request->withCookieParams($cookies));
+        return new self($this->request->withCookieParams($cookies));
     }
 
 
@@ -322,12 +295,10 @@ final class Request implements RequestInterface
 
     /**
      * @param mixed[] $query
-     *
-     * @return static
      */
     public function withQueryParams(array $query): self
     {
-        return new static($this->request->withQueryParams($query));
+        return new self($this->request->withQueryParams($query));
     }
 
 
@@ -347,7 +318,7 @@ final class Request implements RequestInterface
      */
     public function withUploadedFiles(array $uploadedFiles)
     {
-        return new static($this->request->withUploadedFiles($uploadedFiles));
+        return new self($this->request->withUploadedFiles($uploadedFiles));
     }
 
 
@@ -374,12 +345,10 @@ final class Request implements RequestInterface
 
     /**
      * @param mixed[]|object|null $data
-     *
-     * @return static
      */
     public function withParsedBody($data): self
     {
-        return new static($this->request->withParsedBody($data));
+        return new self($this->request->withParsedBody($data));
     }
 
 
@@ -421,12 +390,10 @@ final class Request implements RequestInterface
      *
      * @param string $name
      * @param mixed $value
-     *
-     * @return static
      */
     public function withAttribute($name, $value): self
     {
-        return new static($this->request->withAttribute($name, $value));
+        return new self($this->request->withAttribute($name, $value));
     }
 
 
@@ -434,12 +401,10 @@ final class Request implements RequestInterface
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
      *
      * @param string $name
-     *
-     * @return static
      */
     public function withoutAttribute($name): self
     {
-        return new static($this->request->withoutAttribute($name));
+        return new self($this->request->withoutAttribute($name));
     }
 
 
@@ -462,11 +427,11 @@ final class Request implements RequestInterface
         $datetimeParam = $this->getQueryParam($field);
 
         if ($datetimeParam === null) {
-            throw new LogicException(sprintf('Could not find %s in request\'s params', $field));
+            throw new LogicException(sprintf("Could not find %s in request's params", $field));
         }
 
         if (!is_string($datetimeParam)) {
-            throw new LogicException(sprintf('Invalid data type %s in request\'s params', $field));
+            throw new LogicException(sprintf("Invalid data type %s in request's params", $field));
         }
 
         $datetime = DateTimeImmutable::createFromFormat(DateTime::ATOM, $datetimeParam);
