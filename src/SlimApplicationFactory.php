@@ -14,22 +14,22 @@ use function is_array;
 use function sprintf;
 use function trim;
 
-final class SlimApplicationFactory
+/**
+ * @final
+ */
+class SlimApplicationFactory
 {
     /**
      * @var mixed[]
      */
-    private $configuration;
+    private array $configuration;
 
-    /**
-     * @var Container
-     */
-    private $container;
+    private Container $container;
 
     /**
      * @var array<Middleware>
      */
-    private $beforeRoutesMiddlewares;
+    private array $beforeRoutesMiddlewares = [];
 
 
     /**
@@ -39,7 +39,6 @@ final class SlimApplicationFactory
     {
         $this->configuration = $configuration;
         $this->container = $container;
-        $this->beforeRoutesMiddlewares = [];
     }
 
 
@@ -115,14 +114,16 @@ final class SlimApplicationFactory
                     $configurationCode,
                     $name,
                     $type,
-                    gettype($configuration[$name] ?? null)
-                )
+                    gettype($configuration[$name] ?? null),
+                ),
             );
         }
     }
 
 
     /**
+     * @param class-string<object> $serviceName
+     *
      * @return Closure
      */
     private function getServiceProvider(string $serviceName): callable
@@ -132,7 +133,7 @@ final class SlimApplicationFactory
             $service = $this->container->getByType($serviceName, false);
 
             if ($service === null) {
-                $service = $this->container->getService($serviceName);
+                return $this->container->getService($serviceName);
             }
 
             return $service;
@@ -142,11 +143,9 @@ final class SlimApplicationFactory
 
     private function removeDefaultSlimErrorHandlers(SlimApp $app): void
     {
-        $app->getContainer()['phpErrorHandler'] = static function (): callable {
-            return static function (RequestInterface $request, ResponseInterface $response, Throwable $exception): void {
-                throw $exception;
-            };
-        };
+        $app->getContainer()['phpErrorHandler'] = (static fn(): callable => static function (RequestInterface $request, ResponseInterface $response, Throwable $exception): never {
+            throw $exception;
+        });
     }
 
 
@@ -161,6 +160,9 @@ final class SlimApplicationFactory
     }
 
 
+    /**
+     * @param class-string<object> $serviceName
+     */
     private function registerServiceIntoContainer(SlimApp $app, string $serviceName): void
     {
         if (!$app->getContainer()->has($serviceName)) {
@@ -190,9 +192,10 @@ final class SlimApplicationFactory
 
             if (isset($routeData['type']) && $routeData['type'] === 'controller') {
                 $this->registerControllerRoute($app, $urlPattern, $routeData);
-            } else {
-                $this->registerInvokableActionRoutes($app, $routeData, $urlPattern);
+                continue;
             }
+
+            $this->registerInvokableActionRoutes($app, $routeData, $urlPattern);
         }
     }
 
@@ -261,6 +264,9 @@ final class SlimApplicationFactory
     }
 
 
+    /**
+     * @param class-string<Middleware> $middleware
+     */
     private function registerBeforeRequestMiddleware(SlimApp $app, string $middleware): void
     {
         $this->registerServiceIntoContainer($app, $middleware);

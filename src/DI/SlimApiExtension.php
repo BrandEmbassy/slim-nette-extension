@@ -5,13 +5,16 @@ namespace BrandEmbassy\Slim\DI;
 use BrandEmbassy\Slim\SlimApplicationFactory;
 use Nette\DI\CompilerExtension;
 
-final class SlimApiExtension extends CompilerExtension
+/**
+ * @final
+ */
+class SlimApiExtension extends CompilerExtension
 {
     /**
      * @var mixed[]
      */
-    private $defaults = [
-        'apiDefinitionKey'  => 'api',
+    private array $defaults = [
+        'apiDefinitionKey' => 'api',
         'slimConfiguration' => [],
     ];
 
