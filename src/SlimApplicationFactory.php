@@ -125,9 +125,12 @@ class SlimApplicationFactory
             /** @var Container&ContainerInterface $netteContainer */
             $netteContainer = $this->container;
             $this->copyServicesFromSlimContainerToNetteContainer($netteContainer, $slimContainer);
+            $app = new SlimApp($netteContainer);
         }
 
-        $app = new SlimApp($slimContainer);
+        if (!$disableUsingSlimContainer) {
+            $app = new SlimApp($slimContainer);
+        }
 
         /** @var array<string, mixed> $routesToRegister */
         $routesToRegister = $this->configuration[self::ROUTES];
