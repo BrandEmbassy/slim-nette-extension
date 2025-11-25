@@ -19,7 +19,10 @@ use function is_array;
 use function is_string;
 use function sprintf;
 
-final class Request implements RequestInterface
+/**
+ * @final
+ */
+class Request implements RequestInterface
 {
     /**
      * @var stdClass|null

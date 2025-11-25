@@ -13,13 +13,5 @@ parameters:
         - src
         - tests
 
-#    ignoreErrors:
-#        -
-#            # Ignore cognitive complexity for OnlyNecessaryRoutesProvider::getRoutes() only
-#            message: '#Cognitive complexity for "BrandEmbassy\\Slim\\Route\\OnlyNecessaryRoutesProvider::getRoutes\(\)"#'
-#            identifier: complexity.functionLike
-#            count: 1
-#            path: src/Route/OnlyNecessaryRoutesProvider.php
-
     tmpDir: temp/phpstan
 
