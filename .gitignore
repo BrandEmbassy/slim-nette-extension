@@ -2,3 +2,7 @@ composer.lock
 tests/temp/
 vendor
 .phpunit.result.cache
+
+# Temp directories
+temp/
+/tests/temp/
