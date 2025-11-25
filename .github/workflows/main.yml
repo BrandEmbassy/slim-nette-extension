@@ -1,28 +1,34 @@
 name: CI
 
-on: [pull_request]
+on: [pull_request, workflow_dispatch]
 
 jobs:
-  build:
+  phpstan:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version:
+          - 8.2
+          - 8.3
+          - 8.4
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 7.2
-          extensions: mbstring
-          coverage: xdebug
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring, sockets
 
       - name: Get composer cache directory
         id: composercache
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
       - name: Cache composer dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ${{ steps.composercache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -34,9 +40,149 @@ jobs:
       - name: Run phpstan
         run: composer phpstan
 
-      - name: Run code-sniffer
-        run: composer phpcs
 
-      - name: Run phpunit
+  ecs:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version:
+          - 8.2
+          - 8.3
+          - 8.4
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring, sockets
+
+      - name: Get composer cache directory
+        id: composercache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Cache composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composercache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist
+
+      - name: Run code-sniffer
+        run: composer check-cs
+
+
+  phpunit:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        composer-arg:
+          - "install"
+          - "update --prefer-lowest"
+        php-version:
+          - 8.2
+          - 8.3
+          - 8.4
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring, sockets
+
+      - name: Get composer cache directory
+        id: composercache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Cache composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composercache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer ${{ matrix.composer-arg }} --prefer-dist
+
+      - name: Run tests
         run: composer phpunit
 
+  rector:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.2', '8.3', '8.4' ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          ini-values: zend.assertions=1
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring, sockets, imap, gmp, memcached
+
+      - name: Cache composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install --no-progress --prefer-dist --optimize-autoloader --ignore-platform-reqs
+
+      - name: Restore rector cache
+        id: cache-rector-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: ./temp/rector
+          key: ${{ runner.os }}-rector-${{ hashFiles('**/composer.lock') }}-${{ github.ref }}
+          restore-keys: |
+            ${{ runner.os }}-rector-${{ hashFiles('**/composer.lock') }}-
+            ${{ runner.os }}-rector-
+
+      # Only --dry-run will fail when changes are detected
+      - name: Rector
+        run: vendor/bin/rector process --dry-run
+
+      # Explicitly save rector cache
+      - name: Cache rector save
+        id: cache-rector-save
+        uses: actions/cache/save@v4
+        with:
+          path: ./temp/rector
+          # Adding github.run_id to force cache update https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
+          key: ${{ runner.os }}-rector-${{ hashFiles('**/composer.lock') }}-${{ github.ref }}-${{ github.run_id }}
+
+  # GitHub treats skipped checks as successful (meaning untested code can be merged into master if the check is skipped)
+  check:
+    name: All checks passing
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - phpstan
+      - rector
+      - phpunit
+      - ecs
+
+    steps:
+      - name: Decide whether the needed jobs succeeded or failed
+        uses: re-actors/alls-green@release/v1
+        with:
+          jobs: ${{ toJSON(needs) }}
