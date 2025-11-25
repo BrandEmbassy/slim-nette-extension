@@ -14,30 +14,15 @@ use function levenshtein;
  */
 class RouteRegister
 {
-    /**
-     * @var RouterInterface
-     */
-    private $router;
+    private RouterInterface $router;
 
-    /**
-     * @var RouteDefinitionFactory
-     */
-    private $routeDefinitionFactory;
+    private RouteDefinitionFactory $routeDefinitionFactory;
 
-    /**
-     * @var UrlPatternResolver
-     */
-    private $urlPatternResolver;
+    private UrlPatternResolver $urlPatternResolver;
 
-    /**
-     * @var BeforeRouteMiddlewares
-     */
-    private $beforeRouteMiddlewares;
+    private BeforeRouteMiddlewares $beforeRouteMiddlewares;
 
-    /**
-     * @var MiddlewareGroups
-     */
-    private $middlewareGroups;
+    private MiddlewareGroups $middlewareGroups;
 
 
     public function __construct(
@@ -56,7 +41,18 @@ class RouteRegister
 
 
     /**
-     * @param array<string, mixed[]> $routeData
+     * @param array<string, array<mixed>> $routeData
+     *
+     * @phpstan-param array<
+     *     string,
+     *     array{
+     *         service: string|null,
+     *         middlewares: array<string>,
+     *         middlewareGroups: array<string>,
+     *         ignoreVersionMiddlewareGroup: bool,
+     *         name: string|null
+     *     }
+     * > $routeData
      */
     public function register(
         string $apiNamespace,
@@ -67,7 +63,7 @@ class RouteRegister
         $urlPattern = $this->urlPatternResolver->resolve($apiNamespace, $routePattern);
         $resolveRoutePath = $this->urlPatternResolver->resolveRoutePath(
             $apiNamespace,
-            $routePattern
+            $routePattern,
         );
 
         foreach ($routeData as $method => $routeDefinitionData) {
@@ -79,6 +75,14 @@ class RouteRegister
                 $this->detectTyposInRouteConfiguration([$apiNamespace, $routePattern, $method], $routeDefinitionData);
             }
 
+            /** @phpstan-var array{
+             *     service: string,
+             *     middlewares: array<string>,
+             *     middlewareGroups: array<string>,
+             *     name: string|null,
+             *     ignoreVersionMiddlewareGroup: bool
+             * } $routeDefinitionData
+             */
             $routeDefinition = $this->routeDefinitionFactory->create($method, $routeDefinitionData);
 
             $routeName = $routeDefinition->getName() ?? $resolveRoutePath;
@@ -86,7 +90,7 @@ class RouteRegister
             $routeToAdd = $this->router->map(
                 [$routeDefinition->getMethod()],
                 $urlPattern,
-                $routeDefinition->getRoute()
+                $routeDefinition->getRoute(),
             );
             $routeToAdd->setName($routeName);
 
@@ -109,20 +113,28 @@ class RouteRegister
             : $this->middlewareGroups->getMiddlewares($version);
 
         $middlewaresFromGroups = $this->middlewareGroups->getMiddlewaresForMultipleGroups(
-            $routeDefinition->getMiddlewareGroups()
+            $routeDefinition->getMiddlewareGroups(),
         );
 
         return array_merge_recursive(
             $routeDefinition->getMiddlewares(),
             $middlewaresFromGroups,
             $versionMiddlewares,
-            $this->beforeRouteMiddlewares->getMiddlewares()
+            $this->beforeRouteMiddlewares->getMiddlewares(),
         );
     }
 
 
     /**
      * @return array<string, mixed>
+     *
+     * @phpstan-return array{
+     *     service: null,
+     *     middlewares: array<never>,
+     *     middlewareGroups: array<never>,
+     *     ignoreVersionMiddlewareGroup: bool,
+     *     name: null
+     * }
      */
     private function getEmptyRouteDefinitionData(): array
     {

@@ -20,7 +20,6 @@ class SlimAppTester
     public static function createSlimApp(string $configPath = __DIR__ . '/config.neon'): SlimApp
     {
         $factory = self::createContainer($configPath)->getByType(SlimApplicationFactory::class);
-        assert($factory instanceof SlimApplicationFactory);
 
         return $factory->create();
     }
@@ -36,7 +35,7 @@ class SlimAppTester
 
     public static function createContainer(string $configPath = __DIR__ . '/config.neon'): Container
     {
-        $loader = new ContainerLoader(__DIR__ . '/temp', true);
+        $loader = new ContainerLoader(__DIR__ . '/../temp', true);
         $class = $loader->load(
             static function (Compiler $compiler) use ($configPath): void {
                 $compiler->loadConfig($configPath);
@@ -44,7 +43,9 @@ class SlimAppTester
             },
             md5($configPath)
         );
+        /** @var Container $container */
+        $container = new $class();
 
-        return new $class();
+        return $container;
     }
 }

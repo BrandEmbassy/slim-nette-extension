@@ -14,53 +14,57 @@ use Nette\DI\Container;
  */
 class RouteDefinitionFactory
 {
-    /**
-     * @var Container
-     */
-    private $container;
-
-    /**
-     * @var MiddlewareFactory
-     */
-    private $middlewareFactory;
-
-
     public function __construct(
-        Container $container,
-        MiddlewareFactory $middlewareFactory
+        private Container $container,
+        private MiddlewareFactory $middlewareFactory
     ) {
-        $this->container = $container;
-        $this->middlewareFactory = $middlewareFactory;
     }
 
 
     /**
      * @param array<string, mixed> $routeDefinitionData
+     *
+     * @phpstan-param array{
+     *     service: string,
+     *     middlewares: array<string>,
+     *     middlewareGroups: array<string>,
+     *     name: string|null,
+     *     ignoreVersionMiddlewareGroup: bool
+     * } $routeDefinitionData
      */
     public function create(string $method, array $routeDefinitionData): RouteDefinition
     {
+        /** @var string $serviceId */
+        $serviceId = $routeDefinitionData[RouteDefinition::SERVICE];
         $route = function (
             RequestInterface $request,
             ResponseInterface $response
         ) use (
-            $routeDefinitionData
+            $serviceId
         ): ResponseInterface {
-            $route = $this->getRoute($routeDefinitionData[RouteDefinition::SERVICE]);
+            $route = $this->getRoute($serviceId);
 
             return $route($request, $response);
         };
 
-        $middlewares = $this->middlewareFactory->createFromIdentifiers(
-            $routeDefinitionData[RouteDefinition::MIDDLEWARES]
-        );
+        /** @var array<string> $middlewareIds */
+        $middlewareIds = $routeDefinitionData[RouteDefinition::MIDDLEWARES];
+        $middlewares = $this->middlewareFactory->createFromIdentifiers($middlewareIds);
+
+        /** @var array<string> $middlewareGroups */
+        $middlewareGroups = $routeDefinitionData[RouteDefinition::MIDDLEWARE_GROUPS];
+        /** @var string|null $name */
+        $name = $routeDefinitionData[RouteDefinition::NAME];
+        /** @var bool $ignoreVersionGroup */
+        $ignoreVersionGroup = $routeDefinitionData[RouteDefinition::IGNORE_VERSION_MIDDLEWARE_GROUP];
 
         return new RouteDefinition(
             $method,
             $route,
             $middlewares,
-            $routeDefinitionData[RouteDefinition::MIDDLEWARE_GROUPS],
-            $routeDefinitionData[RouteDefinition::NAME],
-            $routeDefinitionData[RouteDefinition::IGNORE_VERSION_MIDDLEWARE_GROUP]
+            $middlewareGroups,
+            $name,
+            $ignoreVersionGroup,
         );
     }
 

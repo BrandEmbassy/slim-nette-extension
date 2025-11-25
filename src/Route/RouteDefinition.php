@@ -8,9 +8,13 @@ namespace BrandEmbassy\Slim\Route;
 class RouteDefinition
 {
     public const SERVICE = 'service';
+
     public const MIDDLEWARES = 'middlewares';
+
     public const MIDDLEWARE_GROUPS = 'middlewareGroups';
+
     public const IGNORE_VERSION_MIDDLEWARE_GROUP = 'ignoreVersionMiddlewareGroup';
+
     public const NAME = 'name';
 
     public const ALL_DEFINED_KEYS = [
@@ -21,10 +25,7 @@ class RouteDefinition
         self::NAME,
     ];
 
-    /**
-     * @var string
-     */
-    private $method;
+    private string $method;
 
     /**
      * @var callable
@@ -34,22 +35,16 @@ class RouteDefinition
     /**
      * @var callable[]
      */
-    private $middlewares;
+    private array $middlewares;
 
     /**
      * @var string[]
      */
-    private $middlewareGroups;
+    private array $middlewareGroups;
 
-    /**
-     * @var string|null
-     */
-    private $name;
+    private ?string $name;
 
-    /**
-     * @var bool
-     */
-    private $ignoreVersionMiddlewareGroup;
+    private bool $ignoreVersionMiddlewareGroup;
 
 
     /**

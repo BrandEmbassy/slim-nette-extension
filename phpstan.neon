@@ -1,7 +1,25 @@
-parameters:
-    excludes_analyse:
-        - %rootDir%/../../../tests/temp/*
-
 includes:
     - vendor/brandembassy/coding-standard/default-phpstan.neon
+    - vendor/spaze/phpstan-disallowed-calls/extension.neon
+    - vendor/marc-mabe/php-enum-phpstan/extension.neon
+    - phar://vendor/phpstan/phpstan/phpstan.phar/conf/bleedingEdge.neon
+
+parameters:
+    excludePaths:
+        - %rootDir%/../../../temp/*
+
+    level: 8
+    paths:
+        - src
+        - tests
+
+    ignoreErrors:
+        -
+            # Ignore cognitive complexity for OnlyNecessaryRoutesProvider::getRoutes() only
+            message: '#Cognitive complexity for "BrandEmbassy\\Slim\\Route\\OnlyNecessaryRoutesProvider::getRoutes\(\)"#'
+            identifier: complexity.functionLike
+            count: 1
+            path: src/Route/OnlyNecessaryRoutesProvider.php
+
+    tmpDir: temp/phpstan
 

@@ -11,9 +11,6 @@ use BrandEmbassy\Slim\Route\Route;
  */
 class CreateChannelRoute implements Route
 {
-    /**
-     * @param string[] $arguments
-     */
     public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
         return $response->withJson(['status' => 'created'], 201);
