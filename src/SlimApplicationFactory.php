@@ -2,20 +2,44 @@
 
 namespace BrandEmbassy\Slim;
 
-use BrandEmbassy\Slim\Request\RequestInterface;
-use BrandEmbassy\Slim\Response\ResponseInterface;
-use Closure;
+use ArrayAccess;
+use BrandEmbassy\Slim\DI\ServiceProvider;
+use BrandEmbassy\Slim\Middleware\MiddlewareFactory;
+use BrandEmbassy\Slim\Request\Request;
+use BrandEmbassy\Slim\Route\OnlyNecessaryRoutesProvider;
+use BrandEmbassy\Slim\Route\RouteRegister;
 use LogicException;
 use Nette\DI\Container;
-use Slim\Collection;
-use Throwable;
-use function gettype;
-use function is_array;
+use Psr\Container\ContainerInterface;
+use Slim\CallableResolver;
+use Slim\Container as SlimContainer;
+use function apcu_enabled;
+use function assert;
+use function implode;
+use function in_array;
+use function is_callable;
 use function sprintf;
-use function trim;
 
-final class SlimApplicationFactory
+/**
+ * @final
+ */
+class SlimApplicationFactory
 {
+    public const SLIM_CONFIGURATION = 'slimConfiguration';
+    public const SETTINGS = 'settings';
+    public const BEFORE_ROUTE_MIDDLEWARES = 'beforeRouteMiddlewares';
+    public const HANDLERS = 'handlers';
+    public const BEFORE_REQUEST_MIDDLEWARES = 'beforeRequestMiddlewares';
+    public const ROUTES = 'routes';
+    public const API_PREFIX = 'apiPrefix';
+    public const MIDDLEWARE_GROUPS = 'middlewareGroups';
+    private const ALLOWED_HANDLERS = [
+        'notFoundHandler',
+        'notAllowedHandler',
+        'errorHandler',
+        'phpErrorHandler',
+    ];
+
     /**
      * @var mixed[]
      */
@@ -27,51 +51,120 @@ final class SlimApplicationFactory
     private $container;
 
     /**
-     * @var array<Middleware>
+     * @var MiddlewareFactory
      */
-    private $beforeRoutesMiddlewares;
+    private $middlewareFactory;
+
+    /**
+     * @var SlimContainerFactory
+     */
+    private $slimContainerFactory;
+
+    /**
+     * @var RouteRegister
+     */
+    private $routeRegister;
+
+    /**
+     * @var OnlyNecessaryRoutesProvider
+     */
+    private $onlyNecessaryRoutesProvider;
 
 
     /**
-     * @param mixed[]   $configuration
+     * @param mixed[] $configuration
      */
-    public function __construct(array $configuration, Container $container)
-    {
+    public function __construct(
+        array $configuration,
+        Container $container,
+        MiddlewareFactory $middlewareFactory,
+        SlimContainerFactory $slimContainerFactory,
+        RouteRegister $routeRegister,
+        OnlyNecessaryRoutesProvider $onlyNecessaryRoutesProvider
+    ) {
         $this->configuration = $configuration;
         $this->container = $container;
-        $this->beforeRoutesMiddlewares = [];
+        $this->middlewareFactory = $middlewareFactory;
+        $this->slimContainerFactory = $slimContainerFactory;
+        $this->routeRegister = $routeRegister;
+        $this->onlyNecessaryRoutesProvider = $onlyNecessaryRoutesProvider;
     }
 
 
     public function create(): SlimApp
     {
-        $app = new SlimApp($this->configuration['slimConfiguration']);
+        /** @var array<string, mixed> $slimConfiguration */
+        $slimConfiguration = $this->configuration[self::SLIM_CONFIGURATION];
+        $detectTyposInRouteConfiguration = (bool)$this->getSlimSettings(
+            SlimSettings::DETECT_TYPOS_IN_ROUTE_CONFIGURATION,
+            true
+        );
+        $registerOnlyNecessaryRoutes = (bool)$this->getSlimSettings(
+            SlimSettings::REGISTER_ONLY_NECESSARY_ROUTES,
+            false
+        );
+        $useApcuCache = (bool)$this->getSlimSettings(
+            SlimSettings::USE_APCU_CACHE,
+            true
+        );
+        $disableUsingSlimContainer = (bool)$this->getSlimSettings(
+            SlimSettings::DISABLE_USING_SLIM_CONTAINER,
+            false
+        );
 
-        $configuration = $this->getConfiguration($this->configuration['apiDefinitionKey']);
+        $routeApiNamesAlwaysInclude = (array)$this->getSlimSettings(
+            SlimSettings::ROUTE_API_NAMES_ALWAYS_INCLUDE,
+            []
+        );
 
-        $this->registerBeforeRouteMiddlewares($app, $configuration);
-
-        foreach ($configuration['routes'] as $apiName => $api) {
-            $this->registerApis($app, $api, $apiName);
+        if ($useApcuCache && !apcu_enabled()) {
+            // @intentionally For cli scripts is APCU disabled by default
+            $useApcuCache = false;
         }
 
-        $container = $app->getContainer();
-
-        /** @var Collection<string, mixed> $settings */
-        $settings = $container->get('settings');
-
-        if ($settings->get('removeDefaultHandlers') === true) {
-            $this->removeDefaultSlimErrorHandlers($app);
+        if ($disableUsingSlimContainer && !($this->container instanceof ContainerInterface)) {
+            throw new LogicException('Container must be instance of \Psr\Container\ContainerInterface');
         }
 
-        if (isset($configuration['handlers'])) {
-            $this->registerHandlers($app, $configuration['handlers']);
+        $slimContainer = $this->slimContainerFactory->create($slimConfiguration);
+
+        if ($disableUsingSlimContainer) {
+            /** @var Container&ContainerInterface $netteContainer */
+            $netteContainer = $this->container;
+            $this->copyServicesFromSlimContainerToNetteContainer($netteContainer, $slimContainer);
+            $app = new SlimApp($netteContainer);
+        } else {
+            $app = new SlimApp($slimContainer);
         }
 
-        if (isset($configuration['beforeRequestMiddlewares'])) {
-            foreach ($configuration['beforeRequestMiddlewares'] as $middleware) {
-                $this->registerBeforeRequestMiddleware($app, $middleware);
-            }
+        $routesToRegister = $this->configuration[self::ROUTES];
+        if ($registerOnlyNecessaryRoutes) {
+            /** @var Request $request */
+            $request = $slimContainer->get('request');
+            $requestUri = $request->getServerParam('REQUEST_URI');
+
+            $routesToRegister = $this->onlyNecessaryRoutesProvider->getRoutes(
+                $requestUri,
+                $routesToRegister,
+                $useApcuCache,
+                $routeApiNamesAlwaysInclude
+            );
+        }
+
+        foreach ($routesToRegister as $apiNamespace => $routes) {
+            $this->registerApi($apiNamespace, $routes, $detectTyposInRouteConfiguration);
+        }
+
+        $this->registerHandlers(
+            $this->container,
+            $slimContainer,
+            $this->configuration[self::HANDLERS],
+            $disableUsingSlimContainer
+        );
+
+        foreach ($this->configuration[self::BEFORE_REQUEST_MIDDLEWARES] as $middleware) {
+            $middlewareService = $this->middlewareFactory->createFromIdentifier($middleware);
+            $app->add($middlewareService);
         }
 
         return $app;
@@ -79,205 +172,92 @@ final class SlimApplicationFactory
 
 
     /**
-     * @return mixed[]
+     * @param array<string, string> $handlers
      */
-    private function getConfiguration(string $configurationCode): array
-    {
-        $configuration = $this->container->getParameters()[$configurationCode];
-
-        if (!is_array($configuration)) {
-            throw new LogicException(sprintf('Missing %s configuration', $configurationCode));
-        }
-
-        $this->validateConfiguration($configuration, $configurationCode, 'routes', 'array');
-
-        if (isset($configuration['handlers'])) {
-            $this->validateConfiguration($configuration, $configurationCode, 'handlers', 'array');
-        }
-
-        return $configuration;
-    }
-
-
-    /**
-     * @param mixed[] $configuration
-     */
-    private function validateConfiguration(
-        array $configuration,
-        string $configurationCode,
-        string $name,
-        string $type
+    private function registerHandlers(
+        Container $netteContainer,
+        SlimContainer $slimContainer,
+        array $handlers,
+        bool $disableUsingSlimContainer
     ): void {
-        if (!isset($configuration[$name]) || gettype($configuration[$name]) !== $type) {
-            throw new LogicException(
-                sprintf(
-                    'Missing or empty %s.%s configuration (has to be %s, but is %s)',
-                    $configurationCode,
-                    $name,
-                    $type,
-                    gettype($configuration[$name] ?? null)
-                )
-            );
-        }
-    }
-
-
-    /**
-     * @return Closure
-     */
-    private function getServiceProvider(string $serviceName): callable
-    {
-        return function () use ($serviceName) {
-            /** @var object|null $service */
-            $service = $this->container->getByType($serviceName, false);
-
-            if ($service === null) {
-                $service = $this->container->getService($serviceName);
-            }
-
-            return $service;
-        };
-    }
-
-
-    private function removeDefaultSlimErrorHandlers(SlimApp $app): void
-    {
-        $app->getContainer()['phpErrorHandler'] = static function (): callable {
-            return static function (RequestInterface $request, ResponseInterface $response, Throwable $exception): void {
-                throw $exception;
-            };
-        };
-    }
-
-
-    /**
-     * @param mixed[] $handlers
-     */
-    private function registerHandlers(SlimApp $app, array $handlers): void
-    {
         foreach ($handlers as $handlerName => $handlerClass) {
-            $app->getContainer()[$handlerName . 'Handler'] = $this->getServiceProvider($handlerClass);
+            $this->validateHandlerName($handlerName);
+            $handlerService = ServiceProvider::getService($this->container, $handlerClass);
+            assert(is_callable($handlerService));
+
+            if ($disableUsingSlimContainer) {
+                /** @var Container&ContainerInterface&ArrayAccess<mixed, mixed> $netteContainer */
+                unset($netteContainer[$handlerName]);
+                $netteContainer[$handlerName] = ServiceProvider::getService($netteContainer, $handlerClass);
+            } else {
+                $slimContainer[$handlerName] = static function () use ($handlerService) {
+                    return $handlerService;
+                };
+            }
         }
     }
 
 
-    private function registerServiceIntoContainer(SlimApp $app, string $serviceName): void
+    private function validateHandlerName(string $handlerName): void
     {
-        if (!$app->getContainer()->has($serviceName)) {
-            $app->getContainer()[$serviceName] = $this->getServiceProvider($serviceName);
+        if (in_array($handlerName, self::ALLOWED_HANDLERS, true)) {
+            return;
         }
-    }
 
+        $error = sprintf(
+            '%s handler name is not allowed, available handlers: %s',
+            $handlerName,
+            implode(', ', self::ALLOWED_HANDLERS)
+        );
 
-    /**
-     * @param mixed[] $api
-     */
-    private function registerApis(SlimApp $app, array $api, string $apiName): void
-    {
-        foreach ($api as $version => $routes) {
-            $this->registerApi($app, $apiName, $version, $routes);
-        }
+        throw new LogicException($error);
     }
 
 
     /**
      * @param mixed[] $routes
      */
-    private function registerApi(SlimApp $app, string $apiName, string $version, array $routes): void
+    private function registerApi(string $apiNamespace, array $routes, bool $detectTyposInRouteConfiguration): void
     {
-        foreach ($routes as $routeName => $routeData) {
-            $urlPattern = $this->createUrlPattern($apiName, $version, $routeName);
-
-            if (isset($routeData['type']) && $routeData['type'] === 'controller') {
-                $this->registerControllerRoute($app, $urlPattern, $routeData);
-            } else {
-                $this->registerInvokableActionRoutes($app, $routeData, $urlPattern);
-            }
+        foreach ($routes as $routePattern => $routeData) {
+            $this->routeRegister->register($apiNamespace, $routePattern, $routeData, $detectTyposInRouteConfiguration);
         }
     }
 
 
     /**
-     * @deprecated Do not use Controllers, use Invokable Action classes (use MiddleWareInterface)
+     * @param mixed $defaultValue
      *
-     * @param mixed[] $routeData
+     * @return mixed
      */
-    private function registerControllerRoute(SlimApp $app, string $urlPattern, array $routeData): void
+    private function getSlimSettings(string $key, $defaultValue)
     {
-        $this->registerServiceIntoContainer($app, $routeData['service']);
-
-        foreach ($routeData['methods'] as $method => $action) {
-            $app->map([$method], $urlPattern, $routeData['service'] . ':' . $action)
-                ->add($routeData['service'] . ':middleware');
-        }
+        return $this->configuration[self::SLIM_CONFIGURATION][self::SETTINGS][$key] ?? $defaultValue;
     }
 
 
     /**
-     * @param mixed[] $routeData
+     * @param Container&ContainerInterface $netteContainer
      */
-    private function registerInvokableActionRoutes(SlimApp $app, array $routeData, string $urlPattern): void
-    {
-        foreach ($routeData as $method => $config) {
-            $service = $config['service'];
+    private function copyServicesFromSlimContainerToNetteContainer(
+        $netteContainer,
+        SlimContainer $slimContainer
+    ): void {
+        $netteContainer->removeService('request');
+        $netteContainer->removeService('response');
+        $netteContainer->addService('request', $slimContainer->get('request'));
+        $netteContainer->addService('response', $slimContainer->get('response'));
 
-            $this->registerServiceIntoContainer($app, $service);
-            $routeToAdd = $app->map([$method], $urlPattern, $service);
-
-            if (isset($config['middleware'])) {
-                foreach ($config['middleware'] as $middleware) {
-                    $this->registerServiceIntoContainer($app, $middleware);
-
-                    $routeToAdd->add($middleware);
-                }
-            }
-
-            foreach ($this->beforeRoutesMiddlewares as $middleware) {
-                $routeToAdd->add($middleware);
-            }
-        }
-    }
-
-
-    private function createUrlPattern(string $apiName, string $version, string $routeName): string
-    {
-        $apiName = trim($apiName, '/');
-        $version = trim($version, '/');
-        $routeName = trim($routeName, '/');
-
-        if ($version !== '') {
-            $version = '/' . $version;
-        }
-
-        if ($apiName !== '') {
-            $apiName = '/' . $apiName;
-        }
-
-        if ($routeName !== '') {
-            $routeName = '/' . $routeName;
-        }
-
-        return $apiName . $version . $routeName;
-    }
-
-
-    private function registerBeforeRequestMiddleware(SlimApp $app, string $middleware): void
-    {
-        $this->registerServiceIntoContainer($app, $middleware);
-        $app->add($middleware);
-    }
-
-
-    /**
-     * @param mixed[] $configuration
-     */
-    private function registerBeforeRouteMiddlewares(SlimApp $app, array $configuration): void
-    {
-        if (isset($configuration['beforeRouteMiddlewares'])) {
-            foreach ($configuration['beforeRouteMiddlewares'] as $globalMiddleware) {
-                $this->registerServiceIntoContainer($app, $globalMiddleware);
-                $this->beforeRoutesMiddlewares[] = $app->getContainer()->get($globalMiddleware);
-            }
+        if (!$netteContainer->hasService('settings')) {
+            $netteContainer->addService('settings', $slimContainer->get('settings'));
+            $netteContainer->addService('environment', $slimContainer->get('environment'));
+            $netteContainer->addService('router', $slimContainer->get('router'));
+            $netteContainer->addService('foundHandler', $slimContainer->get('foundHandler'));
+            $netteContainer->addService('phpErrorHandler', $slimContainer->get('phpErrorHandler'));
+            $netteContainer->addService('errorHandler', $slimContainer->get('errorHandler'));
+            $netteContainer->addService('notFoundHandler', $slimContainer->get('notFoundHandler'));
+            $netteContainer->addService('notAllowedHandler', $slimContainer->get('notAllowedHandler'));
+            $netteContainer->addService('callableResolver', new CallableResolver($netteContainer));
         }
     }
 }

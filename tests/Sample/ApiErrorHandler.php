@@ -7,15 +7,18 @@ use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use Throwable;
 
-final class ApiErrorHandler implements ErrorHandler
+/**
+ * @final
+ */
+class ApiErrorHandler implements ErrorHandler
 {
     public function __invoke(
         RequestInterface $request,
         ResponseInterface $response,
-        ?Throwable $e = null
+        ?Throwable $exception = null
     ): ResponseInterface {
-        $error = $e !== null
-            ? $e->getMessage()
+        $error = $exception !== null
+            ? $exception->getMessage()
             : 'Unknown error.';
 
         return $response->withJson(['error' => $error], 500);

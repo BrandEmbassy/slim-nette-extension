@@ -4,46 +4,119 @@ namespace BrandEmbassy\Slim\Request;
 
 use DateTimeImmutable;
 use Psr\Http\Message\ServerRequestInterface;
-use stdClass;
+use Slim\Route;
 
 interface RequestInterface extends ServerRequestInterface
 {
+    public function getRoute(): Route;
+
+
     /**
-     * @param string|int|string[]|int[]|null $default
-     *
-     * @return string|integer|mixed[]|null
+     * @return array<string, string>
      */
-    public function getQueryParam(string $key, $default = null);
+    public function getRouteArguments(): array;
+
+
+    public function hasRouteArgument(string $argument): bool;
+
+
+    public function getRouteArgument(string $argument): string;
+
+
+    public function findRouteArgument(string $argument, ?string $default = null): ?string;
 
 
     /**
-     * @return string|integer
+     * @return mixed[]
      */
-    public function getRequiredArgument(string $name);
+    public function getParsedBodyAsArray(): array;
 
 
     /**
-     * @return mixed[]|stdClass|string
+     * @return mixed
      */
     public function getField(string $name);
 
 
     /**
-     * @param string|int|null $default
+     * @param mixed $default
      *
-     * @return mixed[]|stdClass|string|integer|null
+     * @return mixed
      */
-    public function getOptionalField(string $name, $default = null);
+    public function findField(string $fieldName, $default = null);
 
 
-    public function hasField(string $name): bool;
+    public function hasField(string $fieldName): bool;
 
 
     /**
-     * @return mixed[]|stdClass
+     * @return string|string[]|null
      */
-    public function getDecodedJsonFromBody();
+    public function findQueryParam(string $key, ?string $default = null);
+
+
+    /**
+     * @return string|string[]
+     *
+     * @throws QueryParamMissingException
+     */
+    public function getQueryParamStrict(string $key);
+
+
+    public function findQueryParamAsString(string $key, ?string $default = null): ?string;
+
+
+    /**
+     * @throws QueryParamMissingException
+     */
+    public function getQueryParamAsString(string $key): string;
+
+
+    public function hasAttribute(string $name): bool;
+
+
+    /**
+     * @param mixed $default
+     *
+     * @return mixed
+     */
+    public function findAttribute(string $name, $default = null);
+
+
+    /**
+     * @return mixed
+     */
+    public function getAttributeStrict(string $name);
+
+
+    public function hasQueryParam(string $key): bool;
 
 
     public function getDateTimeQueryParam(string $key): DateTimeImmutable;
+
+
+    public function isHtml(): bool;
+
+
+    /**
+     * @deprecated use getAttributeStrict or findAttribute
+     *
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     *
+     * @param string $name
+     * @param mixed $default
+     *
+     * @return mixed
+     */
+    public function getAttribute($name, $default = null);
+
+
+    /**
+     * @deprecated use getQueryParamStrict or findQueryParam
+     *
+     * @param mixed|null $default
+     *
+     * @return mixed
+     */
+    public function getQueryParam(string $key, $default = null);
 }

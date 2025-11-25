@@ -1,0 +1,34 @@
+{
+    "1.0": {
+        "endpoints": {
+            "get": {
+                "service": "api.route.endpoints",
+                "middlewares": [],
+                "middlewareGroups": [],
+                "ignoreVersionMiddlewareGroup": false,
+                "name": null
+            }
+        },
+        "brand\/{brandId}\/channel\/{channelPlatformId}": {
+            "get": {
+                "service": "channelInfo.route",
+                "middlewares": [
+                    "channelInfo.cache.cachedChannelInfoMiddleware",
+                    "api.middleware.corsHeadersResolver"
+                ],
+                "middlewareGroups": [],
+                "ignoreVersionMiddlewareGroup": false,
+                "name": null
+            },
+            "options": {
+                "service": "api.route.preflightRequest",
+                "middlewares": [
+                    "api.middleware.corsHeadersResolver"
+                ],
+                "middlewareGroups": [],
+                "ignoreVersionMiddlewareGroup": false,
+                "name": null
+            }
+        }
+    }
+}

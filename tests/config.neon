@@ -7,50 +7,76 @@ services:
     - BrandEmbassyTest\Slim\Sample\NotAllowedHandler
     - BrandEmbassyTest\Slim\Sample\ApiErrorHandler
     - BrandEmbassyTest\Slim\Sample\GoldenKeyAuthMiddleware
-    - BrandEmbassyTest\Slim\Sample\CreateChannelAction
-    - BrandEmbassyTest\Slim\Sample\GetHelloWorldAction
-    - BrandEmbassyTest\Slim\Sample\ErroringAction
+    - BrandEmbassyTest\Slim\Sample\CreateChannelRoute
+    - BrandEmbassyTest\Slim\Sample\ListChannelsRoute
+    - BrandEmbassyTest\Slim\Sample\ErrorThrowingRoute
     - BrandEmbassyTest\Slim\Sample\BeforeRequestMiddleware
     - BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware
-
-parameters:
-    api:
-        handlers:
-            notFound: BrandEmbassyTest\Slim\Sample\NotFoundHandler
-            notAllowed: BrandEmbassyTest\Slim\Sample\NotAllowedHandler
-            error: BrandEmbassyTest\Slim\Sample\ApiErrorHandler
-
-        routes:
-            "app":
-                "":
-                    "":
-                        get:
-                            service: BrandEmbassyTest\Slim\Sample\GetHelloWorldAction
-
-
-            new-api:
-                "2.0":
-                    '/channels':
-                        post:
-                            service: BrandEmbassyTest\Slim\Sample\CreateChannelAction
-                            middleware:
-                                - BrandEmbassyTest\Slim\Sample\GoldenKeyAuthMiddleware
-
-                    '/error':
-                        post:
-                            service: BrandEmbassyTest\Slim\Sample\ErroringAction
-
-        beforeRouteMiddlewares:
-            - BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware
-
-        beforeRequestMiddlewares:
-            - BrandEmbassyTest\Slim\Sample\BeforeRequestMiddleware
-
+    - BrandEmbassyTest\Slim\Sample\CreateChannelUserRoute
+    - BrandEmbassyTest\Slim\Sample\GroupMiddleware
+    - BrandEmbassyTest\Slim\Sample\OnlyApiGroupMiddleware
+    helloWorldRoute: BrandEmbassyTest\Slim\Sample\HelloWorldRoute
 
 slimApi:
+    apiPrefix: '/tests'
     slimConfiguration:
         settings:
             removeDefaultHandlers: true
             myCustomOption: 'Sample'
 
-    apiDefinitionKey: "api"
+    handlers:
+        notFoundHandler: BrandEmbassyTest\Slim\Sample\NotFoundHandler
+        notAllowedHandler: BrandEmbassyTest\Slim\Sample\NotAllowedHandler
+        errorHandler: BrandEmbassyTest\Slim\Sample\ApiErrorHandler
+
+    routes:
+        "app":
+            "/hello-world-as-class-name":
+                get:
+                    service: BrandEmbassyTest\Slim\Sample\HelloWorldRoute
+                    extraField: 'foo'
+                    middlewareGroups:
+                        - testGroup
+            "/hello-world-as-service-name":
+                get:
+                    service: helloWorldRoute
+                    middlewareGroups:
+                        - testGroup
+
+        "api":
+            '/channels':
+                get:
+                    service: BrandEmbassyTest\Slim\Sample\ListChannelsRoute
+                    middlewareGroups:
+                        - testGroup
+                post:
+                    service: BrandEmbassyTest\Slim\Sample\CreateChannelRoute
+                    middlewares:
+                        - BrandEmbassyTest\Slim\Sample\GoldenKeyAuthMiddleware
+                    middlewareGroups:
+                        - testGroup
+
+            '/channels/{channelId}/users':
+                post:
+                    name: getChannelUsers
+                    service: BrandEmbassyTest\Slim\Sample\CreateChannelUserRoute
+                    middlewareGroups:
+                        - testGroup
+
+            '/error':
+                post:
+                    service: BrandEmbassyTest\Slim\Sample\ErrorThrowingRoute
+                    middlewareGroups:
+                        - testGroup
+
+    middlewareGroups:
+        testGroup:
+            - BrandEmbassyTest\Slim\Sample\GroupMiddleware
+        api:
+            - BrandEmbassyTest\Slim\Sample\OnlyApiGroupMiddleware
+
+    beforeRouteMiddlewares:
+        - BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware
+
+    beforeRequestMiddlewares:
+        - BrandEmbassyTest\Slim\Sample\BeforeRequestMiddleware

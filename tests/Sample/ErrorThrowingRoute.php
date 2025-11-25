@@ -4,16 +4,16 @@ namespace BrandEmbassyTest\Slim\Sample;
 
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
+use BrandEmbassy\Slim\Route\Route;
+use LogicException;
 
 /**
- * Intentionally not extending ErrorHandler. Slim does not call this with 3rd param at __invoke method.
- *
  * @final
  */
-class NotAllowedHandler
+class ErrorThrowingRoute implements Route
 {
     public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        return $response->withJson(['error' => 'Sample NotAllowedHandler here!'], 405);
+        throw new LogicException('Error or not to error, that\'s the question!');
     }
 }

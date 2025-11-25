@@ -3,42 +3,29 @@
 namespace BrandEmbassyTest\Slim;
 
 use BrandEmbassy\MockeryTools\Http\ResponseAssertions;
-use BrandEmbassy\Slim\Request\Request;
-use BrandEmbassy\Slim\Response\Response;
-use BrandEmbassy\Slim\Response\ResponseInterface;
-use BrandEmbassy\Slim\SlimApplicationFactory;
+use BrandEmbassyTest\Slim\Sample\BeforeRequestMiddleware;
+use BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware;
 use BrandEmbassyTest\Slim\Sample\GoldenKeyAuthMiddleware;
-use Nette\DI\Compiler;
-use Nette\DI\Container;
-use Nette\DI\ContainerLoader;
-use Nette\DI\Extensions\ExtensionsExtension;
+use BrandEmbassyTest\Slim\Sample\GroupMiddleware;
+use BrandEmbassyTest\Slim\Sample\InvokeCounterMiddleware;
+use BrandEmbassyTest\Slim\Sample\OnlyApiGroupMiddleware;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
-use Slim\App;
-use Slim\Http\Body;
-use Slim\Http\Headers;
-use Slim\Http\Request as SlimRequest;
-use Slim\Http\Uri;
+use Slim\Router;
 use function assert;
-use function fopen;
-use function is_resource;
-use function md5;
+use function count;
 
-final class SlimApplicationFactoryTest extends TestCase
+/**
+ * @final
+ */
+class SlimApplicationFactoryTest extends TestCase
 {
     public function testShouldPassSettingsToSlimContainer(): void
     {
-        $app = $this->createSlimApp();
+        $app = SlimAppTester::createSlimApp();
         $settings = $app->getContainer()->get('settings');
 
         Assert::assertSame('Sample', $settings['myCustomOption']);
-    }
-
-
-    public function testShouldAllowEmptyErrorHandlers(): void
-    {
-        $this->createSlimApp(__DIR__ . '/configNoHandlers.neon');
-        $this->expectNotToPerformAssertions();
     }
 
 
@@ -46,15 +33,22 @@ final class SlimApplicationFactoryTest extends TestCase
      * @dataProvider routeResponseDataProvider
      *
      * @param mixed[] $expectedResponseBody
+     * @param mixed[] $expectedResponseHeaders
+     * @param array<string, string> $headers
      */
     public function testRouteIsDispatchedAndProcessed(
         array $expectedResponseBody,
+        array $expectedResponseHeaders,
         int $expectedStatusCode,
-        Request $request
+        string $httpMethod,
+        string $requestUri,
+        array $headers = []
     ): void {
-        $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
+        $this->prepareEnvironment($httpMethod, $requestUri, $headers);
+        $response = SlimAppTester::runSlimApp();
 
         ResponseAssertions::assertJsonResponseEqualsArray($expectedResponseBody, $response, $expectedStatusCode);
+        ResponseAssertions::assertResponseHeaders($expectedResponseHeaders, $response);
     }
 
 
@@ -64,117 +58,192 @@ final class SlimApplicationFactoryTest extends TestCase
     public function routeResponseDataProvider(): array
     {
         return [
-            '200 Hello world' => [
+            '200 Hello world as class name' => [
                 'expectedResponse' => ['Hello World'],
+                'expectedResponseHeaders' => [
+                    BeforeRequestMiddleware::HEADER_NAME => 'invoked-0',
+                    BeforeRouteMiddleware::HEADER_NAME => 'invoked-1',
+                    GroupMiddleware::HEADER_NAME => 'invoked-2',
+                ],
                 'expectedStatusCode' => 200,
-                'request' => $this->createRequest('GET', '/app'),
+                'httpMethod' => 'GET',
+                'requestUri' => '/tests/app/hello-world-as-class-name',
+            ],
+            '200 Hello world as service name' => [
+                'expectedResponse' => ['Hello World'],
+                'expectedResponseHeaders' => [
+                    BeforeRequestMiddleware::HEADER_NAME => 'invoked-0',
+                    BeforeRouteMiddleware::HEADER_NAME => 'invoked-1',
+                    GroupMiddleware::HEADER_NAME => 'invoked-2',
+                ],
+                'expectedStatusCode' => 200,
+                'httpMethod' => 'GET',
+                'requestUri' => '/tests/app/hello-world-as-service-name',
             ],
             '404 Not found' => [
                 'expectedResponse' => ['error' => 'Sample NotFoundHandler here!'],
+                'expectedResponseHeaders' => [BeforeRequestMiddleware::HEADER_NAME => 'invoked-0'],
                 'expectedStatusCode' => 404,
-                'request' => $this->createRequest('POST', '/non-existing/path'),
+                'httpMethod' => 'POST',
+                'requestUri' => '/tests/non-existing/path',
             ],
             '405 Not allowed' => [
                 'expectedResponse' => ['error' => 'Sample NotAllowedHandler here!'],
+                'expectedResponseHeaders' => [BeforeRequestMiddleware::HEADER_NAME => 'invoked-0'],
                 'expectedStatusCode' => 405,
-                'request' => $this->createRequest('PATCH', '/new-api/2.0/channels'),
+                'httpMethod' => 'PATCH',
+                'requestUri' => '/tests/api/channels',
             ],
             '500 is 500' => [
                 'expectedResponse' => ['error' => 'Error or not to error, that\'s the question!'],
+                'expectedResponseHeaders' => [],
                 'expectedStatusCode' => 500,
-                'request' => $this->createRequest('POST', '/new-api/2.0/error'),
+                'httpMethod' => 'POST',
+                'requestUri' => '/tests/api/error',
             ],
             '401 Unauthorized' => [
                 'expectedResponse' => ['error' => 'YOU SHALL NOT PASS!'],
+                'expectedResponseHeaders' => [BeforeRequestMiddleware::HEADER_NAME => 'invoked-0'],
                 'expectedStatusCode' => 401,
-                'request' => $this->createRequest('POST', '/new-api/2.0/channels'),
+                'httpMethod' => 'POST',
+                'requestUri' => '/tests/api/channels',
             ],
             'Token authorization passed' => [
                 'expectedResponse' => ['status' => 'created'],
+                'expectedResponseHeaders' => [
+                    BeforeRequestMiddleware::HEADER_NAME => 'invoked-0',
+                    BeforeRouteMiddleware::HEADER_NAME => 'invoked-1',
+                    OnlyApiGroupMiddleware::HEADER_NAME => 'invoked-2',
+                    GroupMiddleware::HEADER_NAME => 'invoked-3',
+                ],
                 'expectedStatusCode' => 201,
-                'request' => $this->createRequest(
-                    'POST',
-                    '/new-api/2.0/channels',
-                    ['goldenKey' => GoldenKeyAuthMiddleware::ACCESS_TOKEN]
-                ),
+                'httpMethod' => 'POST',
+                'requestUri' => '/tests/api/channels',
+                'headers' => ['HTTP_X_API_KEY' => GoldenKeyAuthMiddleware::ACCESS_TOKEN],
+            ],
+            'Get channel list' => [
+                'expectedResponse' => [['id' => 1, 'name' => 'First channel'], ['id' => 2, 'name' => 'Second channel']],
+                'expectedResponseHeaders' => [
+                    BeforeRequestMiddleware::HEADER_NAME => 'invoked-0',
+                    BeforeRouteMiddleware::HEADER_NAME => 'invoked-1',
+                    OnlyApiGroupMiddleware::HEADER_NAME => 'invoked-2',
+                    GroupMiddleware::HEADER_NAME => 'invoked-3',
+                ],
+                'expectedStatusCode' => 200,
+                'httpMethod' => 'GET',
+                'requestUri' => '/tests/api/channels',
             ],
         ];
     }
 
 
-    public function testShouldProcessBothGlobalMiddlewares(): void
+    public function testMiddlewareInvokeOrder(): void
     {
-        $request = $this->createRequest('POST', '/new-api/2.0/channels');
+        $expectedHeaders = [
+            InvokeCounterMiddleware::getName('A') => 'invoked-0',
+            InvokeCounterMiddleware::getName('B') => 'invoked-1',
+            InvokeCounterMiddleware::getName('C') => 'invoked-2',
+            InvokeCounterMiddleware::getName('D') => 'invoked-3',
+            InvokeCounterMiddleware::getName('E') => 'invoked-4',
+            InvokeCounterMiddleware::getName('F') => 'invoked-5',
+            InvokeCounterMiddleware::getName('G') => 'invoked-6',
+            InvokeCounterMiddleware::getName('H') => 'invoked-7',
+            InvokeCounterMiddleware::getName('I') => 'invoked-8',
+            InvokeCounterMiddleware::getName('J') => 'invoked-9',
+            InvokeCounterMiddleware::getName('K') => 'invoked-10',
+            InvokeCounterMiddleware::getName('L') => 'invoked-11',
+        ];
 
-        /** @var ResponseInterface $response */
-        $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
+        $this->prepareEnvironment('POST', '/api/test');
+        $response = SlimAppTester::runSlimApp(__DIR__ . '/no-prefix-config.neon');
 
-        Assert::assertSame(
-            ['proof-for-before-request'],
-            $response->getHeader('processed-by-before-request-middleware')
-        );
-
-        Assert::assertSame(
-            ['proof-for-before-route'],
-            $response->getHeader('processed-by-before-route-middlewares')
-        );
+        ResponseAssertions::assertResponseHeaders($expectedHeaders, $response);
     }
 
 
-    public function testShouldProcessBeforeRequestMiddleware(): void
+    public function testVersionMiddlewareGroupIsIgnored(): void
     {
-        $request = $this->createRequest('POST', '/non-existing/path');
+        $expectedHeaders = [
+            InvokeCounterMiddleware::getName('A') => 'invoked-0',
+            InvokeCounterMiddleware::getName('B') => 'invoked-1',
+            InvokeCounterMiddleware::getName('C') => 'invoked-2',
+            InvokeCounterMiddleware::getName('D') => 'invoked-3',
+            InvokeCounterMiddleware::getName('G') => 'invoked-4',
+            InvokeCounterMiddleware::getName('H') => 'invoked-5',
+        ];
 
-        /** @var ResponseInterface $response */
-        $response = $this->createSlimApp()->process($request, new Response(new \Slim\Http\Response()));
+        $this->prepareEnvironment('POST', '/api/ignore-version-middlewares');
+        $response = SlimAppTester::runSlimApp(__DIR__ . '/no-prefix-config.neon');
 
-        Assert::assertSame(
-            ['proof-for-before-request'],
-            $response->getHeader('processed-by-before-request-middleware')
-        );
+        ResponseAssertions::assertResponseHeaders($expectedHeaders, $response);
     }
 
 
-    private function createContainer(string $configPath = __DIR__ . '/config.neon'): Container
+    public function testRouteCanBeUnregistered(): void
     {
-        $loader = new ContainerLoader(__DIR__ . '/temp', true);
-        $class = $loader->load(
-            static function (Compiler $compiler) use ($configPath): void {
-                $compiler->loadConfig($configPath);
-                $compiler->addExtension('extensions', new ExtensionsExtension());
-            },
-            md5($configPath)
+        $slimAppWithAllRoutes = SlimAppTester::createSlimApp(__DIR__ . '/config.neon');
+        $routerWithAllRoutes = $slimAppWithAllRoutes->getContainer()->get('router');
+        assert($routerWithAllRoutes instanceof Router);
+
+        $slimAppWithUnregisteredRoute = SlimAppTester::createSlimApp(__DIR__ . '/unregister-route-config.neon');
+        $routerWithUnregisteredRoute = $slimAppWithUnregisteredRoute->getContainer()->get('router');
+        assert($routerWithUnregisteredRoute instanceof Router);
+
+        $expectedRouteCount = count($routerWithAllRoutes->getRoutes()) - 1;
+
+        Assert::assertCount($expectedRouteCount, $routerWithUnregisteredRoute->getRoutes());
+    }
+
+
+    public function testRootRouteIsDispatched(): void
+    {
+        $this->prepareEnvironment('GET', '/');
+        $response = SlimAppTester::runSlimApp(__DIR__ . '/no-prefix-config.neon');
+
+        ResponseAssertions::assertResponseStatusCode(200, $response);
+    }
+
+
+    public function testRouteNameIsResolved(): void
+    {
+        $slimApp = SlimAppTester::createSlimApp();
+        $container = $slimApp->getContainer();
+
+        $router = $container->get('router');
+        assert($router instanceof Router);
+
+        Assert::assertSame(
+            '/tests/api/channels/1234/users',
+            $router->urlFor('getChannelUsers', ['channelId' => '1234'])
         );
 
-        return new $class();
+        Assert::assertSame('/tests/api/channels', $router->urlFor('/api/channels'));
     }
 
 
     /**
      * @param array<string> $headers
      */
-    private function createRequest(string $requestMethod, string $requestUrlPath, array $headers = []): Request
+    private function prepareEnvironment(string $requestMethod, string $requestUrlPath, array $headers = []): void
     {
-        $body = fopen('php://temp', 'rb+');
-        assert(is_resource($body));
-        $slimRequest = new SlimRequest(
-            $requestMethod,
-            new Uri('http', 'api.be.com', 80, $requestUrlPath),
-            new Headers($headers),
-            [],
-            [],
-            new Body($body)
-        );
+        MiddlewareInvocationCounter::reset();
 
-        return new Request($slimRequest);
+        $_SERVER['HTTP_HOST'] = 'api.brandembassy.com';
+        $_SERVER['REQUEST_URI'] = $requestUrlPath;
+        $_SERVER['REQUEST_METHOD'] = $requestMethod;
+
+        foreach ($headers as $name => $value) {
+            $_SERVER[$name] = $value;
+        }
     }
 
 
-    private function createSlimApp(string $configPath = __DIR__ . '/config.neon'): App
+    public function testRouteConfigWillFailWhenMisconfigured(): void
     {
-        /** @var SlimApplicationFactory $factory */
-        $factory = $this->createContainer($configPath)->getByType(SlimApplicationFactory::class);
+        $this->expectExceptionMessage(
+            'Unexpected route definition key in "app › /hello-world › get › middleware", did you mean "middlewares"?'
+        );
 
-        return $factory->create();
+        SlimAppTester::createSlimApp(__DIR__ . '/typo-in-config.neon');
     }
 }
