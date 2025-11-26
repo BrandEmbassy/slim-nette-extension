@@ -12,20 +12,11 @@ use Slim\Interfaces\RouterInterface;
  */
 class SlimContainerFactory
 {
-    /**
-     * @var ResponseFactory
-     */
-    private $responseFactory;
+    private ResponseFactory $responseFactory;
 
-    /**
-     * @var RequestFactory
-     */
-    private $requestFactory;
+    private RequestFactory $requestFactory;
 
-    /**
-     * @var RouterInterface
-     */
-    private $router;
+    private RouterInterface $router;
 
 
     public function __construct(
@@ -47,9 +38,11 @@ class SlimContainerFactory
         if (!isset($configuration['response'])) {
             $configuration['response'] = $this->responseFactory->create();
         }
+
         if (!isset($configuration['request'])) {
             $configuration['request'] = $this->requestFactory->create();
         }
+
         if (!isset($configuration['router'])) {
             $configuration['router'] = $this->router;
         }

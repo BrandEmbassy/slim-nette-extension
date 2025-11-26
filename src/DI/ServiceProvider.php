@@ -12,10 +12,7 @@ use function class_exists;
  */
 class ServiceProvider
 {
-    /**
-     * @return object
-     */
-    public static function getService(Container $container, string $serviceIdentifier)
+    public static function getService(Container $container, string $serviceIdentifier): ?object
     {
         try {
             return $container->getByName($serviceIdentifier);

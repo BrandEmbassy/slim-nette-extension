@@ -2,7 +2,6 @@
 
 namespace BrandEmbassyTest\Slim\Request;
 
-use BrandEmbassy\MockeryTools\DateTime\DateTimeAssertions;
 use BrandEmbassy\Slim\Request\QueryParamMissingException;
 use BrandEmbassy\Slim\Request\RequestFieldMissingException;
 use BrandEmbassy\Slim\Request\RequestInterface;
@@ -10,6 +9,7 @@ use BrandEmbassy\Slim\Response\Response;
 use BrandEmbassy\Slim\SlimApplicationFactory;
 use BrandEmbassyTest\Slim\Sample\CreateChannelUserRoute;
 use BrandEmbassyTest\Slim\SlimAppTester;
+use BrandEmbassyTest\Slim\Tools\DateTimeAssertions;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use function urlencode;
@@ -20,7 +20,9 @@ use function urlencode;
 class RequestTest extends TestCase
 {
     private const PARAM_NAME = 'dateFrom';
+    
     private const DATE_TIME_STRING = '2017-06-10T01:00:00+01:00';
+    
     private const CHANNEL_ID = '123';
 
 

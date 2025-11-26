@@ -9,7 +9,6 @@ use Nette\DI\Container;
 use Nette\DI\ContainerLoader;
 use Nette\DI\Extensions\ExtensionsExtension;
 use Psr\Http\Message\ResponseInterface;
-use function assert;
 use function md5;
 
 /**
@@ -20,7 +19,6 @@ class SlimAppTester
     public static function createSlimApp(string $configPath = __DIR__ . '/config.neon'): SlimApp
     {
         $factory = self::createContainer($configPath)->getByType(SlimApplicationFactory::class);
-        assert($factory instanceof SlimApplicationFactory);
 
         return $factory->create();
     }
@@ -45,6 +43,9 @@ class SlimAppTester
             md5($configPath)
         );
 
-        return new $class();
+        /** @var Container $returnClass */
+        $returnClass = new $class();
+
+        return $returnClass;
     }
 }
