@@ -36,7 +36,7 @@ class SlimAppTester
 
     public static function createContainer(string $configPath = __DIR__ . '/config.neon'): Container
     {
-        $loader = new ContainerLoader(__DIR__ . '/temp', true);
+        $loader = new ContainerLoader(__DIR__ . '/../temp', true);
         $class = $loader->load(
             static function (Compiler $compiler) use ($configPath): void {
                 $compiler->loadConfig($configPath);
