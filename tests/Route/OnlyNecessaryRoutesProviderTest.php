@@ -2,8 +2,8 @@
 
 namespace BrandEmbassyTest\Slim\Route;
 
-use BrandEmbassy\MockeryTools\FileLoader;
 use BrandEmbassy\Slim\Route\OnlyNecessaryRoutesProvider;
+use BrandEmbassyTest\Slim\Tools\FileLoader;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 

@@ -14,6 +14,6 @@ class ErrorThrowingRoute implements Route
 {
     public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        throw new LogicException('Error or not to error, that\'s the question!');
+        throw new LogicException("Error or not to error, that's the question!");
     }
 }

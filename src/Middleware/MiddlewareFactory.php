@@ -15,10 +15,7 @@ use function is_callable;
  */
 class MiddlewareFactory
 {
-    /**
-     * @var Container
-     */
-    private $container;
+    private Container $container;
 
 
     public function __construct(Container $container)
@@ -55,10 +52,8 @@ class MiddlewareFactory
     public function createFromIdentifiers(array $middlewareIdentifiers): array
     {
         return array_map(
-            function (string $middlewareIdentifier): callable {
-                return $this->createFromIdentifier($middlewareIdentifier);
-            },
-            $middlewareIdentifiers
+            fn(string $middlewareIdentifier): callable => $this->createFromIdentifier($middlewareIdentifier),
+            $middlewareIdentifiers,
         );
     }
 }

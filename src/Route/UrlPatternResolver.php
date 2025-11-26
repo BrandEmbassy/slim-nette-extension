@@ -9,10 +9,7 @@ use function trim;
  */
 class UrlPatternResolver
 {
-    /**
-     * @var string
-     */
-    private $apiPrefix;
+    private string $apiPrefix;
 
 
     public function __construct(string $apiPrefix)

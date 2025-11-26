@@ -26,13 +26,21 @@ use function sprintf;
 class SlimApplicationFactory
 {
     public const SLIM_CONFIGURATION = 'slimConfiguration';
+
     public const SETTINGS = 'settings';
+
     public const BEFORE_ROUTE_MIDDLEWARES = 'beforeRouteMiddlewares';
+
     public const HANDLERS = 'handlers';
+
     public const BEFORE_REQUEST_MIDDLEWARES = 'beforeRequestMiddlewares';
+
     public const ROUTES = 'routes';
+
     public const API_PREFIX = 'apiPrefix';
+
     public const MIDDLEWARE_GROUPS = 'middlewareGroups';
+
     private const ALLOWED_HANDLERS = [
         'notFoundHandler',
         'notAllowedHandler',
@@ -43,32 +51,17 @@ class SlimApplicationFactory
     /**
      * @var mixed[]
      */
-    private $configuration;
+    private array $configuration;
 
-    /**
-     * @var Container
-     */
-    private $container;
+    private Container $container;
 
-    /**
-     * @var MiddlewareFactory
-     */
-    private $middlewareFactory;
+    private MiddlewareFactory $middlewareFactory;
 
-    /**
-     * @var SlimContainerFactory
-     */
-    private $slimContainerFactory;
+    private SlimContainerFactory $slimContainerFactory;
 
-    /**
-     * @var RouteRegister
-     */
-    private $routeRegister;
+    private RouteRegister $routeRegister;
 
-    /**
-     * @var OnlyNecessaryRoutesProvider
-     */
-    private $onlyNecessaryRoutesProvider;
+    private OnlyNecessaryRoutesProvider $onlyNecessaryRoutesProvider;
 
 
     /**
@@ -97,24 +90,24 @@ class SlimApplicationFactory
         $slimConfiguration = $this->configuration[self::SLIM_CONFIGURATION];
         $detectTyposInRouteConfiguration = (bool)$this->getSlimSettings(
             SlimSettings::DETECT_TYPOS_IN_ROUTE_CONFIGURATION,
-            true
+            true,
         );
         $registerOnlyNecessaryRoutes = (bool)$this->getSlimSettings(
             SlimSettings::REGISTER_ONLY_NECESSARY_ROUTES,
-            false
+            false,
         );
         $useApcuCache = (bool)$this->getSlimSettings(
             SlimSettings::USE_APCU_CACHE,
-            true
+            true,
         );
         $disableUsingSlimContainer = (bool)$this->getSlimSettings(
             SlimSettings::DISABLE_USING_SLIM_CONTAINER,
-            false
+            false,
         );
 
         $routeApiNamesAlwaysInclude = (array)$this->getSlimSettings(
             SlimSettings::ROUTE_API_NAMES_ALWAYS_INCLUDE,
-            []
+            [],
         );
 
         if ($useApcuCache && !apcu_enabled()) {
@@ -133,7 +126,9 @@ class SlimApplicationFactory
             $netteContainer = $this->container;
             $this->copyServicesFromSlimContainerToNetteContainer($netteContainer, $slimContainer);
             $app = new SlimApp($netteContainer);
-        } else {
+        }
+
+        if (!$disableUsingSlimContainer) {
             $app = new SlimApp($slimContainer);
         }
 
@@ -147,7 +142,7 @@ class SlimApplicationFactory
                 $requestUri,
                 $routesToRegister,
                 $useApcuCache,
-                $routeApiNamesAlwaysInclude
+                $routeApiNamesAlwaysInclude,
             );
         }
 
@@ -159,7 +154,7 @@ class SlimApplicationFactory
             $this->container,
             $slimContainer,
             $this->configuration[self::HANDLERS],
-            $disableUsingSlimContainer
+            $disableUsingSlimContainer,
         );
 
         foreach ($this->configuration[self::BEFORE_REQUEST_MIDDLEWARES] as $middleware) {
@@ -189,11 +184,10 @@ class SlimApplicationFactory
                 /** @var Container&ContainerInterface&ArrayAccess<mixed, mixed> $netteContainer */
                 unset($netteContainer[$handlerName]);
                 $netteContainer[$handlerName] = ServiceProvider::getService($netteContainer, $handlerClass);
-            } else {
-                $slimContainer[$handlerName] = static function () use ($handlerService) {
-                    return $handlerService;
-                };
+                continue;
             }
+
+            $slimContainer[$handlerName] = (static fn() => $handlerService);
         }
     }
 
@@ -207,7 +201,7 @@ class SlimApplicationFactory
         $error = sprintf(
             '%s handler name is not allowed, available handlers: %s',
             $handlerName,
-            implode(', ', self::ALLOWED_HANDLERS)
+            implode(', ', self::ALLOWED_HANDLERS),
         );
 
         throw new LogicException($error);
@@ -226,11 +220,9 @@ class SlimApplicationFactory
 
 
     /**
-     * @param mixed $defaultValue
-     *
-     * @return mixed
+     * @param bool|array<mixed> $defaultValue
      */
-    private function getSlimSettings(string $key, $defaultValue)
+    private function getSlimSettings(string $key, bool|array $defaultValue): mixed
     {
         return $this->configuration[self::SLIM_CONFIGURATION][self::SETTINGS][$key] ?? $defaultValue;
     }
