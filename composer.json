@@ -13,7 +13,7 @@
         }
     },
     "require": {
-        "php": ">=7.2",
+        "php": ">=8.2",
         "ext-apcu": "*",
         "adbario/php-dot-notation": "^2.2 || ^3.0",
         "nette/di": "^3.0",

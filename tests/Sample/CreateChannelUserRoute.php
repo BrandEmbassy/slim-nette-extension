@@ -12,10 +12,7 @@ use function assert;
  */
 class CreateChannelUserRoute implements Route
 {
-    /**
-     * @var RequestInterface
-     */
-    private $request;
+    private RequestInterface $request;
 
 
     public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface
