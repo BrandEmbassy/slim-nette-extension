@@ -90,28 +90,28 @@ class SlimApiExtension extends CompilerExtension
         $builder = $this->getContainerBuilder();
         $config = (array)$this->config;
 
-        // Allow configuring via container parameters as a fallback (keeps BC with existing tests/config)
-        $parameters = $builder->parameters;
-
-        // If a key is either not provided or empty in slimApi config, fill it from container parameters
-        // Merge routes from parameters with slimApi routes to allow partial overrides (e.g., unregistering a single route)
-        $baseRoutes = $parameters['routes'] ?? [];
-        $configuredRoutes = $config[SlimApplicationFactory::ROUTES] ?? [];
-        if ($configuredRoutes === [] && $baseRoutes !== []) {
-            $config[SlimApplicationFactory::ROUTES] = $baseRoutes;
-        } else {
-            // Start with base and overlay configured
-            $mergedRoutes = array_replace_recursive($baseRoutes, $configuredRoutes);
-            // Apply explicit unsets where configured routes specify null (e.g., Neon `key!: null`)
-            $this->applyRouteUnsets($mergedRoutes, $configuredRoutes);
-            $config[SlimApplicationFactory::ROUTES] = $mergedRoutes;
-        }
-        $config[SlimApplicationFactory::HANDLERS] = (($config[SlimApplicationFactory::HANDLERS] ?? []) === []) ? ($parameters['api']['handlers'] ?? []) : $config[SlimApplicationFactory::HANDLERS];
-        $config[SlimApplicationFactory::BEFORE_REQUEST_MIDDLEWARES] = (($config[SlimApplicationFactory::BEFORE_REQUEST_MIDDLEWARES] ?? []) === []) ? ($parameters['beforeRequestMiddlewares'] ?? []) : $config[SlimApplicationFactory::BEFORE_REQUEST_MIDDLEWARES];
-        $config[SlimApplicationFactory::AFTER_REQUEST_MIDDLEWARES] = (($config[SlimApplicationFactory::AFTER_REQUEST_MIDDLEWARES] ?? []) === []) ? ($parameters['afterRequestMiddlewares'] ?? []) : $config[SlimApplicationFactory::AFTER_REQUEST_MIDDLEWARES];
-        $config[SlimApplicationFactory::BEFORE_ROUTE_MIDDLEWARES] = (($config[SlimApplicationFactory::BEFORE_ROUTE_MIDDLEWARES] ?? []) === []) ? ($parameters['beforeRouteMiddlewares'] ?? []) : $config[SlimApplicationFactory::BEFORE_ROUTE_MIDDLEWARES];
-        $config[SlimApplicationFactory::AFTER_ROUTE_MIDDLEWARES] = (($config[SlimApplicationFactory::AFTER_ROUTE_MIDDLEWARES] ?? []) === []) ? ($parameters['afterRouteMiddlewares'] ?? []) : $config[SlimApplicationFactory::AFTER_ROUTE_MIDDLEWARES];
-        $config[SlimApplicationFactory::MIDDLEWARE_GROUPS] = (($config[SlimApplicationFactory::MIDDLEWARE_GROUPS] ?? []) === []) ? ($parameters['middlewareGroups'] ?? []) : $config[SlimApplicationFactory::MIDDLEWARE_GROUPS];
+//        // Allow configuring via container parameters as a fallback (keeps BC with existing tests/config)
+//        $parameters = $builder->parameters;
+//
+//        // If a key is either not provided or empty in slimApi config, fill it from container parameters
+//        // Merge routes from parameters with slimApi routes to allow partial overrides (e.g., unregistering a single route)
+//        $baseRoutes = $parameters['routes'] ?? [];
+//        $configuredRoutes = $config[SlimApplicationFactory::ROUTES] ?? [];
+//        if ($configuredRoutes === [] && $baseRoutes !== []) {
+//            $config[SlimApplicationFactory::ROUTES] = $baseRoutes;
+//        } else {
+//            // Start with base and overlay configured
+//            $mergedRoutes = array_replace_recursive($baseRoutes, $configuredRoutes);
+//            // Apply explicit unsets where configured routes specify null (e.g., Neon `key!: null`)
+//            $this->applyRouteUnsets($mergedRoutes, $configuredRoutes);
+//            $config[SlimApplicationFactory::ROUTES] = $mergedRoutes;
+//        }
+//        $config[SlimApplicationFactory::HANDLERS] = (($config[SlimApplicationFactory::HANDLERS] ?? []) === []) ? ($parameters['api']['handlers'] ?? []) : $config[SlimApplicationFactory::HANDLERS];
+//        $config[SlimApplicationFactory::BEFORE_REQUEST_MIDDLEWARES] = (($config[SlimApplicationFactory::BEFORE_REQUEST_MIDDLEWARES] ?? []) === []) ? ($parameters['beforeRequestMiddlewares'] ?? []) : $config[SlimApplicationFactory::BEFORE_REQUEST_MIDDLEWARES];
+//        $config[SlimApplicationFactory::AFTER_REQUEST_MIDDLEWARES] = (($config[SlimApplicationFactory::AFTER_REQUEST_MIDDLEWARES] ?? []) === []) ? ($parameters['afterRequestMiddlewares'] ?? []) : $config[SlimApplicationFactory::AFTER_REQUEST_MIDDLEWARES];
+//        $config[SlimApplicationFactory::BEFORE_ROUTE_MIDDLEWARES] = (($config[SlimApplicationFactory::BEFORE_ROUTE_MIDDLEWARES] ?? []) === []) ? ($parameters['beforeRouteMiddlewares'] ?? []) : $config[SlimApplicationFactory::BEFORE_ROUTE_MIDDLEWARES];
+//        $config[SlimApplicationFactory::AFTER_ROUTE_MIDDLEWARES] = (($config[SlimApplicationFactory::AFTER_ROUTE_MIDDLEWARES] ?? []) === []) ? ($parameters['afterRouteMiddlewares'] ?? []) : $config[SlimApplicationFactory::AFTER_ROUTE_MIDDLEWARES];
+//        $config[SlimApplicationFactory::MIDDLEWARE_GROUPS] = (($config[SlimApplicationFactory::MIDDLEWARE_GROUPS] ?? []) === []) ? ($parameters['middlewareGroups'] ?? []) : $config[SlimApplicationFactory::MIDDLEWARE_GROUPS];
 
         $builder->addDefinition($this->prefix('urlPatterResolver'))
             ->setFactory(UrlPatternResolver::class, [$config[SlimApplicationFactory::API_PREFIX]]);
@@ -222,25 +222,25 @@ class SlimApiExtension extends CompilerExtension
 //    }
 
 
-    /**
-     * Recursively remove keys from $target when $overrides explicitly sets them to null.
-     * This mirrors Neon `key!: null` semantics used in tests to unregister a route.
-     *
-     * @param mixed[] $target
-     * @param mixed[] $overrides
-     */
-    private function applyRouteUnsets(array &$target, array $overrides): void
-    {
-        foreach ($overrides as $key => $value) {
-            if ($value === null) {
-                unset($target[$key]);
-                continue;
-            }
-            if (is_array($value) && isset($target[$key]) && is_array($target[$key])) {
-                $this->applyRouteUnsets($target[$key], $value);
-            }
-        }
-    }
+//    /**
+//     * Recursively remove keys from $target when $overrides explicitly sets them to null.
+//     * This mirrors Neon `key!: null` semantics used in tests to unregister a route.
+//     *
+//     * @param mixed[] $target
+//     * @param mixed[] $overrides
+//     */
+//    private function applyRouteUnsets(array &$target, array $overrides): void
+//    {
+//        foreach ($overrides as $key => $value) {
+//            if ($value === null) {
+//                unset($target[$key]);
+//                continue;
+//            }
+//            if (is_array($value) && isset($target[$key]) && is_array($target[$key])) {
+//                $this->applyRouteUnsets($target[$key], $value);
+//            }
+//        }
+//    }
 
 
     private function createServiceExpect(): Schema
