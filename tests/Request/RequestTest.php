@@ -2,16 +2,28 @@
 
 namespace BrandEmbassyTest\Slim\Request;
 
-use BrandEmbassy\MockeryTools\DateTime\DateTimeAssertions;
 use BrandEmbassy\Slim\Request\QueryParamMissingException;
+use BrandEmbassy\Slim\Request\Request;
 use BrandEmbassy\Slim\Request\RequestFieldMissingException;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\Response;
 use BrandEmbassy\Slim\SlimApplicationFactory;
 use BrandEmbassyTest\Slim\Sample\CreateChannelUserRoute;
 use BrandEmbassyTest\Slim\SlimAppTester;
+use DateTime;
+use LogicException;
+use Mockery;
+use Mockery\MockInterface;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\StreamInterface;
+use Slim\Http\Body;
+use Slim\Http\Headers;
+use Slim\Http\Uri;
+use function assert;
+use function fopen;
+use function is_resource;
+use function sprintf;
 use function urlencode;
 
 /**
@@ -34,6 +46,19 @@ class RequestTest extends TestCase
     }
 
 
+    public function testGetParsedBodyAsArray(): void
+    {
+        $request = $this->createSampleRequest();
+
+        $expectedArray = [
+            'thisIsNull' => null,
+            'thisIsGandalf' => 'gandalf',
+        ];
+
+        Assert::assertSame($expectedArray, $request->getParsedBodyAsArray());
+    }
+
+
     public function testShouldRaiseExceptionForMissingRequiredField(): void
     {
         $request = $this->getDispatchedRequest();
@@ -50,7 +75,8 @@ class RequestTest extends TestCase
         $request = $this->getDispatchedRequest('?' . self::PARAM_NAME . '=' . urlencode(self::DATE_TIME_STRING));
 
         $dateTime = $request->getDateTimeQueryParam(self::PARAM_NAME);
-        DateTimeAssertions::assertDateTimeAtomEqualsDateTime(self::DATE_TIME_STRING, $dateTime);
+
+        Assert::assertSame(self::DATE_TIME_STRING, $dateTime->format(DateTime::ATOM));
     }
 
 
@@ -140,5 +166,77 @@ class RequestTest extends TestCase
                 'level-2-null' => null,
             ],
         ];
+    }
+
+
+    /**
+     * @dataProvider getDataForInvalidDateTimeArgument
+     *
+     * @param mixed[] $arguments
+     */
+    public function testGettingDateTimeQueryParamThrowsExceptionIfInvalidArgument(
+        string $logicExceptionMessage,
+        array $arguments
+    ): void {
+        $slimRequest = $this->createMockRequest($arguments);
+        $request = $slimRequest;
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage($logicExceptionMessage);
+
+        $request->getDateTimeQueryParam(self::PARAM_NAME);
+    }
+
+
+    /**
+     * @return mixed[]
+     */
+    public function getDataForInvalidDateTimeArgument(): array
+    {
+        return [
+            'Missing from' => [
+                sprintf('Could not find %s in request\'s params', self::PARAM_NAME),
+                [],
+            ],
+            'Invalid from' => [
+                sprintf('Could not parse %s as datetime', self::PARAM_NAME),
+                [self::PARAM_NAME => '123456789'],
+            ],
+        ];
+    }
+
+
+    /**
+     * @param mixed[] $arguments
+     *
+     * @return Request&MockInterface
+     */
+    private function createMockRequest(array $arguments): MockInterface
+    {
+        /** @var MockInterface&Request $mock */
+        $mock = Mockery::mock(Request::class)->makePartial();
+        $mock->shouldReceive('getQueryParams')->andReturn($arguments);
+
+        return $mock;
+    }
+
+
+    private function createRequest(StreamInterface $body): Request
+    {
+        $url = new Uri('https', 'example.com');
+        $slimRequest = new Request('POST', $url, new Headers(), [], [], $body);
+
+        return $slimRequest->withHeader('content-type', 'application/json');
+    }
+
+
+    private function createSampleRequest(): Request
+    {
+        $resource = fopen('php://temp', 'rb+');
+        assert(is_resource($resource));
+        $body = new Body($resource);
+        $body->write('{"thisIsNull": null, "thisIsGandalf": "gandalf"}');
+        $body->rewind();
+
+        return $this->createRequest($body);
     }
 }

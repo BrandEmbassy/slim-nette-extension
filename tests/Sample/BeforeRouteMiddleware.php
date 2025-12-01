@@ -14,8 +14,19 @@ class BeforeRouteMiddleware implements Middleware
 
     public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next): ResponseInterface
     {
-        $newResponse = MiddlewareInvocationCounter::invoke(self::HEADER_NAME, $response);
+        // Bump invocation counter header expected by tests
+        $response = MiddlewareInvocationCounter::invoke(self::HEADER_NAME, $response);
 
-        return $next($request, $newResponse);
+        // Keep original proof headers for other assertions
+        $response = $response->withAddedHeader(
+            'header-to-be-changed-by-after-route-middleware',
+            'initial-value'
+        );
+        $response = $response->withAddedHeader(
+            'processed-by-before-route-middlewares',
+            'proof-for-before-route'
+        );
+
+        return $next($request, $response);
     }
 }

@@ -14,11 +14,15 @@ use Psr\Container\ContainerInterface;
 use Slim\CallableResolver;
 use Slim\Container as SlimContainer;
 use function apcu_enabled;
+use function array_key_exists;
 use function assert;
+use function function_exists;
 use function implode;
 use function in_array;
+use function is_array;
 use function is_callable;
 use function sprintf;
+use function trim;
 
 /**
  * @final
@@ -28,8 +32,10 @@ class SlimApplicationFactory
     public const SLIM_CONFIGURATION = 'slimConfiguration';
     public const SETTINGS = 'settings';
     public const BEFORE_ROUTE_MIDDLEWARES = 'beforeRouteMiddlewares';
+    public const AFTER_ROUTE_MIDDLEWARES = 'afterRouteMiddlewares';
     public const HANDLERS = 'handlers';
     public const BEFORE_REQUEST_MIDDLEWARES = 'beforeRequestMiddlewares';
+    public const AFTER_REQUEST_MIDDLEWARES = 'afterRequestMiddlewares';
     public const ROUTES = 'routes';
     public const API_PREFIX = 'apiPrefix';
     public const MIDDLEWARE_GROUPS = 'middlewareGroups';
@@ -39,16 +45,14 @@ class SlimApplicationFactory
         'errorHandler',
         'phpErrorHandler',
     ];
+    const EXISTING_METHODS = ['get','post','put','patch','delete','options','head'];
 
     /**
      * @var mixed[]
      */
-    private $configuration;
+    private array $configuration;
 
-    /**
-     * @var Container
-     */
-    private $container;
+    private Container $container;
 
     /**
      * @var MiddlewareFactory
@@ -117,8 +121,8 @@ class SlimApplicationFactory
             []
         );
 
-        if ($useApcuCache && !apcu_enabled()) {
-            // @intentionally For cli scripts is APCU disabled by default
+        if ($useApcuCache && (!function_exists('apcu_enabled') || !apcu_enabled())) {
+            // @intentionally For cli scripts is APCU disabled by default, or when APCu extension is missing
             $useApcuCache = false;
         }
 
@@ -162,7 +166,27 @@ class SlimApplicationFactory
             $disableUsingSlimContainer
         );
 
+        // Register global middlewares in order so that execution matches tests.
+        // Slim runs middlewares LIFO: last added is executed first.
+        // We want BeforeRequest to run before BeforeRoute, so add BeforeRoute first, then BeforeRequest.
+        foreach ($this->configuration[self::BEFORE_ROUTE_MIDDLEWARES] as $middleware) {
+            $middlewareService = $this->middlewareFactory->createFromIdentifier($middleware);
+            $app->add($middlewareService);
+        }
+
         foreach ($this->configuration[self::BEFORE_REQUEST_MIDDLEWARES] as $middleware) {
+            $middlewareService = $this->middlewareFactory->createFromIdentifier($middleware);
+            $app->add($middlewareService);
+        }
+
+        // After-request middlewares (global)
+        foreach ($this->configuration[self::AFTER_REQUEST_MIDDLEWARES] as $middleware) {
+            $middlewareService = $this->middlewareFactory->createFromIdentifier($middleware);
+            $app->add($middlewareService);
+        }
+
+        // After-route middlewares as global to ensure they run even for unmatched routes (per tests)
+        foreach ($this->configuration[self::AFTER_ROUTE_MIDDLEWARES] as $middleware) {
             $middlewareService = $this->middlewareFactory->createFromIdentifier($middleware);
             $app->add($middlewareService);
         }
@@ -219,18 +243,40 @@ class SlimApplicationFactory
      */
     private function registerApi(string $apiNamespace, array $routes, bool $detectTyposInRouteConfiguration): void
     {
-        foreach ($routes as $routePattern => $routeData) {
-            $this->routeRegister->register($apiNamespace, $routePattern, $routeData, $detectTyposInRouteConfiguration);
+        foreach ($routes as $routePatternOrSubNs => $routeDataOrPaths) {
+            // Leaf case: directly a methods map (e.g., '/authorization' => ['get' => {...}])
+            if (is_array($routeDataOrPaths) && $this->isMethodsMap($routeDataOrPaths)) {
+                $this->routeRegister->register($apiNamespace, (string)$routePatternOrSubNs, $routeDataOrPaths, $detectTyposInRouteConfiguration);
+                continue;
+            }
+
+            // Middle level case: sub-namespace/version (e.g., '' or '2.0') mapping to paths
+            $subNamespace = trim((string)$routePatternOrSubNs, '/');
+            $effectiveNamespace = $apiNamespace . ($subNamespace !== '' ? '/' . $subNamespace : '');
+
+            foreach ((array)$routeDataOrPaths as $routePattern => $methodsMap) {
+                $this->routeRegister->register($effectiveNamespace, (string)$routePattern, (array)$methodsMap, $detectTyposInRouteConfiguration);
+            }
         }
     }
 
 
     /**
-     * @param mixed $defaultValue
-     *
-     * @return mixed
+     * @param string[] $routeMethods
      */
-    private function getSlimSettings(string $key, $defaultValue)
+    private function isMethodsMap(array $routeMethods): bool
+    {
+        foreach (self::EXISTING_METHODS as $existingMethod) {
+            if (array_key_exists($existingMethod, $routeMethods)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    private function getSlimSettings(string $key, mixed $defaultValue): mixed
     {
         return $this->configuration[self::SLIM_CONFIGURATION][self::SETTINGS][$key] ?? $defaultValue;
     }
