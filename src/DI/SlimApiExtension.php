@@ -46,9 +46,9 @@ class SlimApiExtension extends CompilerExtension
                         Expect::arrayOf(
                             Expect::structure($routeSchema)
                                 ->castTo('array')
-                                ->otherItems()
-                        )
-                    )
+                                ->otherItems(),
+                        ),
+                    ),
                 ),
                 SlimApplicationFactory::HANDLERS => Expect::arrayOf($this->createServiceExpect())->default([]),
                 SlimApplicationFactory::BEFORE_REQUEST_MIDDLEWARES => Expect::arrayOf($this->createServiceExpect())
@@ -59,9 +59,9 @@ class SlimApiExtension extends CompilerExtension
                 SlimApplicationFactory::API_PREFIX => Expect::string()->default(''),
                 SlimApplicationFactory::MIDDLEWARE_GROUPS => Expect::arrayOf(
                     Expect::arrayOf($this->createServiceExpect())
-                        ->default([])
+                        ->default([]),
                 ),
-            ]
+            ],
         );
     }
 
@@ -93,7 +93,7 @@ class SlimApiExtension extends CompilerExtension
                     new Reference(SlimContainerFactory::class),
                     'create',
                 ],
-                [$config[SlimApplicationFactory::SLIM_CONFIGURATION]]
+                [$config[SlimApplicationFactory::SLIM_CONFIGURATION]],
             );
 
         $builder->addDefinition($this->prefix('routeDefinitionFactory'))

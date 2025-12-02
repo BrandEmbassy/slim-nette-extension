@@ -10,7 +10,7 @@ class BeforeRouteMiddlewares
     /**
      * @var callable[]
      */
-    private $middlewares;
+    private array $middlewares;
 
 
     /**

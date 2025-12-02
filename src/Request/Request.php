@@ -6,7 +6,6 @@ use Adbar\Dot;
 use DateTime;
 use DateTimeImmutable;
 use InvalidArgumentException;
-use Nette\Utils\Strings;
 use Slim\Http\Request as SlimRequest;
 use Slim\Route;
 use function array_key_exists;
@@ -14,6 +13,7 @@ use function assert;
 use function is_array;
 use function is_string;
 use function sprintf;
+use function str_contains;
 
 /**
  * @method string[]|string[][] getQueryParams()
@@ -24,6 +24,7 @@ use function sprintf;
 class Request extends SlimRequest implements RequestInterface
 {
     private const ROUTE_INFO_ATTRIBUTE = 'routeInfo';
+
     private const ROUTE_ATTRIBUTE = 'route';
 
     /**
@@ -208,7 +209,7 @@ class Request extends SlimRequest implements RequestInterface
     {
         $acceptHeader = $this->getHeaderLine('accept');
 
-        return Strings::contains($acceptHeader, 'html');
+        return str_contains($acceptHeader, 'html');
     }
 
 

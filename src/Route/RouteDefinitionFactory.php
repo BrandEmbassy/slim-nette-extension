@@ -14,15 +14,9 @@ use Nette\DI\Container;
  */
 class RouteDefinitionFactory
 {
-    /**
-     * @var Container
-     */
-    private $container;
+    private Container $container;
 
-    /**
-     * @var MiddlewareFactory
-     */
-    private $middlewareFactory;
+    private MiddlewareFactory $middlewareFactory;
 
 
     public function __construct(
@@ -51,7 +45,7 @@ class RouteDefinitionFactory
         };
 
         $middlewares = $this->middlewareFactory->createFromIdentifiers(
-            $routeDefinitionData[RouteDefinition::MIDDLEWARES]
+            $routeDefinitionData[RouteDefinition::MIDDLEWARES],
         );
 
         return new RouteDefinition(
@@ -60,7 +54,7 @@ class RouteDefinitionFactory
             $middlewares,
             $routeDefinitionData[RouteDefinition::MIDDLEWARE_GROUPS],
             $routeDefinitionData[RouteDefinition::NAME],
-            $routeDefinitionData[RouteDefinition::IGNORE_VERSION_MIDDLEWARE_GROUP]
+            $routeDefinitionData[RouteDefinition::IGNORE_VERSION_MIDDLEWARE_GROUP],
         );
     }
 

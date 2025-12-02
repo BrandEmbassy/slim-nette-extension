@@ -14,10 +14,7 @@ class InvokeCounterMiddleware implements Middleware
 {
     public const HEADER_NAME_PREFIX = 'invoke-counter-';
 
-    /**
-     * @var string
-     */
-    private $ident;
+    private string $ident;
 
 
     public function __construct(string $ident)
