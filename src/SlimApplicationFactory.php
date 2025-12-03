@@ -2,6 +2,7 @@
 
 namespace BrandEmbassy\Slim;
 
+use BrandEmbassy\Slim\Middleware\Middleware;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use Closure;
