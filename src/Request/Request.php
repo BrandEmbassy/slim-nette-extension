@@ -2,358 +2,89 @@
 
 namespace BrandEmbassy\Slim\Request;
 
-use BrandEmbassy\Slim\MissingApiArgumentException;
+use Adbar\Dot;
 use DateTime;
 use DateTimeImmutable;
-use LogicException;
-use Nette\Utils\Json;
+use InvalidArgumentException;
 use Nette\Utils\Strings;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\StreamInterface;
-use Psr\Http\Message\UriInterface;
+use Slim\Http\Request as SlimRequest;
 use Slim\Route;
-use stdClass;
 use function array_key_exists;
 use function assert;
 use function is_array;
 use function is_string;
 use function sprintf;
 
-final class Request implements RequestInterface
+/**
+ * @method string[]|string[][] getQueryParams()
+ * @method string|string[]|null getQueryParam(string $key, ?string $default = null)
+ *
+ * @final
+ */
+class Request extends SlimRequest implements RequestInterface
 {
+    private const ROUTE_INFO_ATTRIBUTE = 'routeInfo';
+    private const ROUTE_ATTRIBUTE = 'route';
+
     /**
-     * @var array<mixed>|stdClass|null
+     * @var Dot<string, mixed[]>|null
      */
-    private mixed $decodedJsonFromBody = null;
-
-    private ServerRequestInterface $request;
+    protected $dotAnnotatedRequestBody;
 
 
-    public function __construct(ServerRequestInterface $request)
+    public function __clone()
     {
-        $this->request = $request;
+        parent::__clone();
+        $this->dotAnnotatedRequestBody = null;
+    }
+
+
+    public function getRoute(): Route
+    {
+        $route = $this->getAttribute(self::ROUTE_ATTRIBUTE);
+        assert($route instanceof Route);
+
+        return $route;
     }
 
 
     /**
-     * @param string|int|string[]|int[]|null $default
-     *
-     * @return string|integer|mixed[]|null
+     * @return array<string, string>
      */
-    public function getQueryParam(string $key, $default = null)
+    public function getRouteArguments(): array
     {
-        $getParams = $this->getQueryParams();
-        $result = $default;
+        $routeInfoAttribute = $this->getAttribute(self::ROUTE_INFO_ATTRIBUTE);
 
-        if (isset($getParams[$key])) {
-            $result = $getParams[$key];
+        if (is_array($routeInfoAttribute) && isset($routeInfoAttribute[2])) {
+            return $routeInfoAttribute[2];
         }
 
-        return $result;
+        return [];
+    }
+
+
+    public function hasRouteArgument(string $argument): bool
+    {
+        return isset($this->getRouteArguments()[$argument]);
     }
 
 
     /**
-     * @return string|integer
+     * @throws RouteArgumentMissingException
      */
-    public function getRequiredArgument(string $name)
+    public function getRouteArgument(string $argument): string
     {
-        $arguments = $this->request->getAttributes();
-
-        $value = $arguments[$name] ?? '';
-        $value = Strings::trim($value);
-
-        if ($value === '') {
-            throw new MissingApiArgumentException(sprintf('Missing "%s" argument', $name));
+        if ($this->hasRouteArgument($argument)) {
+            return $this->getRouteArguments()[$argument];
         }
 
-        return $value;
+        throw RouteArgumentMissingException::create($argument);
     }
 
 
-    /**
-     * @return mixed[]|stdClass|string
-     */
-    public function getField(string $name)
+    public function findRouteArgument(string $argument, ?string $default = null): ?string
     {
-        $body = $this->getDecodedJsonFromBody();
-
-        if (!$this->hasField($name)) {
-            throw new MissingApiArgumentException(sprintf('Field "%s" is missing in request body', $name));
-        }
-
-        return ((array)$body)[$name];
-    }
-
-
-    /**
-     * @param int|string|null $default
-     *
-     * @return mixed[]|stdClass|string|integer|null
-     */
-    public function getOptionalField(string $name, $default = null)
-    {
-        return $this->hasField($name)
-            ? $this->getField($name)
-            : $default;
-    }
-
-
-    public function hasField(string $name): bool
-    {
-        return array_key_exists($name, (array)$this->getDecodedJsonFromBody());
-    }
-
-
-    public function getProtocolVersion(): string
-    {
-        return $this->request->getProtocolVersion();
-    }
-
-
-    /**
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
-     *
-     * @param string $version
-     *
-     * @return static
-     */
-    public function withProtocolVersion($version): self
-    {
-        return new static($this->request->withProtocolVersion($version));
-    }
-
-
-    /**
-     * @return string[][]
-     */
-    public function getHeaders(): array
-    {
-        return $this->request->getHeaders();
-    }
-
-
-    /**
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
-     *
-     * @param string $name
-     */
-    public function hasHeader($name): bool
-    {
-        return $this->request->hasHeader($name);
-    }
-
-
-    /**
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
-     *
-     * @param string $name
-     *
-     * @return string[]
-     */
-    public function getHeader($name): array
-    {
-        return $this->request->getHeader($name);
-    }
-
-
-    /**
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
-     *
-     * @param string $name
-     */
-    public function getHeaderLine($name): string
-    {
-        return $this->request->getHeaderLine($name);
-    }
-
-
-    /**
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
-     *
-     * @param string $name
-     * @param string|string[] $value
-     *
-     * @return static
-     */
-    public function withHeader($name, $value): self
-    {
-        return new static($this->request->withHeader($name, $value));
-    }
-
-
-    /**
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
-     *
-     * @param string $name
-     * @param string|string[] $value
-     *
-     * @return static
-     */
-    public function withAddedHeader($name, $value): self
-    {
-        return new static($this->request->withAddedHeader($name, $value));
-    }
-
-
-    /**
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
-     *
-     * @param string $name
-     *
-     * @return static
-     */
-    public function withoutHeader($name): self
-    {
-        return new static($this->request->withoutHeader($name));
-    }
-
-
-    public function getBody(): StreamInterface
-    {
-        return $this->request->getBody();
-    }
-
-
-    /**
-     * @return static
-     */
-    public function withBody(StreamInterface $body): self
-    {
-        return new static($this->request->withBody($body));
-    }
-
-
-    public function getRequestTarget(): string
-    {
-        return $this->request->getRequestTarget();
-    }
-
-
-    /**
-     * @param mixed $requestTarget
-     *
-     * @return static
-     */
-    public function withRequestTarget($requestTarget): self
-    {
-        return new static($this->request->withRequestTarget($requestTarget));
-    }
-
-
-    public function getMethod(): string
-    {
-        return $this->request->getMethod();
-    }
-
-
-    /**
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
-     *
-     * @param string $method
-     *
-     * @return static
-     */
-    public function withMethod($method): self
-    {
-        return new static($this->request->withMethod($method));
-    }
-
-
-    public function getUri(): UriInterface
-    {
-        return $this->request->getUri();
-    }
-
-
-    /**
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
-     *
-     * @param bool $preserveHost
-     *
-     * @return static
-     */
-    public function withUri(UriInterface $uri, $preserveHost = false): self
-    {
-        return new static($this->request->withUri($uri, $preserveHost));
-    }
-
-
-    /**
-     * @return mixed[]
-     */
-    public function getServerParams(): array
-    {
-        return $this->request->getServerParams();
-    }
-
-
-    /**
-     * @return mixed[]
-     */
-    public function getCookieParams(): array
-    {
-        return $this->request->getCookieParams();
-    }
-
-
-    /**
-     * @param mixed[] $cookies
-     *
-     * @return static
-     */
-    public function withCookieParams(array $cookies): self
-    {
-        return new static($this->request->withCookieParams($cookies));
-    }
-
-
-    /**
-     * @return mixed[]
-     */
-    public function getQueryParams(): array
-    {
-        return $this->request->getQueryParams();
-    }
-
-
-    /**
-     * @param mixed[] $query
-     *
-     * @return static
-     */
-    public function withQueryParams(array $query): self
-    {
-        return new static($this->request->withQueryParams($query));
-    }
-
-
-    /**
-     * @return mixed[]
-     */
-    public function getUploadedFiles(): array
-    {
-        return $this->request->getUploadedFiles();
-    }
-
-
-    /**
-     * @param mixed[] $uploadedFiles
-     *
-     * @return static
-     */
-    public function withUploadedFiles(array $uploadedFiles)
-    {
-        return new static($this->request->withUploadedFiles($uploadedFiles));
-    }
-
-
-    /**
-     * @return mixed[]|object|null
-     */
-    public function getParsedBody()
-    {
-        return $this->request->getParsedBody();
+        return $this->getRouteArguments()[$argument] ?? $default;
     }
 
 
@@ -362,116 +93,166 @@ final class Request implements RequestInterface
      */
     public function getParsedBodyAsArray(): array
     {
-        $parsedBody = $this->getParsedBody();
-        assert(is_array($parsedBody));
-
-        return $parsedBody;
+        return (array)$this->getParsedBody();
     }
 
 
     /**
-     * @param mixed[]|object|null $data
+     * @return mixed
      *
-     * @return static
+     * @throws RequestFieldMissingException
      */
-    public function withParsedBody($data): self
+    public function getField(string $fieldName)
     {
-        return new static($this->request->withParsedBody($data));
+        if ($this->hasField($fieldName)) {
+            return $this->getDotAnnotatedRequestBody()->get($fieldName);
+        }
+
+        throw RequestFieldMissingException::create($fieldName);
     }
 
 
     /**
-     * @return mixed[]
-     */
-    public function getAttributes(): array
-    {
-        return $this->request->getAttributes();
-    }
-
-
-    /**
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
-     *
-     * @param string $name
      * @param mixed $default
      *
      * @return mixed
      */
-    public function getAttribute($name, $default = null)
+    public function findField(string $fieldName, $default = null)
     {
-        $value = $this->request->getAttribute($name, $default);
+        return $this->getDotAnnotatedRequestBody()->get($fieldName, $default);
+    }
 
-        if ($value === $default) {
-            $route = $this->request->getAttribute('route', $default);
 
-            if ($route instanceof Route) {
-                $value = $route->getArgument($name, $default);
-            }
-        }
-
-        return $value;
+    public function hasField(string $fieldName): bool
+    {
+        return $this->getDotAnnotatedRequestBody()->has($fieldName);
     }
 
 
     /**
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
-     *
-     * @param string $name
-     * @param mixed $value
-     *
-     * @return static
+     * @return string|string[]|null
      */
-    public function withAttribute($name, $value): self
+    public function findQueryParam(string $key, ?string $default = null)
     {
-        return new static($this->request->withAttribute($name, $value));
+        return $this->getQueryParam($key) ?? $default;
     }
 
 
     /**
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     * @return string|string[]
      *
-     * @param string $name
-     *
-     * @return static
+     * @throws QueryParamMissingException
      */
-    public function withoutAttribute($name): self
+    public function getQueryParamStrict(string $key)
     {
-        return new static($this->request->withoutAttribute($name));
+        $value = $this->findQueryParam($key);
+
+        if ($value !== null) {
+            return $value;
+        }
+
+        throw QueryParamMissingException::create($key);
+    }
+
+
+    public function findQueryParamAsString(string $key, ?string $default = null): ?string
+    {
+        $queryParam = $this->getQueryParam($key);
+        assert(!is_array($queryParam));
+
+        return $queryParam ?? $default;
     }
 
 
     /**
-     * @return mixed[]|stdClass
+     * @throws QueryParamMissingException
      */
-    public function getDecodedJsonFromBody()
+    public function getQueryParamAsString(string $key): string
     {
-        if ($this->decodedJsonFromBody === null) {
-            $contents = (string)$this->request->getBody();
-            $this->decodedJsonFromBody = Json::decode($contents);
+        $value = $this->findQueryParamAsString($key);
+
+        if ($value !== null) {
+            return $value;
         }
 
-        return $this->decodedJsonFromBody;
+        throw QueryParamMissingException::create($key);
     }
 
 
-    public function getDateTimeQueryParam(string $field): DateTimeImmutable
+    public function hasQueryParam(string $key): bool
     {
-        $datetimeParam = $this->getQueryParam($field);
+        return array_key_exists($key, $this->getQueryParams());
+    }
 
-        if ($datetimeParam === null) {
-            throw new LogicException(sprintf('Could not find %s in request\'s params', $field));
+
+    /**
+     * @throws QueryParamMissingException
+     * @throws InvalidArgumentException
+     */
+    public function getDateTimeQueryParam(string $field, string $format = DateTime::ATOM): DateTimeImmutable
+    {
+        $datetimeParam = $this->getQueryParamStrict($field);
+        assert(is_string($datetimeParam));
+
+        $dateTime = DateTimeImmutable::createFromFormat($format, $datetimeParam);
+
+        if ($dateTime === false) {
+            throw new InvalidArgumentException(sprintf('Field %s is not in %s format', $field, $format));
         }
 
-        if (!is_string($datetimeParam)) {
-            throw new LogicException(sprintf('Invalid data type %s in request\'s params', $field));
+        return $dateTime;
+    }
+
+
+    public function isHtml(): bool
+    {
+        $acceptHeader = $this->getHeaderLine('accept');
+
+        return Strings::contains($acceptHeader, 'html');
+    }
+
+
+    public function hasAttribute(string $name): bool
+    {
+        return array_key_exists($name, $this->getAttributes());
+    }
+
+
+    /**
+     * @param mixed $default
+     *
+     * @return mixed
+     */
+    public function findAttribute(string $name, $default = null)
+    {
+        return $this->getAttribute($name, $default);
+    }
+
+
+    /**
+     * @return mixed
+     *
+     * @throws RequestAttributeMissingException
+     */
+    public function getAttributeStrict(string $name)
+    {
+        if ($this->hasAttribute($name)) {
+            return $this->getAttribute($name);
         }
 
-        $datetime = DateTimeImmutable::createFromFormat(DateTime::ATOM, $datetimeParam);
+        throw RequestAttributeMissingException::create($name);
+    }
 
-        if ($datetime === false || $datetime->format(DateTime::ATOM) !== $datetimeParam) {
-            throw new LogicException(sprintf('Could not parse %s as datetime', $field));
+
+    /**
+     * @return Dot<string, mixed[]>
+     */
+    private function getDotAnnotatedRequestBody(): Dot
+    {
+        if ($this->dotAnnotatedRequestBody === null) {
+            $this->dotAnnotatedRequestBody = new Dot($this->getParsedBodyAsArray());
         }
 
-        return $datetime;
+        return $this->dotAnnotatedRequestBody;
     }
 }
