@@ -5,7 +5,7 @@ namespace BrandEmbassy\Slim\Request;
 use Adbar\Dot;
 use DateTime;
 use DateTimeImmutable;
-use InvalidArgumentException;
+use LogicException;
 use Nette\Utils\Strings;
 use Slim\Http\Request as SlimRequest;
 use Slim\Route;
@@ -79,6 +79,17 @@ class Request extends SlimRequest implements RequestInterface
         }
 
         throw RouteArgumentMissingException::create($argument);
+    }
+
+
+    /**
+     * @param mixed[]|object|null $data
+     *
+     * @return static
+     */
+    public function withParsedBody($data): self
+    {
+        return parent::withParsedBody($data);
     }
 
 
@@ -186,18 +197,21 @@ class Request extends SlimRequest implements RequestInterface
 
 
     /**
-     * @throws QueryParamMissingException
-     * @throws InvalidArgumentException
+     * @throws LogicException
      */
     public function getDateTimeQueryParam(string $field, string $format = DateTime::ATOM): DateTimeImmutable
     {
-        $datetimeParam = $this->getQueryParamStrict($field);
+        $rawParams = $this->getQueryParams();
+        if (!array_key_exists($field, $rawParams)) {
+            throw new LogicException(sprintf('Could not find %s in request\'s params', $field));
+        }
+
+        $datetimeParam = $this->findQueryParamAsString($field);
         assert(is_string($datetimeParam));
 
         $dateTime = DateTimeImmutable::createFromFormat($format, $datetimeParam);
-
         if ($dateTime === false) {
-            throw new InvalidArgumentException(sprintf('Field %s is not in %s format', $field, $format));
+            throw new LogicException(sprintf('Could not parse %s as datetime', $field));
         }
 
         return $dateTime;
@@ -226,6 +240,28 @@ class Request extends SlimRequest implements RequestInterface
     public function findAttribute(string $name, $default = null)
     {
         return $this->getAttribute($name, $default);
+    }
+
+
+    /**
+     * @param string $name
+     * @param mixed $default
+     *
+     * @return mixed|string|null
+     */
+    public function getAttribute($name, $default = null)
+    {
+        $value = parent::getAttribute($name, $default);
+
+        if ($value === $default) {
+            $route = parent::getAttribute('route', $default);
+
+            if ($route instanceof Route) {
+                $value = $route->getArgument($name, $default);
+            }
+        }
+
+        return $value;
     }
 
 

@@ -14,8 +14,10 @@ class BeforeRequestMiddleware implements Middleware
 
     public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next): ResponseInterface
     {
-        $newResponse = MiddlewareInvocationCounter::invoke(self::HEADER_NAME, $response);
+        $response = MiddlewareInvocationCounter::invoke(self::HEADER_NAME, $response);
+        // Also add a proof header to assert that before-request middlewares were executed
+        $response = $response->withAddedHeader('processed-by-before-request-middleware', 'proof-for-before-request');
 
-        return $next($request, $newResponse);
+        return $next($request, $response);
     }
 }

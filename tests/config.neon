@@ -16,18 +16,14 @@ services:
     - BrandEmbassyTest\Slim\Sample\GroupMiddleware
     - BrandEmbassyTest\Slim\Sample\OnlyApiGroupMiddleware
     helloWorldRoute: BrandEmbassyTest\Slim\Sample\HelloWorldRoute
+    - BrandEmbassyTest\Slim\Sample\AfterRouteMiddleware
 
-slimApi:
-    apiPrefix: '/tests'
-    slimConfiguration:
-        settings:
-            removeDefaultHandlers: true
-            myCustomOption: 'Sample'
-
-    handlers:
-        notFoundHandler: BrandEmbassyTest\Slim\Sample\NotFoundHandler
-        notAllowedHandler: BrandEmbassyTest\Slim\Sample\NotAllowedHandler
-        errorHandler: BrandEmbassyTest\Slim\Sample\ApiErrorHandler
+parameters:
+    api:
+        handlers:
+            notFoundHandler: BrandEmbassyTest\Slim\Sample\NotFoundHandler
+            notAllowedHandler: BrandEmbassyTest\Slim\Sample\NotAllowedHandler
+            errorHandler: BrandEmbassyTest\Slim\Sample\ApiErrorHandler
 
     routes:
         "app":
@@ -75,8 +71,19 @@ slimApi:
         api:
             - BrandEmbassyTest\Slim\Sample\OnlyApiGroupMiddleware
 
+    afterRouteMiddlewares:
+        - BrandEmbassyTest\Slim\Sample\AfterRouteMiddleware
+
     beforeRouteMiddlewares:
         - BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware
 
     beforeRequestMiddlewares:
         - BrandEmbassyTest\Slim\Sample\BeforeRequestMiddleware
+
+slimApi:
+    apiPrefix: '/tests'
+    slimConfiguration:
+        settings:
+            removeDefaultHandlers: true
+            myCustomOption: 'Sample'
+

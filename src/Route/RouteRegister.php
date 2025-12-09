@@ -2,11 +2,14 @@
 
 namespace BrandEmbassy\Slim\Route;
 
+use BrandEmbassy\Slim\Middleware\AfterRouteMiddlewares;
 use BrandEmbassy\Slim\Middleware\BeforeRouteMiddlewares;
 use BrandEmbassy\Slim\Middleware\MiddlewareGroups;
 use Slim\Interfaces\RouterInterface;
+use function array_key_exists;
 use function array_keys;
 use function array_merge_recursive;
+use function is_array;
 use function levenshtein;
 
 /**
@@ -39,24 +42,31 @@ class RouteRegister
      */
     private $middlewareGroups;
 
+    /**
+     * @var AfterRouteMiddlewares
+     */
+    private $afterRouteMiddlewares;
+
 
     public function __construct(
         RouterInterface $router,
         RouteDefinitionFactory $routeDefinitionFactory,
         UrlPatternResolver $urlPatternResolver,
         BeforeRouteMiddlewares $beforeRouteMiddlewares,
-        MiddlewareGroups $middlewareGroups
+        MiddlewareGroups $middlewareGroups,
+        AfterRouteMiddlewares $afterRouteMiddlewares
     ) {
         $this->router = $router;
         $this->routeDefinitionFactory = $routeDefinitionFactory;
         $this->urlPatternResolver = $urlPatternResolver;
         $this->beforeRouteMiddlewares = $beforeRouteMiddlewares;
         $this->middlewareGroups = $middlewareGroups;
+        $this->afterRouteMiddlewares = $afterRouteMiddlewares;
     }
 
 
     /**
-     * @param array<string, mixed[]> $routeData
+     * @param array<string, mixed|mixed[]> $routeData
      */
     public function register(
         string $apiNamespace,
@@ -71,7 +81,24 @@ class RouteRegister
         );
 
         foreach ($routeData as $method => $routeDefinitionData) {
-            if ($routeDefinitionData === $this->getEmptyRouteDefinitionData()) {
+            // Skip non-arrays (e.g., neon unsets or explicit false/null to disable a route)
+            if (!is_array($routeDefinitionData)) {
+                continue;
+            }
+
+            // Backward compatibility: allow singular 'middleware' key
+            if (isset($routeDefinitionData['middleware'])
+                && !isset($routeDefinitionData[RouteDefinition::MIDDLEWARES])
+            ) {
+                $routeDefinitionData[RouteDefinition::MIDDLEWARES] = $routeDefinitionData['middleware'];
+                unset($routeDefinitionData['middleware']);
+            }
+
+            // Skip unregistered/disabled routes or incomplete definitions
+            if ($routeDefinitionData === $this->getEmptyRouteDefinitionData()
+                || $routeDefinitionData === []
+                || !array_key_exists(RouteDefinition::SERVICE, $routeDefinitionData)
+            ) {
                 continue;
             }
 
@@ -80,19 +107,12 @@ class RouteRegister
             }
 
             $routeDefinition = $this->routeDefinitionFactory->create($method, $routeDefinitionData);
-
             $routeName = $routeDefinition->getName() ?? $resolveRoutePath;
 
-            $routeToAdd = $this->router->map(
-                [$routeDefinition->getMethod()],
-                $urlPattern,
-                $routeDefinition->getRoute()
-            );
+            $routeToAdd = $this->router->map([$routeDefinition->getMethod()], $urlPattern, $routeDefinition->getRoute());
             $routeToAdd->setName($routeName);
 
-            $middlewaresToAdd = $this->getAllMiddlewares($apiNamespace, $routeDefinition);
-
-            foreach ($middlewaresToAdd as $middleware) {
+            foreach ($this->getAllMiddlewares($apiNamespace, $routeDefinition) as $middleware) {
                 $routeToAdd->add($middleware);
             }
         }
@@ -116,7 +136,7 @@ class RouteRegister
             $routeDefinition->getMiddlewares(),
             $middlewaresFromGroups,
             $versionMiddlewares,
-            $this->beforeRouteMiddlewares->getMiddlewares()
+            $this->afterRouteMiddlewares->getMiddlewares()
         );
     }
 
