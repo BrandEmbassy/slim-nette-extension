@@ -13,6 +13,7 @@
     },
     "require": {
         "php": ">=8.2",
+        "adbario/php-dot-notation": "^2.2 || ^3.0",
         "nette/di": "^3.0",
         "nette/neon": "^3.0",
         "nette/utils": "^3.0 || ^4.0",
