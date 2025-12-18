@@ -23,9 +23,7 @@ class SlimApp extends App
      */
     public function run($silent = false): ResponseInterface
     {
-        $request = new Request($this->getContainer()->get('request'));
-        $response = new Response($this->getContainer()->get('response'));
-        $response = $this->process($request, $response);
+        $response = parent::run(true);
 
         $contentTypes = $response->getHeader('Content-Type');
         $contentType = reset($contentTypes);
@@ -38,8 +36,7 @@ class SlimApp extends App
             $this->respond($response);
         }
 
-        return $response;
-    }
+        return $response;    }
 
 
     /**
