@@ -45,7 +45,7 @@ class Request extends SlimRequest implements RequestInterface
      *
      * @param Environment $environment The Slim application Environment
      *
-     * @return static
+     * @return self
      */
     public static function createFromEnvironment(Environment $environment): self
     {
