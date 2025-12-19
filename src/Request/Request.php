@@ -32,6 +32,29 @@ class Request extends SlimRequest implements RequestInterface
     protected $dotAnnotatedRequestBody;
 
 
+    /**
+     * Create a new Request from a SlimRequest instance
+     * This allows wrapping an existing SlimRequest with additional functionality
+     */
+    public function __construct(SlimRequest $source)
+    {
+        parent::__construct(
+            $source->getMethod(),
+            $source->getUri(),
+            $source->getHeaders(),
+            $source->getCookieParams(),
+            $source->getServerParams(),
+            $source->getBody(),
+            $source->getUploadedFiles()
+        );
+
+        // Copy attributes from source request
+        foreach ($source->getAttributes() as $name => $value) {
+            $this->attributes[$name] = $value;
+        }
+    }
+
+
     public function __clone()
     {
         parent::__clone();

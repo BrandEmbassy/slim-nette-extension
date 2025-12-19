@@ -100,8 +100,12 @@ final class SlimApplicationFactory
         $container['request'] = static function (PsrContainerInterface $container): Request {
             /** @var Environment $environment */
             $environment = $container->get('environment');
-
-            return Request::createFromEnvironment($environment);
+            
+            // First create a standard SlimRequest from the environment
+            $slimRequest = SlimRequest::createFromEnvironment($environment);
+            
+            // Then wrap it in our custom Request class
+            return new Request($slimRequest);
         };
 
         // Override the default response factory to use our custom Response class
