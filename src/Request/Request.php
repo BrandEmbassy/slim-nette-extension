@@ -6,10 +6,17 @@ use Adbar\Dot;
 use DateTime;
 use DateTimeImmutable;
 use InvalidArgumentException;
+use Slim\Http\Cookies;
+use Slim\Http\Environment;
+use Slim\Http\Headers;
+use Slim\Http\RequestBody;
 use Slim\Http\Request as SlimRequest;
+use Slim\Http\UploadedFile;
+use Slim\Http\Uri;
 use Slim\Route;
 use function array_key_exists;
 use function assert;
+use function in_array;
 use function is_array;
 use function is_string;
 use function sprintf;
@@ -31,6 +38,36 @@ class Request extends SlimRequest implements RequestInterface
      * @var Dot<string, mixed[]>|null
      */
     protected $dotAnnotatedRequestBody;
+
+
+    /**
+     * Create new HTTP request with data extracted from the application Environment object
+     *
+     * @param Environment $environment The Slim application Environment
+     *
+     * @return static
+     */
+    public static function createFromEnvironment(Environment $environment): self
+    {
+        $method = $environment['REQUEST_METHOD'];
+        $uri = Uri::createFromEnvironment($environment);
+        $headers = Headers::createFromEnvironment($environment);
+        $cookies = Cookies::parseHeader($headers->get('Cookie', []));
+        $serverParams = $environment->all();
+        $body = new RequestBody();
+        $uploadedFiles = UploadedFile::createFromEnvironment($environment);
+
+        $request = new self($method, $uri, $headers, $cookies, $serverParams, $body, $uploadedFiles);
+
+        if ($method === 'POST' &&
+            in_array($request->getMediaType(), ['application/x-www-form-urlencoded', 'multipart/form-data'], true)
+        ) {
+            // parsed body must be $_POST
+            $request = $request->withParsedBody($_POST);
+        }
+
+        return $request;
+    }
 
 
     public function __clone()
