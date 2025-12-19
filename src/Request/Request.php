@@ -47,11 +47,6 @@ class Request extends SlimRequest implements RequestInterface
             $source->getBody(),
             $source->getUploadedFiles()
         );
-
-        // Copy attributes from source request
-        foreach ($source->getAttributes() as $name => $value) {
-            $this->attributes[$name] = $value;
-        }
     }
 
 
