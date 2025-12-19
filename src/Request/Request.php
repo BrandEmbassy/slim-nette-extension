@@ -16,7 +16,6 @@ use Slim\Http\Uri;
 use Slim\Route;
 use function array_key_exists;
 use function assert;
-use function in_array;
 use function is_array;
 use function is_string;
 use function sprintf;
@@ -60,7 +59,7 @@ class Request extends SlimRequest implements RequestInterface
         $request = new self($method, $uri, $headers, $cookies, $serverParams, $body, $uploadedFiles);
 
         if ($method === 'POST' &&
-            in_array($request->getMediaType(), ['application/x-www-form-urlencoded', 'multipart/form-data'], true)
+            in_array($request->getMediaType(), ['application/x-www-form-urlencoded', 'multipart/form-data'])
         ) {
             // parsed body must be $_POST
             $request = $request->withParsedBody($_POST);
