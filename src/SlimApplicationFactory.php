@@ -3,12 +3,19 @@
 namespace BrandEmbassy\Slim;
 
 use BrandEmbassy\Slim\Middleware\Middleware;
+use BrandEmbassy\Slim\Request\Request;
 use BrandEmbassy\Slim\Request\RequestInterface;
+use BrandEmbassy\Slim\Response\Response;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use Closure;
 use LogicException;
 use Nette\DI\Container;
+use Psr\Container\ContainerInterface as PsrContainerInterface;
 use Slim\Collection;
+use Slim\Http\Environment;
+use Slim\Http\Headers;
+use Slim\Http\Request as SlimRequest;
+use Slim\Http\Response as SlimResponse;
 use Throwable;
 use function gettype;
 use function is_array;
@@ -51,6 +58,8 @@ final class SlimApplicationFactory
     {
         $app = new SlimApp($this->configuration['slimConfiguration']);
 
+        $this->registerCustomRequestAndResponseFactories($app);
+
         $configuration = $this->getConfiguration($this->configuration['apiDefinitionKey']);
 
         $this->registerAfterRouteMiddlewares($app, $configuration);
@@ -80,6 +89,28 @@ final class SlimApplicationFactory
         }
 
         return $app;
+    }
+
+
+    private function registerCustomRequestAndResponseFactories(SlimApp $app): void
+    {
+        $container = $app->getContainer();
+
+        // Override the default request factory to use our custom Request class
+        $container['request'] = static function (PsrContainerInterface $container): Request {
+            /** @var Environment $environment */
+            $environment = $container->get('environment');
+
+            return Request::createFromEnvironment($environment);
+        };
+
+        // Override the default response factory to use our custom Response class
+        $container['response'] = static function (): Response {
+            $headers = new Headers(['Content-Type' => 'text/html; charset=UTF-8']);
+            $slimResponse = new SlimResponse(200, $headers);
+
+            return new Response($slimResponse);
+        };
     }
 
 
