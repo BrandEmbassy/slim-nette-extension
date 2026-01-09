@@ -2,6 +2,7 @@
 
 namespace BrandEmbassy\Slim\Route;
 
+use BrandEmbassy\Slim\Middleware\AfterRouteMiddlewares;
 use BrandEmbassy\Slim\Middleware\BeforeRouteMiddlewares;
 use BrandEmbassy\Slim\Middleware\MiddlewareGroups;
 use Slim\Interfaces\RouterInterface;
@@ -22,6 +23,8 @@ class RouteRegister
 
     private BeforeRouteMiddlewares $beforeRouteMiddlewares;
 
+    private AfterRouteMiddlewares $afterRouteMiddlewares;
+
     private MiddlewareGroups $middlewareGroups;
 
 
@@ -30,12 +33,14 @@ class RouteRegister
         RouteDefinitionFactory $routeDefinitionFactory,
         UrlPatternResolver $urlPatternResolver,
         BeforeRouteMiddlewares $beforeRouteMiddlewares,
+        AfterRouteMiddlewares $afterRouteMiddlewares,
         MiddlewareGroups $middlewareGroups
     ) {
         $this->router = $router;
         $this->routeDefinitionFactory = $routeDefinitionFactory;
         $this->urlPatternResolver = $urlPatternResolver;
         $this->beforeRouteMiddlewares = $beforeRouteMiddlewares;
+        $this->afterRouteMiddlewares = $afterRouteMiddlewares;
         $this->middlewareGroups = $middlewareGroups;
     }
 
@@ -98,6 +103,7 @@ class RouteRegister
         );
 
         return array_merge_recursive(
+            $this->afterRouteMiddlewares->getMiddlewares(),
             $routeDefinition->getMiddlewares(),
             $middlewaresFromGroups,
             $versionMiddlewares,

@@ -7,6 +7,9 @@ use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassyTest\Slim\MiddlewareInvocationCounter;
 
+/**
+ * @final
+ */
 class BeforeRouteMiddleware implements Middleware
 {
     public const HEADER_NAME = 'before-route-middleware';
@@ -14,17 +17,8 @@ class BeforeRouteMiddleware implements Middleware
 
     public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next): ResponseInterface
     {
-        $response = $response->withAddedHeader(
-            'header-to-be-changed-by-after-route-middleware',
-            'initial-value'
-        );
-        $response = $response->withAddedHeader(
-            'processed-by-before-route-middlewares',
-            'proof-for-before-route'
-        );
+        $responseWithCounterHeader = MiddlewareInvocationCounter::invoke(self::HEADER_NAME, $response);
 
-        $newResponse = MiddlewareInvocationCounter::invoke(self::HEADER_NAME, $response);
-
-        return $next($request, $newResponse);
+        return $next($request, $responseWithCounterHeader);
     }
 }
