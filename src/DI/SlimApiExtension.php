@@ -2,6 +2,7 @@
 
 namespace BrandEmbassy\Slim\DI;
 
+use BrandEmbassy\Slim\Middleware\AfterRouteMiddlewares;
 use BrandEmbassy\Slim\Middleware\BeforeRouteMiddlewares;
 use BrandEmbassy\Slim\Middleware\MiddlewareFactory;
 use BrandEmbassy\Slim\Middleware\MiddlewareGroups;
@@ -55,6 +56,8 @@ class SlimApiExtension extends CompilerExtension
                     ->default([]),
                 SlimApplicationFactory::BEFORE_ROUTE_MIDDLEWARES => Expect::arrayOf($this->createServiceExpect())
                     ->default([]),
+                SlimApplicationFactory::AFTER_ROUTE_MIDDLEWARES => Expect::arrayOf($this->createServiceExpect())
+                    ->default([]),
                 SlimApplicationFactory::SLIM_CONFIGURATION => Expect::array()->default([]),
                 SlimApplicationFactory::API_PREFIX => Expect::string()->default(''),
                 SlimApplicationFactory::MIDDLEWARE_GROUPS => Expect::arrayOf(
@@ -76,6 +79,9 @@ class SlimApiExtension extends CompilerExtension
 
         $builder->addDefinition($this->prefix('beforeRouteMiddlewares'))
             ->setFactory(BeforeRouteMiddlewares::class, [$config[SlimApplicationFactory::BEFORE_ROUTE_MIDDLEWARES]]);
+
+        $builder->addDefinition($this->prefix('afterRouteMiddlewares'))
+            ->setFactory(AfterRouteMiddlewares::class, [$config[SlimApplicationFactory::AFTER_ROUTE_MIDDLEWARES]]);
 
         $builder->addDefinition($this->prefix('middlewareGroups'))
             ->setFactory(MiddlewareGroups::class, [$config[SlimApplicationFactory::MIDDLEWARE_GROUPS]]);

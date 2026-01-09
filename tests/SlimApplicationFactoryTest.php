@@ -2,6 +2,7 @@
 
 namespace BrandEmbassyTest\Slim;
 
+use BrandEmbassyTest\Slim\Sample\AfterRouteMiddleware;
 use BrandEmbassyTest\Slim\Sample\BeforeRequestMiddleware;
 use BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware;
 use BrandEmbassyTest\Slim\Sample\GoldenKeyAuthMiddleware;
@@ -64,6 +65,7 @@ class SlimApplicationFactoryTest extends TestCase
                     BeforeRequestMiddleware::HEADER_NAME => 'invoked-0',
                     BeforeRouteMiddleware::HEADER_NAME => 'invoked-1',
                     GroupMiddleware::HEADER_NAME => 'invoked-2',
+                    AfterRouteMiddleware::HEADER_NAME => 'invoked-3',
                 ],
                 'expectedStatusCode' => 200,
                 'httpMethod' => 'GET',
@@ -75,6 +77,7 @@ class SlimApplicationFactoryTest extends TestCase
                     BeforeRequestMiddleware::HEADER_NAME => 'invoked-0',
                     BeforeRouteMiddleware::HEADER_NAME => 'invoked-1',
                     GroupMiddleware::HEADER_NAME => 'invoked-2',
+                    AfterRouteMiddleware::HEADER_NAME => 'invoked-3',
                 ],
                 'expectedStatusCode' => 200,
                 'httpMethod' => 'GET',
@@ -115,6 +118,7 @@ class SlimApplicationFactoryTest extends TestCase
                     BeforeRouteMiddleware::HEADER_NAME => 'invoked-1',
                     OnlyApiGroupMiddleware::HEADER_NAME => 'invoked-2',
                     GroupMiddleware::HEADER_NAME => 'invoked-3',
+                    AfterRouteMiddleware::HEADER_NAME => 'invoked-4',
                 ],
                 'expectedStatusCode' => 201,
                 'httpMethod' => 'POST',
@@ -128,6 +132,7 @@ class SlimApplicationFactoryTest extends TestCase
                     BeforeRouteMiddleware::HEADER_NAME => 'invoked-1',
                     OnlyApiGroupMiddleware::HEADER_NAME => 'invoked-2',
                     GroupMiddleware::HEADER_NAME => 'invoked-3',
+                    AfterRouteMiddleware::HEADER_NAME => 'invoked-4',
                 ],
                 'expectedStatusCode' => 200,
                 'httpMethod' => 'GET',

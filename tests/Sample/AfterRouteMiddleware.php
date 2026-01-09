@@ -2,19 +2,23 @@
 
 namespace BrandEmbassyTest\Slim\Sample;
 
-use BrandEmbassy\Slim\Middleware;
+use BrandEmbassy\Slim\Middleware\Middleware;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
+use BrandEmbassyTest\Slim\MiddlewareInvocationCounter;
 
+/**
+ * @final
+ */
 class AfterRouteMiddleware implements Middleware
 {
+    public const HEADER_NAME = 'after-route-middleware';
+
+
     public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next): ResponseInterface
     {
-        $response = $response->withHeader(
-            'header-to-be-changed-by-after-route-middleware',
-            'changed-value'
-        );
+        $responseWithCounterHeader = MiddlewareInvocationCounter::invoke(self::HEADER_NAME, $response);
 
-        return $next($request, $response);
+        return $next($request, $responseWithCounterHeader);
     }
 }

@@ -31,6 +31,8 @@ class SlimApplicationFactory
 
     public const BEFORE_ROUTE_MIDDLEWARES = 'beforeRouteMiddlewares';
 
+    public const AFTER_ROUTE_MIDDLEWARES = 'afterRouteMiddlewares';
+
     public const HANDLERS = 'handlers';
 
     public const BEFORE_REQUEST_MIDDLEWARES = 'beforeRequestMiddlewares';
@@ -62,11 +64,6 @@ class SlimApplicationFactory
     private RouteRegister $routeRegister;
 
     private OnlyNecessaryRoutesProvider $onlyNecessaryRoutesProvider;
-
-    /**
-     * @var array<Middleware>
-     */
-    private array $afterRoutesMiddlewares = [];
 
 
     /**
@@ -114,8 +111,6 @@ class SlimApplicationFactory
             SlimSettings::ROUTE_API_NAMES_ALWAYS_INCLUDE,
             [],
         );
-
-        $this->registerAfterRouteMiddlewares($app, $configuration);
 
         if ($useApcuCache && !apcu_enabled()) {
             // @intentionally For cli scripts is APCU disabled by default
