@@ -55,6 +55,7 @@
         "process-timeout": 600,
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true
-        }
+        },
+        "github-protocols": ["https"]
     }
 }
