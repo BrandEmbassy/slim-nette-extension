@@ -2,10 +2,9 @@
 
 namespace BrandEmbassyTest\Slim\Sample;
 
-use BrandEmbassy\Slim\Response\Response;
+use BrandEmbassy\Slim\Request\RequestInterface;
+use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassy\Slim\Route\Route;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * @final
@@ -13,10 +12,8 @@ use Psr\Http\Message\ServerRequestInterface;
 class CreateChannelRoute implements Route
 {
 
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+    public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        $wrappedResponse = new Response($response);
-
-        return $wrappedResponse->withJson(['status' => 'created'], 201)->getInnerResponse();
+        return $response->withJson(['status' => 'created'], 201);
     }
 }

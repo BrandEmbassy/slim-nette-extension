@@ -21,7 +21,8 @@ slimApi:
     apiPrefix: '/tests'
     slimConfiguration:
         settings:
-            displayErrorDetails: true
+            removeDefaultHandlers: true
+            myCustomOption: 'Sample'
 
     handlers:
         notFoundHandler: BrandEmbassyTest\Slim\Sample\NotFoundHandler

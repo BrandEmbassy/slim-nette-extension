@@ -9,7 +9,6 @@ use Nette\DI\Container;
 use Nette\DI\ContainerLoader;
 use Nette\DI\Extensions\ExtensionsExtension;
 use Psr\Http\Message\ResponseInterface;
-use Slim\Factory\ServerRequestCreatorFactory;
 use function md5;
 
 /**
@@ -29,10 +28,7 @@ class SlimAppTester
     {
         $slimApp = self::createSlimApp($configPath);
 
-        $serverRequestCreator = ServerRequestCreatorFactory::create();
-        $request = $serverRequestCreator->createServerRequestFromGlobals();
-
-        return $slimApp->run($request);
+        return $slimApp->run(true);
     }
 
 

@@ -6,19 +6,24 @@ use BrandEmbassy\Slim\DI\ServiceProvider;
 use BrandEmbassy\Slim\Middleware\MiddlewareFactory;
 use BrandEmbassy\Slim\Request\Request;
 use BrandEmbassy\Slim\Request\RequestFactory;
+use BrandEmbassy\Slim\Response\Response;
 use BrandEmbassy\Slim\Response\ResponseFactory;
 use BrandEmbassy\Slim\Route\OnlyNecessaryRoutesProvider;
 use BrandEmbassy\Slim\Route\RouteRegister;
 use LogicException;
 use Nette\DI\Container;
 use Psr\Http\Message\ResponseFactoryInterface;
+use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Slim\Factory\AppFactory;
 use Slim\Interfaces\RouteCollectorInterface;
+use Throwable;
 use function apcu_enabled;
 use function assert;
 use function implode;
 use function in_array;
 use function is_callable;
+use function is_string;
 use function sprintf;
 
 /**
@@ -178,7 +183,9 @@ class SlimApplicationFactory
         if (isset($handlers['errorHandler'])) {
             $errorHandler = ServiceProvider::getService($this->container, $handlers['errorHandler']);
             assert(is_callable($errorHandler));
-            $errorMiddleware->setDefaultErrorHandler($errorHandler);
+            $errorMiddleware->setDefaultErrorHandler(
+                $this->createErrorHandlerAdapter($errorHandler),
+            );
         }
 
         if (isset($handlers['notFoundHandler'])) {
@@ -186,7 +193,7 @@ class SlimApplicationFactory
             assert(is_callable($notFoundHandler));
             $errorMiddleware->setErrorHandler(
                 \Slim\Exception\HttpNotFoundException::class,
-                $notFoundHandler,
+                $this->createErrorHandlerAdapter($notFoundHandler),
             );
         }
 
@@ -195,9 +202,38 @@ class SlimApplicationFactory
             assert(is_callable($notAllowedHandler));
             $errorMiddleware->setErrorHandler(
                 \Slim\Exception\HttpMethodNotAllowedException::class,
-                $notAllowedHandler,
+                $this->createErrorHandlerAdapter($notAllowedHandler),
             );
         }
+    }
+
+
+    /**
+     * Creates an adapter that converts old-style error handlers to Slim 4 signature.
+     * Old signature: (RequestInterface $request, ResponseInterface $response, ?Throwable $exception): ResponseInterface
+     * New signature: (ServerRequestInterface $request, Throwable $exception, bool $displayErrorDetails, bool $logErrors, bool $logErrorDetails): ResponseInterface
+     */
+    private function createErrorHandlerAdapter(callable $handler): callable
+    {
+        $psr17ResponseFactory = $this->psr17ResponseFactory;
+
+        return static function (
+            ServerRequestInterface $psrRequest,
+            Throwable $exception,
+            bool $displayErrorDetails,
+            bool $logErrors,
+            bool $logErrorDetails
+        ) use ($handler, $psr17ResponseFactory): PsrResponseInterface {
+            // Wrap PSR-7 request/response in our wrappers for backward compatibility
+            $request = new Request($psrRequest);
+            $response = new Response($psr17ResponseFactory->createResponse());
+
+            // Call the old-style error handler
+            $result = $handler($request, $response, $exception);
+
+            // Return the inner PSR response if it's our wrapper
+            return $result instanceof Response ? $result->getInnerResponse() : $result;
+        };
     }
 
 

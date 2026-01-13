@@ -3,11 +3,9 @@
 namespace BrandEmbassyTest\Slim\Sample;
 
 use BrandEmbassy\Slim\Middleware\Middleware;
-use BrandEmbassy\Slim\Response\Response;
+use BrandEmbassy\Slim\Request\RequestInterface;
+use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassyTest\Slim\MiddlewareInvocationCounter;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\RequestHandlerInterface;
 
 /**
  * @final
@@ -17,14 +15,10 @@ class GroupMiddleware implements Middleware
     public const HEADER_NAME = 'group-middleware';
 
 
-    public function __invoke(
-        ServerRequestInterface $request,
-        RequestHandlerInterface $handler
-    ): ResponseInterface {
-        $response = $handler->handle($request);
-        $wrappedResponse = new Response($response);
-        $newResponse = MiddlewareInvocationCounter::invoke(self::HEADER_NAME, $wrappedResponse);
+    public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next): ResponseInterface
+    {
+        $newResponse = MiddlewareInvocationCounter::invoke(self::HEADER_NAME, $response);
 
-        return $newResponse->getInnerResponse();
+        return $next($request, $newResponse);
     }
 }

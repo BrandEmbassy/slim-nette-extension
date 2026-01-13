@@ -3,10 +3,8 @@
 namespace BrandEmbassyTest\Slim\Sample;
 
 use BrandEmbassy\Slim\ErrorHandler;
-use BrandEmbassy\Slim\Response\Response;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Slim\Psr7\Factory\ResponseFactory;
+use BrandEmbassy\Slim\Request\RequestInterface;
+use BrandEmbassy\Slim\Response\ResponseInterface;
 use Throwable;
 
 /**
@@ -15,16 +13,13 @@ use Throwable;
 class ApiErrorHandler implements ErrorHandler
 {
     public function __invoke(
-        ServerRequestInterface $request,
-        Throwable $exception,
-        bool $displayErrorDetails,
-        bool $logErrors,
-        bool $logErrorDetails
+        RequestInterface $request,
+        ResponseInterface $response,
+        ?Throwable $exception = null
     ): ResponseInterface {
-        $error = $exception->getMessage();
-
-        $responseFactory = new ResponseFactory();
-        $response = new Response($responseFactory->createResponse());
+        $error = $exception !== null
+            ? $exception->getMessage()
+            : 'Unknown error.';
 
         return $response->withJson(['error' => $error], 500);
     }

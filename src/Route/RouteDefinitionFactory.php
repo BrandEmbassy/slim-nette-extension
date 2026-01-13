@@ -4,10 +4,14 @@ namespace BrandEmbassy\Slim\Route;
 
 use BrandEmbassy\Slim\DI\ServiceProvider;
 use BrandEmbassy\Slim\Middleware\MiddlewareFactory;
+use BrandEmbassy\Slim\Request\Request;
 use BrandEmbassy\Slim\Request\RequestInterface;
+use BrandEmbassy\Slim\Response\Response;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use LogicException;
 use Nette\DI\Container;
+use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * @final
@@ -33,15 +37,24 @@ class RouteDefinitionFactory
      */
     public function create(string $method, array $routeDefinitionData): RouteDefinition
     {
+        // Create an adapter that converts PSR-7 to our interfaces for backward compatibility
         $route = function (
-            RequestInterface $request,
-            ResponseInterface $response
+            ServerRequestInterface $psrRequest,
+            PsrResponseInterface $psrResponse
         ) use (
             $routeDefinitionData
-        ): ResponseInterface {
+        ): PsrResponseInterface {
             $route = $this->getRoute($routeDefinitionData[RouteDefinition::SERVICE]);
 
-            return $route($request, $response);
+            // Wrap PSR-7 request/response in our wrappers
+            $request = new Request($psrRequest);
+            $response = new Response($psrResponse);
+
+            // Call the old-style route
+            $result = $route($request, $response);
+
+            // Return the inner PSR response if it's our wrapper
+            return $result instanceof Response ? $result->getInnerResponse() : $result;
         };
 
         $middlewares = $this->middlewareFactory->createFromIdentifiers(

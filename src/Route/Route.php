@@ -2,10 +2,10 @@
 
 namespace BrandEmbassy\Slim\Route;
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
+use BrandEmbassy\Slim\Request\RequestInterface;
+use BrandEmbassy\Slim\Response\ResponseInterface;
 
 interface Route
 {
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface;
+    public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface;
 }

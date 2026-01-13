@@ -3,8 +3,10 @@
 namespace BrandEmbassy\Slim\Middleware;
 
 use BrandEmbassy\Slim\DI\ServiceProvider;
+use BrandEmbassy\Slim\Request\Request;
+use BrandEmbassy\Slim\Response\Response;
 use Nette\DI\Container;
-use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use function array_map;
@@ -30,16 +32,35 @@ class MiddlewareFactory
         $container = $this->container;
 
         return static function (
-            ServerRequestInterface $request,
+            ServerRequestInterface $psrRequest,
             RequestHandlerInterface $handler
         ) use (
             $middlewareIdentifier,
             $container
-        ): ResponseInterface {
+        ): PsrResponseInterface {
             $middleware = ServiceProvider::getService($container, $middlewareIdentifier);
             assert(is_callable($middleware));
 
-            return $middleware($request, $handler);
+            // Wrap PSR-7 request in our Request wrapper for backward compatibility
+            $request = new Request($psrRequest);
+
+            // Create a Response wrapper with an empty response
+            $responseFactory = new \Slim\Psr7\Factory\ResponseFactory();
+            $response = new Response($responseFactory->createResponse());
+
+            // Create a $next callable that wraps the PSR-15 handler
+            $next = static function ($req, $res) use ($handler, $psrRequest): PsrResponseInterface {
+                // Get the inner PSR request if it's our wrapper
+                $innerRequest = $req instanceof Request ? $req->getInnerRequest() : $psrRequest;
+
+                return $handler->handle($innerRequest);
+            };
+
+            // Call the old-style middleware
+            $result = $middleware($request, $response, $next);
+
+            // Return the inner PSR response if it's our wrapper
+            return $result instanceof Response ? $result->getInnerResponse() : $result;
         };
     }
 

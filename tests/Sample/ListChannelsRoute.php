@@ -2,21 +2,18 @@
 
 namespace BrandEmbassyTest\Slim\Sample;
 
-use BrandEmbassy\Slim\Response\Response;
+use BrandEmbassy\Slim\Request\RequestInterface;
+use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassy\Slim\Route\Route;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * @final
  */
 class ListChannelsRoute implements Route
 {
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+    public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        $wrappedResponse = new Response($response);
-
-        return $wrappedResponse->withJson(
+        return $response->withJson(
             [
                 [
                     'id' => 1,
@@ -28,6 +25,6 @@ class ListChannelsRoute implements Route
                 ],
             ],
             200
-        )->getInnerResponse();
+        );
     }
 }

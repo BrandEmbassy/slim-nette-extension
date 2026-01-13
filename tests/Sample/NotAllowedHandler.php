@@ -2,28 +2,18 @@
 
 namespace BrandEmbassyTest\Slim\Sample;
 
-use BrandEmbassy\Slim\ErrorHandler;
-use BrandEmbassy\Slim\Response\Response;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Slim\Psr7\Factory\ResponseFactory;
-use Throwable;
+use BrandEmbassy\Slim\Request\RequestInterface;
+use BrandEmbassy\Slim\Response\ResponseInterface;
 
 /**
+ * Intentionally not extending ErrorHandler. Slim does not call this with 3rd param at __invoke method.
+ *
  * @final
  */
-class NotAllowedHandler implements ErrorHandler
+class NotAllowedHandler
 {
-    public function __invoke(
-        ServerRequestInterface $request,
-        Throwable $exception,
-        bool $displayErrorDetails,
-        bool $logErrors,
-        bool $logErrorDetails
-    ): ResponseInterface {
-        $responseFactory = new ResponseFactory();
-        $response = new Response($responseFactory->createResponse());
-
+    public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface
+    {
         return $response->withJson(['error' => 'Sample NotAllowedHandler here!'], 405);
     }
 }

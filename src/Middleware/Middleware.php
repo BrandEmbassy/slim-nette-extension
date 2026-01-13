@@ -2,14 +2,10 @@
 
 namespace BrandEmbassy\Slim\Middleware;
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\RequestHandlerInterface;
+use BrandEmbassy\Slim\Request\RequestInterface;
+use BrandEmbassy\Slim\Response\ResponseInterface;
 
 interface Middleware
 {
-    public function __invoke(
-        ServerRequestInterface $request,
-        RequestHandlerInterface $handler
-    ): ResponseInterface;
+    public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next): ResponseInterface;
 }
