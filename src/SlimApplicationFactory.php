@@ -14,6 +14,7 @@ use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Slim\Factory\AppFactory;
 use Slim\Interfaces\RouteCollectorProxyInterface;
+use Slim\Psr7\Factory\ResponseFactory;
 use function apcu_enabled;
 use function assert;
 use function implode;
@@ -122,25 +123,28 @@ class SlimApplicationFactory
             throw new LogicException('Container must be instance of \Psr\Container\ContainerInterface');
         }
 
-        // In Slim 4, we set the container before creating the app
-        if ($this->container instanceof ContainerInterface) {
-            AppFactory::setContainer($this->container);
+        // Create a compatibility container for backward compatibility
+        $compatContainer = new CompatibilityContainer($this->container);
+        
+        // Store settings in the compatibility container
+        if (isset($slimConfiguration[self::SETTINGS])) {
+            $compatContainer['settings'] = $slimConfiguration[self::SETTINGS];
         }
 
-        // Create the Slim app using Slim 4's AppFactory
-        $app = AppFactory::create();
+        // Create response factory
+        $responseFactory = new ResponseFactory();
 
-        // Cast to SlimApp (our extended class)
-        // We'll need to handle this differently - create SlimApp directly
-        $responseFactory = $app->getResponseFactory();
+        // Create custom SlimApp instance with the compatibility container
+        $slimApp = new SlimApp($responseFactory, $compatContainer);
         
-        // Create custom SlimApp instance
-        $slimApp = new SlimApp($responseFactory, $this->container);
+        // Set the app reference in the container so it can provide the router
+        $compatContainer->setApp($slimApp);
 
         $routesToRegister = $this->configuration[self::ROUTES];
         if ($registerOnlyNecessaryRoutes) {
+            $configData = $this->slimContainerFactory->create($slimConfiguration);
             /** @var Request $request */
-            $request = $this->slimContainerFactory->create($slimConfiguration)['request'];
+            $request = $configData['request'];
             $requestUri = $request->getServerParam('REQUEST_URI');
 
             $routesToRegister = $this->onlyNecessaryRoutesProvider->getRoutes(
@@ -156,7 +160,7 @@ class SlimApplicationFactory
         }
 
         $this->registerHandlers(
-            $this->container,
+            $compatContainer,
             $slimApp,
             $this->configuration[self::HANDLERS],
         );
@@ -174,7 +178,7 @@ class SlimApplicationFactory
      * @param array<string, string> $handlers
      */
     private function registerHandlers(
-        Container $netteContainer,
+        CompatibilityContainer $container,
         SlimApp $app,
         array $handlers
     ): void {
@@ -183,12 +187,8 @@ class SlimApplicationFactory
             $handlerService = ServiceProvider::getService($this->container, $handlerClass);
             assert(is_callable($handlerService));
 
-            // In Slim 4, error handlers are added differently
-            // We'll need to use the error middleware and custom error handlers
-            // For now, store them in the container if it supports it
-            if ($netteContainer instanceof ArrayAccess) {
-                $netteContainer[$handlerName] = $handlerService;
-            }
+            // Store handlers in the compatibility container
+            $container[$handlerName] = $handlerService;
         }
     }
 
@@ -219,7 +219,7 @@ class SlimApplicationFactory
         bool $detectTyposInRouteConfiguration
     ): void {
         foreach ($routes as $routePattern => $routeData) {
-            $this->routeRegister->register($apiNamespace, $routePattern, $routeData, $detectTyposInRouteConfiguration);
+            $this->routeRegister->register($apiNamespace, $routePattern, $routeData, $detectTyposInRouteConfiguration, $app);
         }
     }
 

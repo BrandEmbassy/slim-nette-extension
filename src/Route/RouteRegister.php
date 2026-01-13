@@ -15,8 +15,6 @@ use function levenshtein;
  */
 class RouteRegister
 {
-    private RouteCollectorProxyInterface $router;
-
     private RouteDefinitionFactory $routeDefinitionFactory;
 
     private UrlPatternResolver $urlPatternResolver;
@@ -29,14 +27,12 @@ class RouteRegister
 
 
     public function __construct(
-        RouteCollectorProxyInterface $router,
         RouteDefinitionFactory $routeDefinitionFactory,
         UrlPatternResolver $urlPatternResolver,
         BeforeRouteMiddlewares $beforeRouteMiddlewares,
         AfterRouteMiddlewares $afterRouteMiddlewares,
         MiddlewareGroups $middlewareGroups
     ) {
-        $this->router = $router;
         $this->routeDefinitionFactory = $routeDefinitionFactory;
         $this->urlPatternResolver = $urlPatternResolver;
         $this->beforeRouteMiddlewares = $beforeRouteMiddlewares;
@@ -52,8 +48,13 @@ class RouteRegister
         string $apiNamespace,
         string $routePattern,
         array $routeData,
-        bool $detectTyposInRouteConfiguration = true
+        bool $detectTyposInRouteConfiguration = true,
+        ?RouteCollectorProxyInterface $router = null
     ): void {
+        if ($router === null) {
+            throw new \LogicException('Router must be provided to register routes');
+        }
+
         $urlPattern = $this->urlPatternResolver->resolve($apiNamespace, $routePattern);
         $resolveRoutePath = $this->urlPatternResolver->resolveRoutePath(
             $apiNamespace,
@@ -73,7 +74,7 @@ class RouteRegister
 
             $routeName = $routeDefinition->getName() ?? $resolveRoutePath;
 
-            $routeToAdd = $this->router->map(
+            $routeToAdd = $router->map(
                 [$routeDefinition->getMethod()],
                 $urlPattern,
                 $routeDefinition->getRoute(),
