@@ -5,7 +5,7 @@ namespace BrandEmbassy\Slim\Route;
 use BrandEmbassy\Slim\Middleware\AfterRouteMiddlewares;
 use BrandEmbassy\Slim\Middleware\BeforeRouteMiddlewares;
 use BrandEmbassy\Slim\Middleware\MiddlewareGroups;
-use Slim\Interfaces\RouterInterface;
+use Slim\Interfaces\RouteCollectorProxyInterface;
 use function array_keys;
 use function array_merge_recursive;
 use function levenshtein;
@@ -15,7 +15,7 @@ use function levenshtein;
  */
 class RouteRegister
 {
-    private RouterInterface $router;
+    private RouteCollectorProxyInterface $router;
 
     private RouteDefinitionFactory $routeDefinitionFactory;
 
@@ -29,7 +29,7 @@ class RouteRegister
 
 
     public function __construct(
-        RouterInterface $router,
+        RouteCollectorProxyInterface $router,
         RouteDefinitionFactory $routeDefinitionFactory,
         UrlPatternResolver $urlPatternResolver,
         BeforeRouteMiddlewares $beforeRouteMiddlewares,

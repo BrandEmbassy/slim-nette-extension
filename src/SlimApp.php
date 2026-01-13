@@ -2,6 +2,8 @@
 
 namespace BrandEmbassy\Slim;
 
+use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Slim\App;
 use Throwable;
@@ -9,6 +11,13 @@ use function reset;
 
 class SlimApp extends App
 {
+    public function __construct(
+        ResponseFactoryInterface $responseFactory,
+        ?ContainerInterface $container = null
+    ) {
+        parent::__construct($responseFactory, $container);
+    }
+
     /**
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
      *

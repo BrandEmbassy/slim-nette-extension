@@ -4,11 +4,13 @@ namespace BrandEmbassy\Slim;
 
 use BrandEmbassy\Slim\Request\RequestFactory;
 use BrandEmbassy\Slim\Response\ResponseFactory;
-use Slim\Container;
-use Slim\Interfaces\RouterInterface;
+use Psr\Container\ContainerInterface;
 
 /**
  * @final
+ * 
+ * This class is kept for compatibility but is not used in Slim 4
+ * as Slim 4 doesn't use its own container.
  */
 class SlimContainerFactory
 {
@@ -16,24 +18,22 @@ class SlimContainerFactory
 
     private RequestFactory $requestFactory;
 
-    private RouterInterface $router;
-
 
     public function __construct(
         ResponseFactory $responseFactory,
-        RequestFactory $requestFactory,
-        RouterInterface $router
+        RequestFactory $requestFactory
     ) {
         $this->responseFactory = $responseFactory;
         $this->requestFactory = $requestFactory;
-        $this->router = $router;
     }
 
 
     /**
      * @param array<string, mixed> $configuration
+     * 
+     * @return array<string, mixed>
      */
-    public function create(array $configuration): Container
+    public function create(array $configuration): array
     {
         if (!isset($configuration['response'])) {
             $configuration['response'] = $this->responseFactory->create();
@@ -43,10 +43,6 @@ class SlimContainerFactory
             $configuration['request'] = $this->requestFactory->create();
         }
 
-        if (!isset($configuration['router'])) {
-            $configuration['router'] = $this->router;
-        }
-
-        return new Container($configuration);
+        return $configuration;
     }
 }
