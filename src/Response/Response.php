@@ -6,8 +6,10 @@ use Nette\Utils\Json;
 use Nette\Utils\JsonException;
 use Psr\Http\Message\UriInterface;
 use Slim\Psr7\Response as SlimResponse;
+use Slim\Psr7\Stream;
 use stdClass;
 use function assert;
+use function fopen;
 use function is_array;
 
 /**
@@ -38,8 +40,9 @@ class Response extends SlimResponse implements ResponseInterface
         $json = Json::encode($data, $encodingOptions);
         
         // Create a new stream with the JSON content
-        $body = new \Slim\Psr7\Stream(fopen('php://temp', 'r+'));
+        $body = new Stream(fopen('php://temp', 'r+'));
         $body->write($json);
+        $body->rewind(); // Rewind so it can be read
         
         $response = $this->withBody($body);
         $response = $response->withHeader('Content-Type', 'application/json');
