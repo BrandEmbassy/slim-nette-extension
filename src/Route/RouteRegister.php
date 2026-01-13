@@ -53,7 +53,7 @@ class RouteRegister
         ?RouteCollectorProxyInterface $router = null
     ): void {
         if ($router === null) {
-            throw new \LogicException('Router must be provided to register routes');
+            throw new LogicException('Router must be provided to register routes');
         }
 
         $urlPattern = $this->urlPatternResolver->resolve($apiNamespace, $routePattern);
