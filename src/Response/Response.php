@@ -4,7 +4,7 @@ namespace BrandEmbassy\Slim\Response;
 
 use Nette\Utils\Json;
 use Nette\Utils\JsonException;
-use Slim\Http\Response as SlimResponse;
+use Slim\Psr7\Response as SlimResponse;
 use function assert;
 use function is_array;
 

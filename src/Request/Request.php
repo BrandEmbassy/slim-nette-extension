@@ -6,8 +6,9 @@ use Adbar\Dot;
 use DateTime;
 use DateTimeImmutable;
 use InvalidArgumentException;
-use Slim\Http\Request as SlimRequest;
-use Slim\Route;
+use Psr\Http\Message\ServerRequestInterface;
+use Slim\Psr7\Request as SlimRequest;
+use Slim\Routing\Route;
 use function array_key_exists;
 use function assert;
 use function is_array;
@@ -242,6 +243,18 @@ class Request extends SlimRequest implements RequestInterface
         }
 
         throw RequestAttributeMissingException::create($name);
+    }
+
+
+    /**
+     * Helper method to get query param (for compatibility)
+     * 
+     * @return string|string[]|null
+     */
+    public function getQueryParam(string $key, $default = null)
+    {
+        $params = $this->getQueryParams();
+        return $params[$key] ?? $default;
     }
 
 
