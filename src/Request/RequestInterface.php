@@ -4,13 +4,9 @@ namespace BrandEmbassy\Slim\Request;
 
 use DateTimeImmutable;
 use Psr\Http\Message\ServerRequestInterface;
-use Slim\Routing\Route;
 
 interface RequestInterface extends ServerRequestInterface
 {
-    public function getRoute(): Route;
-
-
     /**
      * @return array<string, string>
      */

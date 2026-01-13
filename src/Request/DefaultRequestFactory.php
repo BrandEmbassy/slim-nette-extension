@@ -12,16 +12,8 @@ class DefaultRequestFactory implements RequestFactory
     public function create(): RequestInterface
     {
         $serverRequestFactory = new ServerRequestFactory();
-        $serverRequest = $serverRequestFactory->createFromGlobals();
+        $psrRequest = $serverRequestFactory->createFromGlobals();
         
-        // Create our custom Request from the ServerRequest
-        return new Request(
-            $serverRequest->getMethod(),
-            $serverRequest->getUri(),
-            $serverRequest->getHeaders(),
-            $serverRequest->getBody(),
-            $serverRequest->getProtocolVersion(),
-            $serverRequest->getServerParams()
-        );
+        return new Request($psrRequest);
     }
 }

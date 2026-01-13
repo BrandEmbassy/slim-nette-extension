@@ -3,9 +3,13 @@
 namespace BrandEmbassy\Slim\Middleware;
 
 use BrandEmbassy\Slim\DI\ServiceProvider;
-use BrandEmbassy\Slim\Request\RequestInterface;
-use BrandEmbassy\Slim\Response\ResponseInterface;
+use BrandEmbassy\Slim\Request\Request;
+use BrandEmbassy\Slim\Response\Response;
+use BrandEmbassy\Slim\Response\ResponseFactory;
 use Nette\DI\Container;
+use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use function array_map;
 use function assert;
 use function is_callable;
@@ -17,29 +21,54 @@ class MiddlewareFactory
 {
     private Container $container;
 
+    private ResponseFactory $responseFactory;
 
-    public function __construct(Container $container)
+
+    public function __construct(Container $container, ResponseFactory $responseFactory)
     {
         $this->container = $container;
+        $this->responseFactory = $responseFactory;
     }
 
 
+    /**
+     * Creates a PSR-15 middleware adapter that wraps old Slim 3 style middleware
+     */
     public function createFromIdentifier(string $middlewareIdentifier): callable
     {
         $container = $this->container;
+        $responseFactory = $this->responseFactory;
 
-        return function (
-            RequestInterface $request,
-            ResponseInterface $response,
-            callable $next
+        return static function (
+            ServerRequestInterface $psrRequest,
+            RequestHandlerInterface $handler
         ) use (
             $middlewareIdentifier,
-            $container
-        ): ResponseInterface {
+            $container,
+            $responseFactory
+        ): PsrResponseInterface {
             $middleware = ServiceProvider::getService($container, $middlewareIdentifier);
             assert(is_callable($middleware));
 
-            return $middleware($request, $response, $next);
+            // Wrap PSR-7 request in our Request wrapper for backward compatibility
+            $request = new Request($psrRequest);
+
+            // Create a Response wrapper with an empty response
+            $response = $responseFactory->create();
+
+            // Create a $next callable that wraps the PSR-15 handler
+            $next = static function ($req, $res) use ($handler, $psrRequest): PsrResponseInterface {
+                // Get the inner PSR request if it's our wrapper
+                $innerRequest = $req instanceof Request ? $req->getInnerRequest() : $psrRequest;
+
+                return $handler->handle($innerRequest);
+            };
+
+            // Call the old-style middleware
+            $result = $middleware($request, $response, $next);
+
+            // Return the inner PSR response if it's our wrapper
+            return $result instanceof Response ? $result->getInnerResponse() : $result;
         };
     }
 
