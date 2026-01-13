@@ -23,9 +23,7 @@
         "psr/http-factory": "^1.0",
         "psr/http-server-middleware": "^1.0",
         "slim/slim": "^4.0",
-        "slim/psr7": "^1.0",
-        "nyholm/psr7": "^1.0",
-        "nyholm/psr7-server": "^1.0"
+        "slim/psr7": "^1.0"
     },
     "require-dev": {
         "brandembassy/coding-standard": "^14.3",
