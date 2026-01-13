@@ -132,6 +132,16 @@ class SlimApplicationFactory
         /** @var SlimApp $app */
         $app = AppFactory::createFromContainer($this->container);
 
+        // Create and configure compatibility container for backward compatible access
+        $compatibilityContainer = new CompatibilityContainer($this->container);
+        $compatibilityContainer->setApp($app);
+
+        // Store settings in compatibility container for $container['settings'] access
+        $settings = $this->configuration[self::SLIM_CONFIGURATION][self::SETTINGS] ?? [];
+        $compatibilityContainer['settings'] = $settings;
+
+        $app->setCompatibilityContainer($compatibilityContainer);
+
         // Add routing middleware (required for Slim 4)
         $app->addRoutingMiddleware();
 
@@ -162,6 +172,7 @@ class SlimApplicationFactory
 
         return $app;
     }
+
 
 
     /**

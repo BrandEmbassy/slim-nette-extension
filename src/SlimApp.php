@@ -11,6 +11,25 @@ use function reset;
 
 class SlimApp extends App
 {
+    private ?CompatibilityContainer $compatibilityContainer = null;
+
+
+    public function setCompatibilityContainer(CompatibilityContainer $container): void
+    {
+        $this->compatibilityContainer = $container;
+    }
+
+
+    /**
+     * Get the compatibility container for backward compatible access to router and settings.
+     * This provides Slim 3 style access: $app->getContainer()->get('router'), $container['settings']
+     */
+    public function getCompatibilityContainer(): ?CompatibilityContainer
+    {
+        return $this->compatibilityContainer;
+    }
+
+
     /**
      * Backward compatible run method.
      *
