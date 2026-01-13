@@ -4,8 +4,8 @@ namespace BrandEmbassy\Slim;
 
 use Slim\Interfaces\RouteCollectorInterface;
 use Slim\Interfaces\RouteInterface;
-use Slim\Routing\RouteCollector;
 use Slim\Routing\RouteParser;
+use Slim\Routing\RouteParserInterface;
 
 /**
  * @final
@@ -14,10 +14,10 @@ use Slim\Routing\RouteParser;
  */
 class RouterCompatibility
 {
-    private RouteCollector $routeCollector;
-    private RouteParser $routeParser;
+    private RouteCollectorInterface $routeCollector;
+    private RouteParserInterface $routeParser;
 
-    public function __construct(RouteCollector $routeCollector, RouteParser $routeParser)
+    public function __construct(RouteCollectorInterface $routeCollector, RouteParserInterface $routeParser)
     {
         $this->routeCollector = $routeCollector;
         $this->routeParser = $routeParser;

@@ -35,8 +35,17 @@ class Response extends SlimResponse implements ResponseInterface
      */
     public function withJson($data, ?int $status = null, int $encodingOptions = 0)
     {
+        $json = Json::encode($data, $encodingOptions);
+        
         $response = clone $this;
-        $response->getBody()->write(Json::encode($data, $encodingOptions));
+        $body = $response->getBody();
+        
+        // Rewind the stream to ensure we write from the beginning
+        if ($body->isSeekable()) {
+            $body->rewind();
+        }
+        
+        $body->write($json);
         $response = $response->withHeader('Content-Type', 'application/json');
         
         if ($status !== null) {
