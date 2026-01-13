@@ -44,14 +44,4 @@ class RouterCompatibility
     {
         return $this->routeParser->urlFor($name, $data, $queryParams);
     }
-
-    /**
-     * Get all routes
-     *
-     * @return RouteInterface[]
-     */
-    public function getAllRoutes(): array
-    {
-        return $this->routeCollector->getRoutes();
-    }
 }
