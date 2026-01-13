@@ -6,16 +6,20 @@ use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Slim\App;
+use Slim\Interfaces\RouteCollectorProxyInterface;
 use Throwable;
 use function reset;
 
 class SlimApp extends App
 {
+    private ?ContainerInterface $container;
+
     public function __construct(
         ResponseFactoryInterface $responseFactory,
         ?ContainerInterface $container = null
     ) {
         parent::__construct($responseFactory, $container);
+        $this->container = $container;
     }
 
     /**
@@ -41,5 +45,22 @@ class SlimApp extends App
         }
 
         return $response;
+    }
+
+    /**
+     * Backward compatibility method for Slim 3
+     * In Slim 4, container is accessed via getContainer()
+     */
+    public function getContainer(): ?ContainerInterface
+    {
+        return $this->container;
+    }
+
+    /**
+     * Get the route collector (replaces the old router access)
+     */
+    public function getRouteCollector(): RouteCollectorProxyInterface
+    {
+        return $this;
     }
 }
