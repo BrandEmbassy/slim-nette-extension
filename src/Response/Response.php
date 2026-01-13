@@ -4,15 +4,33 @@ namespace BrandEmbassy\Slim\Response;
 
 use Nette\Utils\Json;
 use Nette\Utils\JsonException;
-use Slim\Http\Response as SlimResponse;
+use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
+use Psr\Http\Message\StreamInterface;
+use Psr\Http\Message\UriInterface;
+use Slim\Psr7\Factory\StreamFactory;
 use function assert;
 use function is_array;
 
 /**
  * @final
  */
-class Response extends SlimResponse implements ResponseInterface
+class Response implements ResponseInterface
 {
+    private PsrResponseInterface $response;
+
+
+    public function __construct(PsrResponseInterface $response)
+    {
+        $this->response = $response;
+    }
+
+
+    public function getInnerResponse(): PsrResponseInterface
+    {
+        return $this->response;
+    }
+
+
     /**
      * @return mixed[]
      *
@@ -24,5 +42,155 @@ class Response extends SlimResponse implements ResponseInterface
         assert(is_array($parsedBody));
 
         return $parsedBody;
+    }
+
+
+    /**
+     * @param mixed[]|\stdClass $data
+     *
+     * @return static
+     */
+    public function withJson($data, ?int $status = null, int $encodingOptions = 0): static
+    {
+        $json = Json::encode($data, $encodingOptions);
+        $streamFactory = new StreamFactory();
+        $body = $streamFactory->createStream($json);
+
+        $clone = clone $this;
+        $clone->response = $this->response
+            ->withBody($body)
+            ->withHeader('Content-Type', 'application/json');
+
+        if ($status !== null) {
+            $clone->response = $clone->response->withStatus($status);
+        }
+
+        return $clone;
+    }
+
+
+    /**
+     * @param string|UriInterface $url
+     *
+     * @return static
+     */
+    public function withRedirect($url, int $statusCode = 302): static
+    {
+        $clone = clone $this;
+        $clone->response = $this->response
+            ->withHeader('Location', (string)$url)
+            ->withStatus($statusCode);
+
+        return $clone;
+    }
+
+
+    // PSR-7 ResponseInterface implementation - delegate to inner response
+
+    public function getProtocolVersion(): string
+    {
+        return $this->response->getProtocolVersion();
+    }
+
+
+    public function withProtocolVersion(string $version): static
+    {
+        $clone = clone $this;
+        $clone->response = $this->response->withProtocolVersion($version);
+
+        return $clone;
+    }
+
+
+    /**
+     * @return string[][]
+     */
+    public function getHeaders(): array
+    {
+        return $this->response->getHeaders();
+    }
+
+
+    public function hasHeader(string $name): bool
+    {
+        return $this->response->hasHeader($name);
+    }
+
+
+    /**
+     * @return string[]
+     */
+    public function getHeader(string $name): array
+    {
+        return $this->response->getHeader($name);
+    }
+
+
+    public function getHeaderLine(string $name): string
+    {
+        return $this->response->getHeaderLine($name);
+    }
+
+
+    public function withHeader(string $name, $value): static
+    {
+        $clone = clone $this;
+        $clone->response = $this->response->withHeader($name, $value);
+
+        return $clone;
+    }
+
+
+    public function withAddedHeader(string $name, $value): static
+    {
+        $clone = clone $this;
+        $clone->response = $this->response->withAddedHeader($name, $value);
+
+        return $clone;
+    }
+
+
+    public function withoutHeader(string $name): static
+    {
+        $clone = clone $this;
+        $clone->response = $this->response->withoutHeader($name);
+
+        return $clone;
+    }
+
+
+    public function getBody(): StreamInterface
+    {
+        return $this->response->getBody();
+    }
+
+
+    public function withBody(StreamInterface $body): static
+    {
+        $clone = clone $this;
+        $clone->response = $this->response->withBody($body);
+
+        return $clone;
+    }
+
+
+    public function getStatusCode(): int
+    {
+        return $this->response->getStatusCode();
+    }
+
+
+    public function withStatus(int $code, string $reasonPhrase = ''): static
+    {
+        $clone = clone $this;
+        $clone->response = $this->response->withStatus($code, $reasonPhrase);
+
+        return $clone;
+    }
+
+
+    public function getReasonPhrase(): string
+    {
+        return $this->response->getReasonPhrase();
     }
 }

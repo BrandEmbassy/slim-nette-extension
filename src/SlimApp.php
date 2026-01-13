@@ -3,22 +3,20 @@
 namespace BrandEmbassy\Slim;
 
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Slim\App;
+use Slim\ResponseEmitter;
 use Throwable;
 use function reset;
 
 class SlimApp extends App
 {
     /**
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
-     *
-     * @param bool $silent
-     *
      * @throws Throwable
      */
-    public function run($silent = false): ResponseInterface
+    public function run(?ServerRequestInterface $request = null): ResponseInterface
     {
-        $response = parent::run(true);
+        $response = $this->handle($request ?? $this->createRequest());
 
         $contentTypes = $response->getHeader('Content-Type');
         $contentType = reset($contentTypes);
@@ -27,10 +25,25 @@ class SlimApp extends App
             $response = $response->withHeader('Content-Type', 'text/plain; charset=UTF-8');
         }
 
-        if (!$silent) {
-            $this->respond($response);
-        }
+        return $response;
+    }
+
+
+    /**
+     * @throws Throwable
+     */
+    public function runAndEmit(?ServerRequestInterface $request = null): ResponseInterface
+    {
+        $response = $this->run($request);
+        $responseEmitter = new ResponseEmitter();
+        $responseEmitter->emit($response);
 
         return $response;
+    }
+
+
+    private function createRequest(): ServerRequestInterface
+    {
+        return \Slim\Factory\ServerRequestCreatorFactory::create()->createServerRequestFromGlobals();
     }
 }

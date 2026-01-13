@@ -2,15 +2,17 @@
 
 namespace BrandEmbassy\Slim;
 
-use BrandEmbassy\Slim\Request\RequestInterface;
-use BrandEmbassy\Slim\Response\ResponseInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
 
 interface ErrorHandler
 {
     public function __invoke(
-        RequestInterface $request,
-        ResponseInterface $response,
-        ?Throwable $exception = null
+        ServerRequestInterface $request,
+        Throwable $exception,
+        bool $displayErrorDetails,
+        bool $logErrors,
+        bool $logErrorDetails
     ): ResponseInterface;
 }

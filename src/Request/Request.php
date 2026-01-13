@@ -6,8 +6,11 @@ use Adbar\Dot;
 use DateTime;
 use DateTimeImmutable;
 use InvalidArgumentException;
-use Slim\Http\Request as SlimRequest;
-use Slim\Route;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\StreamInterface;
+use Psr\Http\Message\UriInterface;
+use Slim\Routing\RouteContext;
+use Slim\Routing\RoutingResults;
 use function array_key_exists;
 use function assert;
 use function is_array;
@@ -16,36 +19,35 @@ use function sprintf;
 use function str_contains;
 
 /**
- * @method string[]|string[][] getQueryParams()
- * @method string|string[]|null getQueryParam(string $key, ?string $default = null)
- *
  * @final
  */
-class Request extends SlimRequest implements RequestInterface
+class Request implements RequestInterface
 {
-    private const ROUTE_INFO_ATTRIBUTE = 'routeInfo';
-
-    private const ROUTE_ATTRIBUTE = 'route';
+    private const ROUTE_ATTRIBUTE = '__route__';
 
     /**
      * @var Dot<string, mixed[]>|null
      */
-    protected $dotAnnotatedRequestBody;
+    protected ?Dot $dotAnnotatedRequestBody = null;
+
+    private ServerRequestInterface $request;
 
 
-    public function __clone()
+    public function __construct(ServerRequestInterface $request)
     {
-        parent::__clone();
-        $this->dotAnnotatedRequestBody = null;
+        $this->request = $request;
     }
 
 
-    public function getRoute(): Route
+    public function getInnerRequest(): ServerRequestInterface
     {
-        $route = $this->getAttribute(self::ROUTE_ATTRIBUTE);
-        assert($route instanceof Route);
+        return $this->request;
+    }
 
-        return $route;
+
+    public function getRoutingResults(): RoutingResults
+    {
+        return RouteContext::fromRequest($this->request)->getRoutingResults();
     }
 
 
@@ -54,13 +56,9 @@ class Request extends SlimRequest implements RequestInterface
      */
     public function getRouteArguments(): array
     {
-        $routeInfoAttribute = $this->getAttribute(self::ROUTE_INFO_ATTRIBUTE);
+        $routingResults = $this->getRoutingResults();
 
-        if (is_array($routeInfoAttribute) && isset($routeInfoAttribute[2])) {
-            return $routeInfoAttribute[2];
-        }
-
-        return [];
+        return $routingResults->getRouteArguments();
     }
 
 
@@ -94,7 +92,7 @@ class Request extends SlimRequest implements RequestInterface
      */
     public function getParsedBodyAsArray(): array
     {
-        return (array)$this->getParsedBody();
+        return (array)$this->request->getParsedBody();
     }
 
 
@@ -127,6 +125,26 @@ class Request extends SlimRequest implements RequestInterface
     public function hasField(string $fieldName): bool
     {
         return $this->getDotAnnotatedRequestBody()->has($fieldName);
+    }
+
+
+    /**
+     * @return string[]|string[][]
+     */
+    public function getQueryParams(): array
+    {
+        return $this->request->getQueryParams();
+    }
+
+
+    /**
+     * @return string|string[]|null
+     */
+    public function getQueryParam(string $key, ?string $default = null)
+    {
+        $params = $this->getQueryParams();
+
+        return $params[$key] ?? $default;
     }
 
 
@@ -246,6 +264,17 @@ class Request extends SlimRequest implements RequestInterface
 
 
     /**
+     * @param string $name
+     *
+     * @return array<int|string, string>|null
+     */
+    public function getServerParam(string $name): array|string|null
+    {
+        return $this->request->getServerParams()[$name] ?? null;
+    }
+
+
+    /**
      * @return Dot<string, mixed[]>
      */
     private function getDotAnnotatedRequestBody(): Dot
@@ -255,5 +284,278 @@ class Request extends SlimRequest implements RequestInterface
         }
 
         return $this->dotAnnotatedRequestBody;
+    }
+
+
+    // PSR-7 ServerRequestInterface implementation - delegate to inner request
+
+    public function getProtocolVersion(): string
+    {
+        return $this->request->getProtocolVersion();
+    }
+
+
+    public function withProtocolVersion(string $version): static
+    {
+        $clone = clone $this;
+        $clone->request = $this->request->withProtocolVersion($version);
+        $clone->dotAnnotatedRequestBody = null;
+
+        return $clone;
+    }
+
+
+    /**
+     * @return string[][]
+     */
+    public function getHeaders(): array
+    {
+        return $this->request->getHeaders();
+    }
+
+
+    public function hasHeader(string $name): bool
+    {
+        return $this->request->hasHeader($name);
+    }
+
+
+    /**
+     * @return string[]
+     */
+    public function getHeader(string $name): array
+    {
+        return $this->request->getHeader($name);
+    }
+
+
+    public function getHeaderLine(string $name): string
+    {
+        return $this->request->getHeaderLine($name);
+    }
+
+
+    public function withHeader(string $name, $value): static
+    {
+        $clone = clone $this;
+        $clone->request = $this->request->withHeader($name, $value);
+        $clone->dotAnnotatedRequestBody = null;
+
+        return $clone;
+    }
+
+
+    public function withAddedHeader(string $name, $value): static
+    {
+        $clone = clone $this;
+        $clone->request = $this->request->withAddedHeader($name, $value);
+        $clone->dotAnnotatedRequestBody = null;
+
+        return $clone;
+    }
+
+
+    public function withoutHeader(string $name): static
+    {
+        $clone = clone $this;
+        $clone->request = $this->request->withoutHeader($name);
+        $clone->dotAnnotatedRequestBody = null;
+
+        return $clone;
+    }
+
+
+    public function getBody(): StreamInterface
+    {
+        return $this->request->getBody();
+    }
+
+
+    public function withBody(StreamInterface $body): static
+    {
+        $clone = clone $this;
+        $clone->request = $this->request->withBody($body);
+        $clone->dotAnnotatedRequestBody = null;
+
+        return $clone;
+    }
+
+
+    public function getRequestTarget(): string
+    {
+        return $this->request->getRequestTarget();
+    }
+
+
+    public function withRequestTarget(string $requestTarget): static
+    {
+        $clone = clone $this;
+        $clone->request = $this->request->withRequestTarget($requestTarget);
+        $clone->dotAnnotatedRequestBody = null;
+
+        return $clone;
+    }
+
+
+    public function getMethod(): string
+    {
+        return $this->request->getMethod();
+    }
+
+
+    public function withMethod(string $method): static
+    {
+        $clone = clone $this;
+        $clone->request = $this->request->withMethod($method);
+        $clone->dotAnnotatedRequestBody = null;
+
+        return $clone;
+    }
+
+
+    public function getUri(): UriInterface
+    {
+        return $this->request->getUri();
+    }
+
+
+    public function withUri(UriInterface $uri, bool $preserveHost = false): static
+    {
+        $clone = clone $this;
+        $clone->request = $this->request->withUri($uri, $preserveHost);
+        $clone->dotAnnotatedRequestBody = null;
+
+        return $clone;
+    }
+
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getServerParams(): array
+    {
+        return $this->request->getServerParams();
+    }
+
+
+    /**
+     * @return array<string, string>
+     */
+    public function getCookieParams(): array
+    {
+        return $this->request->getCookieParams();
+    }
+
+
+    /**
+     * @param array<string, string> $cookies
+     */
+    public function withCookieParams(array $cookies): static
+    {
+        $clone = clone $this;
+        $clone->request = $this->request->withCookieParams($cookies);
+        $clone->dotAnnotatedRequestBody = null;
+
+        return $clone;
+    }
+
+
+    /**
+     * @param array<string, string|string[]> $query
+     */
+    public function withQueryParams(array $query): static
+    {
+        $clone = clone $this;
+        $clone->request = $this->request->withQueryParams($query);
+        $clone->dotAnnotatedRequestBody = null;
+
+        return $clone;
+    }
+
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getUploadedFiles(): array
+    {
+        return $this->request->getUploadedFiles();
+    }
+
+
+    /**
+     * @param array<string, mixed> $uploadedFiles
+     */
+    public function withUploadedFiles(array $uploadedFiles): static
+    {
+        $clone = clone $this;
+        $clone->request = $this->request->withUploadedFiles($uploadedFiles);
+        $clone->dotAnnotatedRequestBody = null;
+
+        return $clone;
+    }
+
+
+    /**
+     * @return mixed[]|object|null
+     */
+    public function getParsedBody()
+    {
+        return $this->request->getParsedBody();
+    }
+
+
+    /**
+     * @param mixed[]|object|null $data
+     */
+    public function withParsedBody($data): static
+    {
+        $clone = clone $this;
+        $clone->request = $this->request->withParsedBody($data);
+        $clone->dotAnnotatedRequestBody = null;
+
+        return $clone;
+    }
+
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getAttributes(): array
+    {
+        return $this->request->getAttributes();
+    }
+
+
+    /**
+     * @param mixed $default
+     *
+     * @return mixed
+     */
+    public function getAttribute(string $name, $default = null)
+    {
+        return $this->request->getAttribute($name, $default);
+    }
+
+
+    /**
+     * @param mixed $value
+     */
+    public function withAttribute(string $name, $value): static
+    {
+        $clone = clone $this;
+        $clone->request = $this->request->withAttribute($name, $value);
+        $clone->dotAnnotatedRequestBody = null;
+
+        return $clone;
+    }
+
+
+    public function withoutAttribute(string $name): static
+    {
+        $clone = clone $this;
+        $clone->request = $this->request->withoutAttribute($name);
+        $clone->dotAnnotatedRequestBody = null;
+
+        return $clone;
     }
 }

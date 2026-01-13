@@ -4,11 +4,14 @@ namespace BrandEmbassy\Slim\Request;
 
 use DateTimeImmutable;
 use Psr\Http\Message\ServerRequestInterface;
-use Slim\Route;
+use Slim\Routing\RoutingResults;
 
 interface RequestInterface extends ServerRequestInterface
 {
-    public function getRoute(): Route;
+    public function getInnerRequest(): ServerRequestInterface;
+
+
+    public function getRoutingResults(): RoutingResults;
 
 
     /**
@@ -99,16 +102,11 @@ interface RequestInterface extends ServerRequestInterface
 
 
     /**
-     * @deprecated use getAttributeStrict or findAttribute
-     *
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
-     *
      * @param string $name
-     * @param mixed $default
      *
-     * @return mixed
+     * @return array<int|string, string>|string|null
      */
-    public function getAttribute($name, $default = null);
+    public function getServerParam(string $name): array|string|null;
 
 
     /**
@@ -118,5 +116,5 @@ interface RequestInterface extends ServerRequestInterface
      *
      * @return mixed
      */
-    public function getQueryParam(string $key, $default = null);
+    public function getQueryParam(string $key, ?string $default = null);
 }

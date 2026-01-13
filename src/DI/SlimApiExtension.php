@@ -15,13 +15,13 @@ use BrandEmbassy\Slim\Route\RouteDefinitionFactory;
 use BrandEmbassy\Slim\Route\RouteRegister;
 use BrandEmbassy\Slim\Route\UrlPatternResolver;
 use BrandEmbassy\Slim\SlimApplicationFactory;
-use BrandEmbassy\Slim\SlimContainerFactory;
 use Nette\DI\CompilerExtension;
-use Nette\DI\Definitions\Reference;
 use Nette\Schema\Expect;
 use Nette\Schema\Schema;
-use Slim\Container;
-use Slim\Router;
+use Psr\Http\Message\ResponseFactoryInterface;
+use Slim\Interfaces\RouteCollectorInterface;
+use Slim\Psr7\Factory\ResponseFactory as SlimResponseFactory;
+use Slim\Routing\RouteCollector;
 
 /**
  * @final
@@ -83,19 +83,6 @@ class SlimApiExtension extends CompilerExtension
         $builder->addDefinition($this->prefix('slimAppFactory'))
             ->setFactory(SlimApplicationFactory::class, [$config]);
 
-        $builder->addDefinition($this->prefix('slimContainerFactory'))
-            ->setFactory(SlimContainerFactory::class);
-
-        $builder->addDefinition($this->prefix('slimContainer'))
-            ->setType(Container::class)
-            ->setFactory(
-                [
-                    new Reference(SlimContainerFactory::class),
-                    'create',
-                ],
-                [$config[SlimApplicationFactory::SLIM_CONFIGURATION]],
-            );
-
         $builder->addDefinition($this->prefix('routeDefinitionFactory'))
             ->setFactory(RouteDefinitionFactory::class);
 
@@ -113,8 +100,15 @@ class SlimApiExtension extends CompilerExtension
         $builder->addDefinition($this->prefix('middlewareFactory'))
             ->setFactory(MiddlewareFactory::class);
 
-        $builder->addDefinition($this->prefix('slimRouter'))
-            ->setFactory(Router::class);
+        // PSR-17 Response Factory for Slim 4
+        $builder->addDefinition($this->prefix('psr17ResponseFactory'))
+            ->setType(ResponseFactoryInterface::class)
+            ->setFactory(SlimResponseFactory::class);
+
+        // Route collector for Slim 4
+        $builder->addDefinition($this->prefix('routeCollector'))
+            ->setType(RouteCollectorInterface::class)
+            ->setFactory(RouteCollector::class, ['@' . ResponseFactoryInterface::class]);
 
         $builder->addDefinition($this->prefix('onlyNecessaryRoutesProvider'))
             ->setFactory(OnlyNecessaryRoutesProvider::class);
