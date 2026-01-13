@@ -30,9 +30,10 @@ class CompatibilityContainer implements ContainerInterface, ArrayAccess
     {
         $this->app = $app;
         // Create router compatibility wrapper
+        $routeCollector = $app->getRouteCollector();
         $this->router = new RouterCompatibility(
-            $app->getRouteCollector(),
-            $app->getRouteCollector()->getRouteParser()
+            $routeCollector,
+            $routeCollector->getRouteParser()
         );
     }
 
