@@ -19,7 +19,9 @@
         "nette/di": "^3.0",
         "nette/neon": "^3.0",
         "nette/utils": ">=3.2",
+        "psr/http-factory": "^1.0",
         "psr/http-message": "^1.0 || ^2.0",
+        "psr/http-server-handler": "^1.0",
         "psr/http-server-middleware": "^1.0",
         "slim/psr7": "^1.6",
         "slim/slim": "^4.14"
