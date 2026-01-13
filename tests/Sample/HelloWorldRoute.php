@@ -2,17 +2,20 @@
 
 namespace BrandEmbassyTest\Slim\Sample;
 
-use BrandEmbassy\Slim\Request\RequestInterface;
-use BrandEmbassy\Slim\Response\ResponseInterface;
+use BrandEmbassy\Slim\Response\Response;
 use BrandEmbassy\Slim\Route\Route;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * @final
  */
 class HelloWorldRoute implements Route
 {
-    public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface
+    public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        return $response->withJson(['Hello World']);
+        $wrappedResponse = new Response($response);
+
+        return $wrappedResponse->withJson(['Hello World'])->getInnerResponse();
     }
 }

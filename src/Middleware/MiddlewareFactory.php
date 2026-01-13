@@ -3,9 +3,10 @@
 namespace BrandEmbassy\Slim\Middleware;
 
 use BrandEmbassy\Slim\DI\ServiceProvider;
-use BrandEmbassy\Slim\Request\RequestInterface;
-use BrandEmbassy\Slim\Response\ResponseInterface;
 use Nette\DI\Container;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use function array_map;
 use function assert;
 use function is_callable;
@@ -28,10 +29,9 @@ class MiddlewareFactory
     {
         $container = $this->container;
 
-        return function (
-            RequestInterface $request,
-            ResponseInterface $response,
-            callable $next
+        return static function (
+            ServerRequestInterface $request,
+            RequestHandlerInterface $handler
         ) use (
             $middlewareIdentifier,
             $container
@@ -39,7 +39,7 @@ class MiddlewareFactory
             $middleware = ServiceProvider::getService($container, $middlewareIdentifier);
             assert(is_callable($middleware));
 
-            return $middleware($request, $response, $next);
+            return $middleware($request, $handler);
         };
     }
 
