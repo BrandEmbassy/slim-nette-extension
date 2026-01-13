@@ -37,15 +37,11 @@ class Response extends SlimResponse implements ResponseInterface
     {
         $json = Json::encode($data, $encodingOptions);
         
-        $response = clone $this;
-        $body = $response->getBody();
-        
-        // Rewind the stream to ensure we write from the beginning
-        if ($body->isSeekable()) {
-            $body->rewind();
-        }
-        
+        // Create a new stream with the JSON content
+        $body = new \Slim\Psr7\Stream(fopen('php://temp', 'r+'));
         $body->write($json);
+        
+        $response = $this->withBody($body);
         $response = $response->withHeader('Content-Type', 'application/json');
         
         if ($status !== null) {
