@@ -103,11 +103,11 @@ class RouteRegister
         );
 
         return array_merge_recursive(
-            $this->afterRouteMiddlewares->getMiddlewares(),
             $routeDefinition->getMiddlewares(),
             $middlewaresFromGroups,
             $versionMiddlewares,
             $this->beforeRouteMiddlewares->getMiddlewares(),
+            $this->afterRouteMiddlewares->getMiddlewares()
         );
     }
 
