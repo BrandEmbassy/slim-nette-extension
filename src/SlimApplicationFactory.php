@@ -152,6 +152,16 @@ class SlimApplicationFactory
             $this->registerApi($apiNamespace, $routes, $detectTyposInRouteConfiguration);
         }
 
+        // Ensure router service always points to slimApi.slimRouter (important for multiple create() calls)
+        if ($disableUsingSlimContainer) {
+            /** @var Container&ContainerInterface $netteContainer */
+            $netteContainer = $this->container;
+            if ($netteContainer->hasService('router')) {
+                $netteContainer->removeService('router');
+            }
+            $netteContainer->addService('router', $netteContainer->getService('slimApi.slimRouter'));
+        }
+
         $this->registerHandlers(
             $this->container,
             $slimContainer,
@@ -215,7 +225,88 @@ class SlimApplicationFactory
      */
     private function registerApi(string $apiNamespace, array $routes, bool $detectTyposInRouteConfiguration): void
     {
+        // Platform backend uses nested structure: routes[namespace][version/prefix][path][method]
+        // Check if we have the nested structure (single key that contains all routes)
+        if (count($routes) === 1) {
+            $firstKey = array_key_first($routes);
+            $firstValue = $routes[$firstKey];
+
+            // If the first value is an array and contains route definitions, it is the nested structure
+            if (is_array($firstValue) && !empty($firstValue)) {
+                // Check if this looks like routes (paths starting with / or empty string)
+                $sampleKey = array_key_first($firstValue);
+                if ($sampleKey === '' || strpos($sampleKey, '/') === 0) {
+                    // This is the nested structure - use the inner array and append version to namespace
+                    if ($firstKey !== '' && $firstKey !== ' ') {
+                        $apiNamespace = trim($apiNamespace, '/') . '/' . trim($firstKey, '/');
+                    }
+                    $routes = $firstValue;
+                }
+            }
+        }
+
         foreach ($routes as $routePattern => $routeData) {
+            // Ensure route definitions have required keys with defaults
+            // (Parameters from neon don't go through schema validation defaults)
+            if (is_array($routeData)) {
+                // Check if we have the flat structure (method keys mixed with definition keys)
+                // This happens when routes come from parameters without schema validation
+                $httpMethods = ['get', 'post', 'put', 'patch', 'delete', 'options', 'head'];
+                $hasHttpMethod = false;
+                $hasDefinitionKeys = false;
+
+                foreach (array_keys($routeData) as $key) {
+                    if (in_array(strtolower($key), $httpMethods)) {
+                        $hasHttpMethod = true;
+                    }
+                    if (in_array($key, ['service', 'middlewares', 'middleware', 'middlewareGroups'])) {
+                        $hasDefinitionKeys = true;
+                    }
+                }
+
+                // If we have both HTTP methods and definition keys at same level, it's the flat structure
+                // We need to restructure it properly
+                if ($hasHttpMethod && $hasDefinitionKeys) {
+                    $restructuredData = [];
+                    $definitionKeys = ['service', 'middlewares', 'middleware', 'middlewareGroups', 'name', 'ignoreVersionMiddlewareGroup', 'public'];
+
+                    foreach ($routeData as $key => $value) {
+                        if (in_array(strtolower($key), $httpMethods)) {
+                            // This is an HTTP method - extract the definition from the flat structure
+                            $methodDefinition = [];
+                            foreach ($definitionKeys as $defKey) {
+                                if (isset($routeData[$defKey])) {
+                                    $methodDefinition[$defKey] = $routeData[$defKey];
+                                }
+                            }
+                            $restructuredData[$key] = $methodDefinition;
+                        }
+                    }
+                    $routeData = $restructuredData;
+                }
+
+                // Now normalize each method definition
+                $normalizedRouteData = [];
+                foreach ($routeData as $method => $definition) {
+                    if (!is_array($definition)) {
+                        // Skip non-array definitions
+                        continue;
+                    }
+
+                    // Normalize the definition
+                    $normalizedDefinition = $definition;
+                    $normalizedDefinition['middlewares'] = $definition['middlewares'] ?? $definition['middleware'] ?? [];
+                    $normalizedDefinition['middlewareGroups'] = $definition['middlewareGroups'] ?? [];
+                    $normalizedDefinition['name'] = $definition['name'] ?? null;
+                    $normalizedDefinition['ignoreVersionMiddlewareGroup'] = $definition['ignoreVersionMiddlewareGroup'] ?? false;
+                    // Remove old 'middleware' key if it exists
+                    unset($normalizedDefinition['middleware']);
+
+                    $normalizedRouteData[$method] = $normalizedDefinition;
+                }
+                $routeData = $normalizedRouteData;
+            }
+
             $this->routeRegister->register($apiNamespace, $routePattern, $routeData, $detectTyposInRouteConfiguration);
         }
     }
@@ -245,7 +336,8 @@ class SlimApplicationFactory
         if (!$netteContainer->hasService('settings')) {
             $netteContainer->addService('settings', $slimContainer->get('settings'));
             $netteContainer->addService('environment', $slimContainer->get('environment'));
-            $netteContainer->addService('router', $slimContainer->get('router'));
+            // Use slimApi.slimRouter which will have routes registered on it, not Slim container router
+            $netteContainer->addService('router', $netteContainer->getService('slimApi.slimRouter'));
             $netteContainer->addService('foundHandler', $slimContainer->get('foundHandler'));
             $netteContainer->addService('phpErrorHandler', $slimContainer->get('phpErrorHandler'));
             $netteContainer->addService('errorHandler', $slimContainer->get('errorHandler'));
