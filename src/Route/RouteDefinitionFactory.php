@@ -37,14 +37,23 @@ class RouteDefinitionFactory
      */
     public function create(string $method, array $routeDefinitionData): RouteDefinition
     {
+        // Validate that 'service' key exists
+        if (!isset($routeDefinitionData[RouteDefinition::SERVICE])) {
+            throw new LogicException(
+                'Route definition must contain "' . RouteDefinition::SERVICE . '" key with a service class or name'
+            );
+        }
+
+        $serviceIdentifier = $routeDefinitionData[RouteDefinition::SERVICE];
+
         // Create an adapter that converts PSR-7 to our interfaces for backward compatibility
         $route = function (
             ServerRequestInterface $psrRequest,
             PsrResponseInterface $psrResponse
         ) use (
-            $routeDefinitionData
+            $serviceIdentifier
         ): PsrResponseInterface {
-            $route = $this->getRoute($routeDefinitionData[RouteDefinition::SERVICE]);
+            $route = $this->getRoute($serviceIdentifier);
 
             // Wrap PSR-7 request/response in our wrappers
             $request = new Request($psrRequest);
