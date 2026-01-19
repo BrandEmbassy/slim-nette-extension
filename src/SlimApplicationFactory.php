@@ -1,5 +1,7 @@
 <?php declare(strict_types = 1);
 
+// Platform Backend Patch Applied - PATCH_VERSION: v8
+
 namespace BrandEmbassy\Slim;
 
 use ArrayAccess;
@@ -290,6 +292,11 @@ class SlimApplicationFactory
                 foreach ($routeData as $method => $definition) {
                     if (!is_array($definition)) {
                         // Skip non-array definitions
+                        continue;
+                    }
+
+                    // Skip routes without a service key - they are invalid
+                    if (!isset($definition['service'])) {
                         continue;
                     }
 
