@@ -274,11 +274,17 @@ class SlimApplicationFactory
 
                     foreach ($routeData as $key => $value) {
                         if (in_array(strtolower($key), $httpMethods)) {
-                            // This is an HTTP method - extract the definition from the flat structure
-                            $methodDefinition = [];
-                            foreach ($definitionKeys as $defKey) {
-                                if (isset($routeData[$defKey])) {
-                                    $methodDefinition[$defKey] = $routeData[$defKey];
+                            // Check if the HTTP method value is already an array (contains the actual definition)
+                            if (is_array($value) && !empty($value)) {
+                                // Use the HTTP method's array value directly as the definition
+                                $methodDefinition = $value;
+                            } else {
+                                // This is an HTTP method - extract the definition from the flat structure
+                                $methodDefinition = [];
+                                foreach ($definitionKeys as $defKey) {
+                                    if (isset($routeData[$defKey])) {
+                                        $methodDefinition[$defKey] = $routeData[$defKey];
+                                    }
                                 }
                             }
                             $restructuredData[$key] = $methodDefinition;
