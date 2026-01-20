@@ -129,7 +129,7 @@ parameters:
         routes:
             new-api:           # API name
                 "2.0":         # Version
-                    '/channels':   # URL pattern
+                    '/channels':   # URL pattern (final URL: /new-api/2.0/channels)
                         post:
                             service: App\CreateChannelAction
                             middleware:
@@ -142,12 +142,17 @@ parameters:
 slimApi:
     routes:
         "api":                 # API namespace (used for middleware groups)
-            '/channels':       # URL pattern
+            '/channels':       # URL pattern (final URL: /api/channels)
                 post:
                     service: App\CreateChannelAction
                     middlewares:
                         - App\AuthMiddleware
 ```
+
+> **Note on versioning**: In v5.x, the version is no longer a separate configuration level. If you need versioned URLs, include the version in either:
+> - The `apiPrefix` setting (under `slimApi:`): `apiPrefix: '/api/v2'`
+> - The api-namespace: `"api/v2":`
+> - The url-pattern: `"/v2/channels":`
 
 ### Middleware Key
 
