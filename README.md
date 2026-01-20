@@ -38,28 +38,26 @@ slimApi: # Configure it
         settings:
             removeDefaultHandlers: true # It's recommended to disable original error handling 
                                         # and use your own error handlers suited for needs of your app. 
-
-    apiDefinitionKey: api # Your API definition will be under this key in "parameters" section. 
 ```
 
 
 ### First API endpoint
-Now let's say you want to make a REST endpoint creating channels, `[POST] /new-api/2.0/channels`
+Now let's say you want to make a REST endpoint creating channels, `[POST] /2.0/channels`
 
-You need to define in `parameters.api` section in `config.neon`.
+You need to define routes in the `slimApi` section in `config.neon`.
 
 > **Both services and middlewares must be registered services in DI Container.**
 
 ```yaml
 slimApi:
     handlers:
-        notFound: App\NotFoundHandler # Called when not route isn't matched by URL
-        notAllowed: App\NotAllowedHandler # Called when route isn't matched by method
-        error: App\ApiErrorHandler # Called when unhandled exception bubbles out
+        notFoundHandler: App\NotFoundHandler # Called when route isn't matched by URL
+        notAllowedHandler: App\NotAllowedHandler # Called when route isn't matched by method
+        errorHandler: App\ApiErrorHandler # Called when unhandled exception bubbles out
 
     routes:
         "2.0": # Version of your API
-            "channels": # Matched URL will be "your-domain.org/2.0/channels"
+            "/channels": # Matched URL will be "your-domain.org/2.0/channels"
                 post:
                     # This is service will be invoked to handle the request
                     service: App\CreateChannelAction
@@ -90,3 +88,155 @@ Now you can simply get `SlimApplicationFactory` class from your DI Container (or
 $factory = $container->getByType(SlimApplicationFactory::class);
 $factory->create()->run();
 ```
+
+## Migrating from v4.x to v5.x
+
+Version 5.x introduced significant changes to the route configuration structure. Here's a guide to help you migrate.
+
+### Configuration Location
+
+**v4.x**: Routes and handlers were defined in the `parameters` section under your `apiDefinitionKey`:
+
+```yaml
+slimApi:
+    apiDefinitionKey: api
+
+parameters:
+    api:
+        handlers:
+            notFound: App\NotFoundHandler
+        routes:
+            # ...
+```
+
+**v5.x**: Routes and handlers are now defined directly under the `slimApi` extension:
+
+```yaml
+slimApi:
+    handlers:
+        notFoundHandler: App\NotFoundHandler
+    routes:
+        # ...
+```
+
+### Route Structure
+
+**v4.x**: Routes were nested as `api-name > version > url-pattern > method`:
+
+```yaml
+parameters:
+    api:
+        routes:
+            new-api:           # API name
+                "2.0":         # Version
+                    '/channels':   # URL pattern
+                        post:
+                            service: App\CreateChannelAction
+                            middleware:
+                                - App\AuthMiddleware
+```
+
+**v5.x**: Routes are now `api-namespace > url-pattern > method` (flattened structure):
+
+```yaml
+slimApi:
+    routes:
+        "api":                 # API namespace (used for middleware groups)
+            '/channels':       # URL pattern
+                post:
+                    service: App\CreateChannelAction
+                    middlewares:
+                        - App\AuthMiddleware
+```
+
+### Middleware Key
+
+**v4.x**: Used singular `middleware` key:
+```yaml
+middleware:
+    - App\AuthMiddleware
+```
+
+**v5.x**: Uses plural `middlewares` key:
+```yaml
+middlewares:
+    - App\AuthMiddleware
+```
+
+### Handler Names
+
+**v4.x**: Handler names without "Handler" suffix:
+```yaml
+handlers:
+    notFound: App\NotFoundHandler
+    notAllowed: App\NotAllowedHandler
+    error: App\ApiErrorHandler
+```
+
+**v5.x**: Handler names with "Handler" suffix:
+```yaml
+handlers:
+    notFoundHandler: App\NotFoundHandler
+    notAllowedHandler: App\NotAllowedHandler
+    errorHandler: App\ApiErrorHandler
+```
+
+### New Features in v5.x
+
+#### API Prefix
+You can now set a global prefix for all routes:
+```yaml
+slimApi:
+    apiPrefix: '/api/v1'
+```
+
+#### Middleware Groups
+Define reusable middleware groups:
+```yaml
+slimApi:
+    middlewareGroups:
+        auth:
+            - App\AuthMiddleware
+            - App\RateLimitMiddleware
+        logging:
+            - App\LoggingMiddleware
+
+    routes:
+        "api":
+            '/channels':
+                post:
+                    service: App\CreateChannelAction
+                    middlewareGroups:
+                        - auth
+                        - logging
+```
+
+#### Ignore Version Middleware Group
+Skip the API namespace middleware group for specific routes:
+```yaml
+slimApi:
+    routes:
+        "api":
+            '/health':
+                get:
+                    service: App\HealthCheckAction
+                    ignoreVersionMiddlewareGroup: true
+```
+
+#### Performance Settings
+New settings for performance optimization:
+```yaml
+slimApi:
+    slimConfiguration:
+        settings:
+            detectTyposInRouteConfiguration: true   # Validates route config (default: true)
+            registerOnlyNecessaryRoutes: false      # Register only matching routes (default: false)
+            useApcuCache: true                      # Use APCu for caching (default: true)
+            disableUsingSlimContainer: false        # When true, uses Nette container instead of Slim container (default: false)
+```
+
+### Removed Features in v5.x
+
+- `afterRouteMiddlewares` configuration option (present in v4.2) is not available in v5.x
+- `apiDefinitionKey` is no longer used - configuration is now directly in `slimApi` section
+- Controller-style routes (`type: controller`) have been removed
