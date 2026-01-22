@@ -33,10 +33,94 @@ class Request extends SlimRequest implements RequestInterface
     protected $dotAnnotatedRequestBody;
 
 
+    /**
+     * Private SlimRequest instance when wrapping an existing request
+     */
+    private ?SlimRequest $wrappedRequest = null;
+
+
+    /**
+     * Constructor that accepts either a SlimRequest to wrap or the standard Slim constructor arguments
+     *
+     * @param string|SlimRequest $method Either HTTP method string or a SlimRequest instance to wrap
+     * @param UriInterface|string $uri
+     * @param array<string, string[]> $headers
+     * @param array<string, string> $cookies
+     * @param array<string, mixed> $serverParams
+     * @param StreamInterface|null $body
+     */
+    public function __construct(
+        $method = 'GET',
+        $uri = '',
+        $headers = [],
+        $cookies = [],
+        $serverParams = [],
+        $body = null
+    ) {
+        // If first argument is actually a SlimRequest, store it and delegate to it
+        if ($method instanceof SlimRequest) {
+            $this->wrappedRequest = $method;
+
+            // Call parent constructor with properties from the wrapped request
+            parent::__construct(
+                $method->getMethod(),
+                $method->getUri(),
+                $method->getHeaders(),
+                $method->getCookieParams(),
+                $method->getServerParams(),
+                $method->getBody()
+            );
+        } else {
+            // Standard Slim constructor call
+            parent::__construct($method, $uri, $headers, $cookies, $serverParams, $body);
+        }
+    }
+
+
+    /**
+     * Override methods to delegate to wrapped request if available
+     */
+    public function getAttributes()
+    {
+        return $this->wrappedRequest !== null
+            ? $this->wrappedRequest->getAttributes()
+            : parent::getAttributes();
+    }
+
+
+    public function getAttribute($name, $default = null)
+    {
+        return $this->wrappedRequest !== null
+            ? $this->wrappedRequest->getAttribute($name, $default)
+            : parent::getAttribute($name, $default);
+    }
+
+
+    public function getParsedBody()
+    {
+        return $this->wrappedRequest !== null
+            ? $this->wrappedRequest->getParsedBody()
+            : parent::getParsedBody();
+    }
+
+
+    public function getQueryParams()
+    {
+        return $this->wrappedRequest !== null
+            ? $this->wrappedRequest->getQueryParams()
+            : parent::getQueryParams();
+    }
+
+
     public function __clone()
     {
         parent::__clone();
         $this->dotAnnotatedRequestBody = null;
+
+        // Clone the wrapped request if present
+        if ($this->wrappedRequest !== null) {
+            $this->wrappedRequest = clone $this->wrappedRequest;
+        }
     }
 
 
