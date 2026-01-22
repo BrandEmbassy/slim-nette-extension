@@ -64,6 +64,7 @@ class SlimApiExtension extends CompilerExtension
                     Expect::arrayOf($this->createServiceExpect())
                         ->default([]),
                 ),
+                'apiDefinitionKey' => Expect::string()->default('api'), // Backward compatibility
             ],
         );
     }
@@ -73,6 +74,42 @@ class SlimApiExtension extends CompilerExtension
     {
         $builder = $this->getContainerBuilder();
         $config = (array)$this->config;
+
+        // Backward compatibility: merge configuration from container parameters if apiDefinitionKey is set
+        if (isset($config['apiDefinitionKey'])) {
+            $apiDefinitionKey = $config['apiDefinitionKey'];
+            $parameters = $builder->parameters;
+
+            if (isset($parameters[$apiDefinitionKey])) {
+                $apiConfig = $parameters[$apiDefinitionKey];
+
+                // Merge routes from parameters into config
+                if (isset($apiConfig[SlimApplicationFactory::ROUTES])) {
+                    if (!isset($config[SlimApplicationFactory::ROUTES])) {
+                        $config[SlimApplicationFactory::ROUTES] = [];
+                    }
+                    $config[SlimApplicationFactory::ROUTES] = array_merge_recursive(
+                        $config[SlimApplicationFactory::ROUTES],
+                        $apiConfig[SlimApplicationFactory::ROUTES]
+                    );
+                }
+
+                // Merge other configuration keys if not already set
+                $mergeableKeys = [
+                    SlimApplicationFactory::HANDLERS,
+                    SlimApplicationFactory::BEFORE_REQUEST_MIDDLEWARES,
+                    SlimApplicationFactory::BEFORE_ROUTE_MIDDLEWARES,
+                    SlimApplicationFactory::AFTER_ROUTE_MIDDLEWARES,
+                    SlimApplicationFactory::MIDDLEWARE_GROUPS,
+                ];
+
+                foreach ($mergeableKeys as $key) {
+                    if (isset($apiConfig[$key]) && !isset($config[$key])) {
+                        $config[$key] = $apiConfig[$key];
+                    }
+                }
+            }
+        }
 
         $builder->addDefinition($this->prefix('urlPatterResolver'))
             ->setFactory(UrlPatternResolver::class, [$config[SlimApplicationFactory::API_PREFIX]]);
