@@ -62,10 +62,15 @@ class Request extends SlimRequest implements RequestInterface
             $this->wrappedRequest = $method;
 
             // Call parent constructor with properties from the wrapped request
+            // Note: getHeaders() returns array, but parent expects HeadersInterface
+            // So we need to reconstruct the Headers object
+            $headersArray = $method->getHeaders();
+            $headersObject = new \Slim\Http\Headers($headersArray);
+
             parent::__construct(
                 $method->getMethod(),
                 $method->getUri(),
-                $method->getHeaders(),
+                $headersObject,
                 $method->getCookieParams(),
                 $method->getServerParams(),
                 $method->getBody()
@@ -121,6 +126,19 @@ class Request extends SlimRequest implements RequestInterface
         if ($this->wrappedRequest !== null) {
             $this->wrappedRequest = clone $this->wrappedRequest;
         }
+    }
+
+
+    public function withAttribute($name, $value)
+    {
+        $clone = parent::withAttribute($name, $value);
+
+        // If we have a wrapped request, update it as well to maintain consistency
+        if ($clone->wrappedRequest !== null) {
+            $clone->wrappedRequest = $clone->wrappedRequest->withAttribute($name, $value);
+        }
+
+        return $clone;
     }
 
 
