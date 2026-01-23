@@ -142,6 +142,32 @@ class Request extends SlimRequest implements RequestInterface
     }
 
 
+    public function withParsedBody($data)
+    {
+        $clone = parent::withParsedBody($data);
+
+        // If we have a wrapped request, update it as well to maintain consistency
+        if ($clone->wrappedRequest !== null) {
+            $clone->wrappedRequest = $clone->wrappedRequest->withParsedBody($data);
+        }
+
+        return $clone;
+    }
+
+
+    public function withQueryParams(array $query)
+    {
+        $clone = parent::withQueryParams($query);
+
+        // If we have a wrapped request, update it as well to maintain consistency
+        if ($clone->wrappedRequest !== null) {
+            $clone->wrappedRequest = $clone->wrappedRequest->withQueryParams($query);
+        }
+
+        return $clone;
+    }
+
+
     public function getRoute(): Route
     {
         $route = $this->getAttribute(self::ROUTE_ATTRIBUTE);
