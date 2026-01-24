@@ -131,40 +131,43 @@ class Request extends SlimRequest implements RequestInterface
 
     public function withAttribute($name, $value)
     {
-        $clone = parent::withAttribute($name, $value);
-
-        // If we have a wrapped request, update it as well to maintain consistency
-        if ($clone->wrappedRequest !== null) {
-            $clone->wrappedRequest = $clone->wrappedRequest->withAttribute($name, $value);
+        // If we have a wrapped request, we need to update it and clone ourselves
+        if ($this->wrappedRequest !== null) {
+            $clone = clone $this;
+            $clone->wrappedRequest = $this->wrappedRequest->withAttribute($name, $value);
+            return $clone;
         }
 
-        return $clone;
+        // No wrapped request, use parent implementation
+        return parent::withAttribute($name, $value);
     }
 
 
     public function withParsedBody($data)
     {
-        $clone = parent::withParsedBody($data);
-
-        // If we have a wrapped request, update it as well to maintain consistency
-        if ($clone->wrappedRequest !== null) {
-            $clone->wrappedRequest = $clone->wrappedRequest->withParsedBody($data);
+        // If we have a wrapped request, we need to update it and clone ourselves
+        if ($this->wrappedRequest !== null) {
+            $clone = clone $this;
+            $clone->wrappedRequest = $this->wrappedRequest->withParsedBody($data);
+            return $clone;
         }
 
-        return $clone;
+        // No wrapped request, use parent implementation
+        return parent::withParsedBody($data);
     }
 
 
     public function withQueryParams(array $query)
     {
-        $clone = parent::withQueryParams($query);
-
-        // If we have a wrapped request, update it as well to maintain consistency
-        if ($clone->wrappedRequest !== null) {
-            $clone->wrappedRequest = $clone->wrappedRequest->withQueryParams($query);
+        // If we have a wrapped request, we need to update it and clone ourselves
+        if ($this->wrappedRequest !== null) {
+            $clone = clone $this;
+            $clone->wrappedRequest = $this->wrappedRequest->withQueryParams($query);
+            return $clone;
         }
 
-        return $clone;
+        // No wrapped request, use parent implementation
+        return parent::withQueryParams($query);
     }
 
 
