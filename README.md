@@ -75,8 +75,8 @@ slimApi:
         - App\SomeBeforeRouteMiddleware 
         
     afterRouteMiddlewares:
-      # this is called for each route, after the route middlewares
-      - App\SomeAfterRouteMiddleware
+        # this is called for each route, after the route middlewares
+        - App\SomeAfterRouteMiddleware
 
     beforeRequestMiddlewares:
         # this is called for each request, even when route does NOT exist (404 requests)
