@@ -114,8 +114,8 @@ class SlimApplicationFactory
             [],
         );
 
-        if ($useApcuCache && !apcu_enabled()) {
-            // @intentionally For cli scripts is APCU disabled by default
+        if ($useApcuCache && (!function_exists('apcu_enabled') || !apcu_enabled())) {
+            // @intentionally For cli scripts is APCU disabled by default or extension not installed
             $useApcuCache = false;
         }
 

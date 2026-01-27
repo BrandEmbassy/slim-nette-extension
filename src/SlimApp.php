@@ -5,14 +5,15 @@ namespace BrandEmbassy\Slim;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Slim\App;
-use Slim\Interfaces\RouteCollectorProxyInterface;
+use Slim\Interfaces\RouteCollectorInterface;
 use Throwable;
 use function reset;
 
 class SlimApp extends App
 {
-    private ?ContainerInterface $container;
+    protected ?ContainerInterface $container;
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
@@ -23,25 +24,26 @@ class SlimApp extends App
     }
 
     /**
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
-     *
-     * @param bool $silent
+     * Run the application and return the response
+     * This method is for backward compatibility with Slim 3 style
+     * where run() returned a ResponseInterface
      *
      * @throws Throwable
      */
-    public function run($silent = false): ResponseInterface
+    public function runAndReturnResponse(?ServerRequestInterface $request = null): ResponseInterface
     {
-        $response = parent::run(true);
+        if (!$request) {
+            $serverRequestCreator = \Slim\Factory\ServerRequestCreatorFactory::create();
+            $request = $serverRequestCreator->createServerRequestFromGlobals();
+        }
+
+        $response = $this->handle($request);
 
         $contentTypes = $response->getHeader('Content-Type');
         $contentType = reset($contentTypes);
 
         if ($contentType === 'text/html; charset=UTF-8' && $response->getBody()->getSize() === 0) {
             $response = $response->withHeader('Content-Type', 'text/plain; charset=UTF-8');
-        }
-
-        if (!$silent) {
-            $this->respond($response);
         }
 
         return $response;
@@ -58,9 +60,6 @@ class SlimApp extends App
 
     /**
      * Get the route collector (replaces the old router access)
+     * Inherits from parent class, just documenting for clarity
      */
-    public function getRouteCollector(): RouteCollectorProxyInterface
-    {
-        return $this;
-    }
 }
