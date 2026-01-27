@@ -39,7 +39,7 @@ class MiddlewareFactory
         $container = $this->container;
         $responseFactory = $this->responseFactory;
 
-        return static function (
+        return function (
             ServerRequestInterface $psrRequest,
             RequestHandlerInterface $handler
         ) use (
@@ -57,7 +57,7 @@ class MiddlewareFactory
             $response = $responseFactory->create();
 
             // Create a $next callable that wraps the PSR-15 handler
-            $next = static function ($req, $res) use ($handler, $psrRequest): PsrResponseInterface {
+            $next = function ($req, $res) use ($handler, $psrRequest): PsrResponseInterface {
                 // Get the inner PSR request if it's our wrapper
                 $innerRequest = $req instanceof Request ? $req->getInnerRequest() : $psrRequest;
 

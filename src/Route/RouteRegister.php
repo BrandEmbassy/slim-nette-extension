@@ -104,13 +104,16 @@ class RouteRegister
             $routeDefinition->getMiddlewareGroups(),
         );
 
-        return array_merge_recursive(
+        $allMiddlewares = array_merge(
             $this->afterRouteMiddlewares->getMiddlewares(),
             $routeDefinition->getMiddlewares(),
             $middlewaresFromGroups,
             $versionMiddlewares,
             $this->beforeRouteMiddlewares->getMiddlewares(),
         );
+
+        // Filter out any null values that might have been introduced
+        return array_filter($allMiddlewares, static fn($middleware) => $middleware !== null);
     }
 
 

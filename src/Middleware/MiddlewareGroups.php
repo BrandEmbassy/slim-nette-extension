@@ -53,6 +53,6 @@ class MiddlewareGroups
             $groupNames,
         );
 
-        return array_merge_recursive(...$groupsToMerge);
+        return array_merge(...$groupsToMerge);
     }
 }
