@@ -31,6 +31,8 @@ class SlimApplicationFactory
 
     public const BEFORE_ROUTE_MIDDLEWARES = 'beforeRouteMiddlewares';
 
+    public const AFTER_ROUTE_MIDDLEWARES = 'afterRouteMiddlewares';
+
     public const HANDLERS = 'handlers';
 
     public const BEFORE_REQUEST_MIDDLEWARES = 'beforeRequestMiddlewares';

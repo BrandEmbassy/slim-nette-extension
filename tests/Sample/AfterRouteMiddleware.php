@@ -10,9 +10,9 @@ use BrandEmbassyTest\Slim\MiddlewareInvocationCounter;
 /**
  * @final
  */
-class BeforeRouteMiddleware implements Middleware
+class AfterRouteMiddleware implements Middleware
 {
-    public const HEADER_NAME = 'before-route-middleware';
+    public const HEADER_NAME = 'after-route-middleware';
 
 
     public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next): ResponseInterface

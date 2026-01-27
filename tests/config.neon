@@ -12,6 +12,7 @@ services:
     - BrandEmbassyTest\Slim\Sample\ErrorThrowingRoute
     - BrandEmbassyTest\Slim\Sample\BeforeRequestMiddleware
     - BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware
+    - BrandEmbassyTest\Slim\Sample\AfterRouteMiddleware
     - BrandEmbassyTest\Slim\Sample\CreateChannelUserRoute
     - BrandEmbassyTest\Slim\Sample\GroupMiddleware
     - BrandEmbassyTest\Slim\Sample\OnlyApiGroupMiddleware
@@ -77,6 +78,9 @@ slimApi:
 
     beforeRouteMiddlewares:
         - BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware
+
+    afterRouteMiddlewares:
+        - BrandEmbassyTest\Slim\Sample\AfterRouteMiddleware
 
     beforeRequestMiddlewares:
         - BrandEmbassyTest\Slim\Sample\BeforeRequestMiddleware
