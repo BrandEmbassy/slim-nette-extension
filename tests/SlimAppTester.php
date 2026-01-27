@@ -28,7 +28,7 @@ class SlimAppTester
     {
         $slimApp = self::createSlimApp($configPath);
 
-        return $slimApp->run(true);
+        return $slimApp->runAndReturnResponse();
     }
 
 

@@ -4,8 +4,8 @@ namespace BrandEmbassy\Slim;
 
 use Slim\Interfaces\RouteCollectorInterface;
 use Slim\Interfaces\RouteInterface;
+use Slim\Interfaces\RouteParserInterface;
 use Slim\Routing\RouteParser;
-use Slim\Routing\RouteParserInterface;
 
 /**
  * @final
