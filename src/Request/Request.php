@@ -246,24 +246,6 @@ class Request extends SlimRequest implements RequestInterface
 
 
     /**
-     * Get decoded JSON from request body
-     *
-     * @return mixed Decoded JSON data (array or object)
-     * @throws \JsonException
-     */
-    public function getDecodedJsonFromBody()
-    {
-        $body = (string)$this->getBody();
-
-        if ($body === '') {
-            return [];
-        }
-
-        return json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-    }
-
-
-    /**
      * @return Dot<string, mixed[]>
      */
     private function getDotAnnotatedRequestBody(): Dot
