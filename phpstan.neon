@@ -29,9 +29,6 @@ parameters:
             message: '#Cannot call method get\(\) on Psr\\Container\\ContainerInterface\|null#'
             path: tests/SlimApplicationFactoryTest.php
         -
-            message: '#Property BrandEmbassy\\Slim\\CompatibilityContainer::\$app is never read, only written#'
-            path: src/CompatibilityContainer.php
-        -
             message: '#Anonymous function uses \$this assigned to variable \$factory#'
             path: src/Route/RouteDefinitionFactory.php
         -
@@ -40,9 +37,6 @@ parameters:
         -
             message: '#Dynamic call to static method .+::createFromGlobals\(\)#'
             path: src/Request/DefaultRequestFactory.php
-        -
-            message: '#Only booleans are allowed in a negated boolean#'
-            path: src/SlimApp.php
         -
             message: '#Strict comparison using !== between callable\(\): mixed and null will always evaluate to true#'
             path: src/Route/RouteRegister.php
