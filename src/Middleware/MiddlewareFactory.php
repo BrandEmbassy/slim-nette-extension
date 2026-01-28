@@ -57,11 +57,22 @@ class MiddlewareFactory
             $response = $responseFactory->create();
 
             // Create a $next callable that wraps the PSR-15 handler
-            $next = function ($req, $res) use ($handler, $psrRequest, $responseFactory): PsrResponseInterface {
+            $next = function ($req, $res) use ($handler): PsrResponseInterface {
                 // Get the inner PSR request if it's our wrapper
-                $innerRequest = $req instanceof Request ? $req->getInnerRequest() : $psrRequest;
+                $innerRequest = $req instanceof Request ? $req->getInnerRequest() : $req;
 
+                // Handle the request to get the response from the next layer
                 $psrResponse = $handler->handle($innerRequest);
+
+                // If middleware passed a response with headers/state, merge them into the result
+                if ($res instanceof Response) {
+                    // Get headers from the middleware's response
+                    foreach ($res->getHeaders() as $name => $values) {
+                        foreach ($values as $value) {
+                            $psrResponse = $psrResponse->withAddedHeader($name, $value);
+                        }
+                    }
+                }
 
                 // Wrap PSR-7 response in our Response wrapper for backward compatibility
                 return new Response($psrResponse);

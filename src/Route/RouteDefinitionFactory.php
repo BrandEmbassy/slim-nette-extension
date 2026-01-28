@@ -33,15 +33,31 @@ class RouteDefinitionFactory
      */
     public function create(string $method, array $routeDefinitionData): RouteDefinition
     {
-        $route = function (
-            RequestInterface $request,
-            ResponseInterface $response
-        ) use (
-            $routeDefinitionData
-        ): ResponseInterface {
-            $route = $this->getRoute($routeDefinitionData[RouteDefinition::SERVICE]);
+        $container = $this->container;
+        $routeService = $routeDefinitionData[RouteDefinition::SERVICE];
 
-            return $route($request, $response);
+        // Create PSR-15 compatible route handler that wraps Slim 3 style route
+        $factory = $this;
+        $route = function (
+            \Psr\Http\Message\ServerRequestInterface $psrRequest,
+            \Psr\Http\Message\ResponseInterface $psrResponse,
+            array $args
+        ) use (
+            $routeService,
+            $container,
+            $factory
+        ): \Psr\Http\Message\ResponseInterface {
+            $route = $factory->getRoute($routeService);
+
+            // Wrap PSR-7 request/response in our wrappers for backward compatibility
+            $request = new \BrandEmbassy\Slim\Request\Request($psrRequest);
+            $response = new \BrandEmbassy\Slim\Response\Response($psrResponse);
+
+            // Call Slim 3 style route
+            $result = $route($request, $response);
+
+            // Return inner PSR-7 response
+            return $result instanceof ResponseInterface ? $result->getInnerResponse() : $result;
         };
 
         $middlewares = $this->middlewareFactory->createFromIdentifiers(

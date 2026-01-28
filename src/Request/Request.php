@@ -59,6 +59,17 @@ class Request implements RequestInterface
 
 
     /**
+     * Get the matched route for backward compatibility with Slim 3
+     * In Slim 4, routes are accessed via RouteContext
+     */
+    public function getRoute(): ?\Slim\Routing\Route
+    {
+        $routeContext = \Slim\Routing\RouteContext::fromRequest($this->request);
+        return $routeContext->getRoute();
+    }
+
+
+    /**
      * @return array<string, string>
      */
     public function getRouteArguments(): array

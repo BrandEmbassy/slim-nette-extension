@@ -76,7 +76,7 @@ class RouteRegister
             $routeName = $routeDefinition->getName() ?? $resolveRoutePath;
 
             $routeToAdd = $router->map(
-                [$routeDefinition->getMethod()],
+                [strtoupper($routeDefinition->getMethod())],
                 $urlPattern,
                 $routeDefinition->getRoute(),
             );
