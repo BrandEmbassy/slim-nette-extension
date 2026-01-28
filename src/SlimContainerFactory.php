@@ -4,11 +4,10 @@ namespace BrandEmbassy\Slim;
 
 use BrandEmbassy\Slim\Request\RequestFactory;
 use BrandEmbassy\Slim\Response\ResponseFactory;
-use Psr\Container\ContainerInterface;
 
 /**
  * @final
- * 
+ *
  * This class is kept for compatibility but is not used in Slim 4
  * as Slim 4 doesn't use its own container.
  */
@@ -30,7 +29,7 @@ class SlimContainerFactory
 
     /**
      * @param array<string, mixed> $configuration
-     * 
+     *
      * @return array<string, mixed>
      */
     public function create(array $configuration): array

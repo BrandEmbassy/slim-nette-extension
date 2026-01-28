@@ -13,7 +13,7 @@ class DefaultResponseFactory implements ResponseFactory
     {
         $psr7Factory = new Psr7ResponseFactory();
         $psrResponse = $psr7Factory->createResponse();
-        
+
         return new Response($psrResponse);
     }
 }

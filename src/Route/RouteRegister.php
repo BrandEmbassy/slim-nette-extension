@@ -7,9 +7,11 @@ use BrandEmbassy\Slim\Middleware\BeforeRouteMiddlewares;
 use BrandEmbassy\Slim\Middleware\MiddlewareGroups;
 use LogicException;
 use Slim\Interfaces\RouteCollectorProxyInterface;
+use function array_filter;
 use function array_keys;
-use function array_merge_recursive;
+use function array_merge;
 use function levenshtein;
+use function strtoupper;
 
 /**
  * @final

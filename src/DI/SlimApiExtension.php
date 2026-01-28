@@ -18,7 +18,6 @@ use BrandEmbassy\Slim\Route\UrlPatternResolver;
 use BrandEmbassy\Slim\SlimApplicationFactory;
 use BrandEmbassy\Slim\SlimContainerFactory;
 use Nette\DI\CompilerExtension;
-use Nette\DI\Definitions\Reference;
 use Nette\Schema\Expect;
 use Nette\Schema\Schema;
 

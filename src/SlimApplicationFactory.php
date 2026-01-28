@@ -2,21 +2,25 @@
 
 namespace BrandEmbassy\Slim;
 
-use ArrayAccess;
 use BrandEmbassy\Slim\DI\ServiceProvider;
 use BrandEmbassy\Slim\Middleware\MiddlewareFactory;
 use BrandEmbassy\Slim\Request\Request;
+use BrandEmbassy\Slim\Response\DefaultResponseFactory;
 use BrandEmbassy\Slim\Route\OnlyNecessaryRoutesProvider;
 use BrandEmbassy\Slim\Route\RouteRegister;
 use LogicException;
 use Nette\DI\Container;
 use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ResponseFactoryInterface;
-use Slim\Factory\AppFactory;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Slim\Exception\HttpMethodNotAllowedException;
+use Slim\Exception\HttpNotFoundException;
 use Slim\Interfaces\RouteCollectorProxyInterface;
 use Slim\Psr7\Factory\ResponseFactory;
+use Throwable;
 use function apcu_enabled;
 use function assert;
+use function function_exists;
 use function implode;
 use function in_array;
 use function is_callable;
@@ -125,19 +129,19 @@ class SlimApplicationFactory
 
         // Create a compatibility container for backward compatibility
         $compatContainer = new CompatibilityContainer($this->container);
-        
+
         // Store settings in the compatibility container
         if (isset($slimConfiguration[self::SETTINGS])) {
             $compatContainer['settings'] = $slimConfiguration[self::SETTINGS];
         }
 
         // Create response factory (using our ResponseFactory interface, not Slim's PSR-7 factory)
-        $responseFactory = new \BrandEmbassy\Slim\Response\DefaultResponseFactory();
+        $responseFactory = new DefaultResponseFactory();
         $psrResponseFactory = new ResponseFactory();
 
         // Create custom SlimApp instance with the compatibility container
         $slimApp = new SlimApp($psrResponseFactory, $compatContainer);
-        
+
         // Set the app reference in the container so it can provide the router
         $compatContainer->setApp($slimApp);
 
@@ -175,35 +179,42 @@ class SlimApplicationFactory
 
         // Create a custom error handler that delegates to Slim 3 style handlers
         $customErrorHandler = function (
-            \Psr\Http\Message\ServerRequestInterface $request,
-            \Throwable $exception,
+            ServerRequestInterface $request,
+            Throwable $exception,
             bool $displayErrorDetails,
             bool $logErrors,
             bool $logErrorDetails
-        ) use ($compatContainer, $responseFactory): \Psr\Http\Message\ResponseInterface {
+        ) use (
+            $compatContainer,
+            $responseFactory
+        ): ResponseInterface {
             $response = $responseFactory->create();
 
             // Determine which handler to use based on exception type
-            if ($exception instanceof \Slim\Exception\HttpNotFoundException && isset($compatContainer['notFoundHandler'])) {
+            if ($exception instanceof HttpNotFoundException && isset($compatContainer['notFoundHandler'])) {
                 $handler = $compatContainer['notFoundHandler'];
                 $wrappedRequest = new Request($request);
+
                 return $handler($wrappedRequest, $response->withStatus(404), $exception)->getInnerResponse();
             }
 
-            if ($exception instanceof \Slim\Exception\HttpMethodNotAllowedException && isset($compatContainer['notAllowedHandler'])) {
+            if ($exception instanceof HttpMethodNotAllowedException && isset($compatContainer['notAllowedHandler'])) {
                 $handler = $compatContainer['notAllowedHandler'];
                 $wrappedRequest = new Request($request);
+
                 return $handler($wrappedRequest, $response->withStatus(405), $exception)->getInnerResponse();
             }
 
             if (isset($compatContainer['errorHandler'])) {
                 $handler = $compatContainer['errorHandler'];
                 $wrappedRequest = new Request($request);
+
                 return $handler($wrappedRequest, $response->withStatus(500), $exception)->getInnerResponse();
             }
 
             // Fallback to default error response
             $response->getBody()->write('Internal Server Error');
+
             return $response->getInnerResponse()->withStatus(500);
         };
 

@@ -7,13 +7,14 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\App;
-use Slim\Interfaces\RouteCollectorInterface;
+use Slim\Factory\ServerRequestCreatorFactory;
 use Throwable;
 use function reset;
 
 class SlimApp extends App
 {
     protected ?ContainerInterface $container;
+
 
     public function __construct(
         ResponseFactoryInterface $responseFactory,
@@ -22,6 +23,7 @@ class SlimApp extends App
         parent::__construct($responseFactory, $container);
         $this->container = $container;
     }
+
 
     /**
      * Run the application and return the response
@@ -33,7 +35,7 @@ class SlimApp extends App
     public function runAndReturnResponse(?ServerRequestInterface $request = null): ResponseInterface
     {
         if (!$request) {
-            $serverRequestCreator = \Slim\Factory\ServerRequestCreatorFactory::create();
+            $serverRequestCreator = ServerRequestCreatorFactory::create();
             $request = $serverRequestCreator->createServerRequestFromGlobals();
         }
 
@@ -49,6 +51,7 @@ class SlimApp extends App
         return $response;
     }
 
+
     /**
      * Backward compatibility method for Slim 3
      * In Slim 4, container is accessed via getContainer()
@@ -57,6 +60,7 @@ class SlimApp extends App
     {
         return $this->container;
     }
+
 
     /**
      * Get the route collector (replaces the old router access)

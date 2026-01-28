@@ -4,10 +4,11 @@ namespace BrandEmbassy\Slim\Route;
 
 use BrandEmbassy\Slim\DI\ServiceProvider;
 use BrandEmbassy\Slim\Middleware\MiddlewareFactory;
-use BrandEmbassy\Slim\Request\RequestInterface;
-use BrandEmbassy\Slim\Response\ResponseInterface;
+use BrandEmbassy\Slim\Request\Request;
+use BrandEmbassy\Slim\Response\Response;
 use LogicException;
 use Nette\DI\Container;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * @final
@@ -33,31 +34,29 @@ class RouteDefinitionFactory
      */
     public function create(string $method, array $routeDefinitionData): RouteDefinition
     {
-        $container = $this->container;
         $routeService = $routeDefinitionData[RouteDefinition::SERVICE];
 
         // Create PSR-15 compatible route handler that wraps Slim 3 style route
         $factory = $this;
         $route = function (
-            \Psr\Http\Message\ServerRequestInterface $psrRequest,
+            ServerRequestInterface $psrRequest,
             \Psr\Http\Message\ResponseInterface $psrResponse,
             array $args
         ) use (
             $routeService,
-            $container,
             $factory
         ): \Psr\Http\Message\ResponseInterface {
             $route = $factory->getRoute($routeService);
 
             // Wrap PSR-7 request/response in our wrappers for backward compatibility
-            $request = new \BrandEmbassy\Slim\Request\Request($psrRequest);
-            $response = new \BrandEmbassy\Slim\Response\Response($psrResponse);
+            $request = new Request($psrRequest);
+            $response = new Response($psrResponse);
 
             // Call Slim 3 style route
             $result = $route($request, $response);
 
-            // Return inner PSR-7 response
-            return $result instanceof ResponseInterface ? $result->getInnerResponse() : $result;
+            // Return inner PSR-7 response (result will always be our ResponseInterface)
+            return $result->getInnerResponse();
         };
 
         $middlewares = $this->middlewareFactory->createFromIdentifiers(

@@ -9,6 +9,12 @@ use stdClass;
 interface ResponseInterface extends PsrResponseInterface
 {
     /**
+     * Get the inner PSR-7 ResponseInterface
+     */
+    public function getInnerResponse(): PsrResponseInterface;
+
+
+    /**
      * @param mixed[]|stdClass $data
      *
      * @return static

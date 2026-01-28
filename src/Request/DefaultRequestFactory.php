@@ -13,7 +13,7 @@ class DefaultRequestFactory implements RequestFactory
     {
         $serverRequestFactory = new ServerRequestFactory();
         $psrRequest = $serverRequestFactory->createFromGlobals();
-        
+
         return new Request($psrRequest);
     }
 }

@@ -14,7 +14,7 @@ use function is_array;
 
 /**
  * @final
- * 
+ *
  * Wrapper around PSR-7 ResponseInterface to provide backward compatibility
  * with Slim 3 response methods while using Slim 4.
  */
@@ -54,22 +54,20 @@ class Response implements ResponseInterface
 
     /**
      * @param mixed[]|stdClass $data
-     *
-     * @return static
      */
     public function withJson($data, ?int $status = null, int $encodingOptions = 0): static
     {
         $json = Json::encode($data, $encodingOptions);
-        
+
         // Create a new stream with the JSON content
         $streamFactory = new StreamFactory();
         $body = $streamFactory->createStream($json);
-        
+
         $clone = clone $this;
         $clone->response = $this->response
             ->withBody($body)
             ->withHeader('Content-Type', 'application/json');
-        
+
         if ($status !== null) {
             $clone->response = $clone->response->withStatus($status);
         }
@@ -80,8 +78,6 @@ class Response implements ResponseInterface
 
     /**
      * @param string|UriInterface $url
-     *
-     * @return static
      */
     public function withRedirect($url, int $statusCode = 302): static
     {
