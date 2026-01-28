@@ -82,13 +82,21 @@ class RequestTest extends TestCase
     public function testGetRoute(): void
     {
         $request = $this->getDispatchedRequest('?foo=bar&two=2&null=null&array[]=item1&array[]=item2');
-        $response = new Response();
+        $responseFactory = new \BrandEmbassy\Slim\Response\DefaultResponseFactory();
+        $response = $responseFactory->create();
         $response = $response->withHeader('hasBeenCalled', 'true');
 
         /** @var Response $response */
-        $responseFromRoute = ($request->getRoute()->getCallable())($request, $response);
+        // In Slim 4, route callables receive (request, response, args)
+        $responseFromRoute = ($request->getRoute()->getCallable())(
+            $request->getInnerRequest(),
+            $response->getInnerResponse(),
+            $request->getRouteArguments()
+        );
 
-        Assert::assertSame(['true'], $responseFromRoute->getHeader('hasBeenCalled'));
+        // Wrap the PSR-7 response back in our Response wrapper for the assertion
+        $wrappedResponse = new Response($responseFromRoute);
+        Assert::assertSame(['true'], $wrappedResponse->getHeader('hasBeenCalled'));
     }
 
 
