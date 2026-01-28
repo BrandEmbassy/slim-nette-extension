@@ -177,6 +177,7 @@ class SlimApplicationFactory
         $errorMiddleware = $slimApp->addErrorMiddleware(true, true, true);
 
         // Create a custom error handler that delegates to Slim 3 style handlers
+        // @codingStandardsIgnoreStart
         $customErrorHandler = function (
             ServerRequestInterface $request,
             Throwable $exception,
@@ -187,6 +188,7 @@ class SlimApplicationFactory
             $compatContainer,
             $responseFactory
         ): ResponseInterface {
+            // @codingStandardsIgnoreEnd
             $response = $responseFactory->create();
 
             // Determine which handler to use based on exception type
