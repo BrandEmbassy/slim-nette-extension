@@ -3,7 +3,7 @@
 namespace BrandEmbassy\Slim\Middleware;
 
 use function array_map;
-use function array_merge_recursive;
+use function array_merge;
 
 /**
  * @final

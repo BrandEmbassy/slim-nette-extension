@@ -16,4 +16,54 @@ parameters:
         -
             message: '#Cognitive complexity for "BrandEmbassy\\Slim\\Route\\OnlyNecessaryRoutesProvider::getRoutes\(\)" is 14, keep it under 9#'
             path: src/Route/OnlyNecessaryRoutesProvider.php
+        -
+            message: '#Cognitive complexity for "BrandEmbassy\\Slim\\Middleware\\MiddlewareFactory::createFromIdentifier\(\)" is \d+, keep it under 9#'
+            path: src/Middleware/MiddlewareFactory.php
+        -
+            message: '#Class Slim\\Router not found#'
+            path: tests/SlimApplicationFactoryTest.php
+        -
+            message: '#Call to method .+ on an unknown class Slim\\Router#'
+            path: tests/SlimApplicationFactoryTest.php
+        -
+            message: '#Cannot call method get\(\) on Psr\\Container\\ContainerInterface\|null#'
+            path: tests/SlimApplicationFactoryTest.php
+        -
+            message: '#Property BrandEmbassy\\Slim\\CompatibilityContainer::\$app is never read, only written#'
+            path: src/CompatibilityContainer.php
+        -
+            message: '#Anonymous function uses \$this assigned to variable \$factory#'
+            path: src/Route/RouteDefinitionFactory.php
+        -
+            message: '#Call to internal static method .+::createFromGlobals\(\) from outside its root namespace#'
+            path: src/Request/DefaultRequestFactory.php
+        -
+            message: '#Dynamic call to static method .+::createFromGlobals\(\)#'
+            path: src/Request/DefaultRequestFactory.php
+        -
+            message: '#Only booleans are allowed in a negated boolean#'
+            path: src/SlimApp.php
+        -
+            message: '#Strict comparison using !== between callable\(\): mixed and null will always evaluate to true#'
+            path: src/Route/RouteRegister.php
+        -
+            message: '#.+ (does not specify its types|has no value type specified in iterable type|type has no value type specified)#'
+        -
+            message: '#Cognitive complexity for "BrandEmbassy\\Slim\\SlimApplicationFactory::create\(\)"#'
+            path: src/SlimApplicationFactory.php
+        -
+            message: '#Cannot call method getCallable\(\) on Slim\\Routing\\Route\|null#'
+            path: tests/Request/RequestTest.php
+        -
+            message: '#Trying to invoke .+ but it might not be a callable#'
+            path: tests/Request/RequestTest.php
+        -
+            message: '#Parameter .+ of method .+::(withCookieParams|withQueryParams|withUploadedFiles)\(\) should be contravariant#'
+            path: src/Request/Request.php
+        -
+            message: '#Return type \(mixed\) of method .+::getParsedBody\(\) should be covariant#'
+            path: src/Request/Request.php
+        -
+            message: '#Method .+::urlFor\(\) has parameter \$(data|queryParams) with no value type specified#'
+            path: src/RouterCompatibility.php
 

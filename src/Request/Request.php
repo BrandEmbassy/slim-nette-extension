@@ -9,6 +9,7 @@ use InvalidArgumentException;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
+use Slim\Routing\Route;
 use Slim\Routing\RouteContext;
 use Slim\Routing\RoutingResults;
 use function array_key_exists;
@@ -20,7 +21,7 @@ use function str_contains;
 
 /**
  * @final
- * 
+ *
  * Wrapper around PSR-7 ServerRequestInterface to provide backward compatibility
  * with Slim 3 request methods while using Slim 4.
  */
@@ -62,10 +63,14 @@ class Request implements RequestInterface
      * Get the matched route for backward compatibility with Slim 3
      * In Slim 4, routes are accessed via RouteContext
      */
-    public function getRoute(): ?\Slim\Routing\Route
+    public function getRoute(): ?Route
     {
-        $routeContext = \Slim\Routing\RouteContext::fromRequest($this->request);
-        return $routeContext->getRoute();
+        $routeContext = RouteContext::fromRequest($this->request);
+        $route = $routeContext->getRoute();
+
+        // PHPStan: RouteContext::getRoute() returns RouteInterface|null but we need Route|null
+        // At runtime, this will always be Route|null in Slim 4
+        return $route instanceof \Slim\Routing\Route ? $route : null;
     }
 
 
@@ -452,14 +457,14 @@ class Request implements RequestInterface
 
 
     /**
-     * @param string $key
      * @param mixed|null $default
+     *
      * @return mixed
      */
     public function getServerParam(string $key, $default = null)
     {
         $serverParams = $this->getServerParams();
-        
+
         return $serverParams[$key] ?? $default;
     }
 
@@ -554,6 +559,7 @@ class Request implements RequestInterface
 
     /**
      * @param mixed $default
+     *
      * @return mixed
      */
     public function getAttribute($name, $default = null)
