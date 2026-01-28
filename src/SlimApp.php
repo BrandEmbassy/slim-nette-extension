@@ -34,7 +34,7 @@ class SlimApp extends App
      */
     public function runAndReturnResponse(?ServerRequestInterface $request = null): ResponseInterface
     {
-        if (!$request) {
+        if (!$request instanceof ServerRequestInterface) {
             $serverRequestCreator = ServerRequestCreatorFactory::create();
             $request = $serverRequestCreator->createServerRequestFromGlobals();
         }
@@ -45,7 +45,7 @@ class SlimApp extends App
         $contentType = reset($contentTypes);
 
         if ($contentType === 'text/html; charset=UTF-8' && $response->getBody()->getSize() === 0) {
-            $response = $response->withHeader('Content-Type', 'text/plain; charset=UTF-8');
+            return $response->withHeader('Content-Type', 'text/plain; charset=UTF-8');
         }
 
         return $response;

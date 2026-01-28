@@ -2,6 +2,7 @@
 
 namespace BrandEmbassyTest\Slim\Request;
 
+use BrandEmbassy\Slim\Response\DefaultResponseFactory;
 use BrandEmbassy\Slim\Request\QueryParamMissingException;
 use BrandEmbassy\Slim\Request\RequestFieldMissingException;
 use BrandEmbassy\Slim\Request\RequestInterface;
@@ -82,7 +83,7 @@ class RequestTest extends TestCase
     public function testGetRoute(): void
     {
         $request = $this->getDispatchedRequest('?foo=bar&two=2&null=null&array[]=item1&array[]=item2');
-        $responseFactory = new \BrandEmbassy\Slim\Response\DefaultResponseFactory();
+        $responseFactory = new DefaultResponseFactory();
         $response = $responseFactory->create();
         $response = $response->withHeader('hasBeenCalled', 'true');
 
