@@ -2,13 +2,13 @@
 
 namespace BrandEmbassy\Slim\Route;
 
-use Psr\Http\Message\ResponseInterface;
 use BrandEmbassy\Slim\DI\ServiceProvider;
 use BrandEmbassy\Slim\Middleware\MiddlewareFactory;
 use BrandEmbassy\Slim\Request\Request;
 use BrandEmbassy\Slim\Response\Response;
 use LogicException;
 use Nette\DI\Container;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**

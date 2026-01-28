@@ -16,6 +16,9 @@ class CompatibilityContainer implements ContainerInterface, ArrayAccess
 {
     private Container $netteContainer;
 
+    /**
+     * @var array<string, mixed>
+     */
     private array $customServices = [];
 
     private ?RouterCompatibility $router = null;
@@ -67,24 +70,37 @@ class CompatibilityContainer implements ContainerInterface, ArrayAccess
     }
 
 
+    /**
+     * @param mixed $offset
+     */
     public function offsetExists($offset): bool
     {
         return $this->has($offset);
     }
 
 
+    /**
+     * @param mixed $offset
+     */
     public function offsetGet($offset): mixed
     {
         return $this->get($offset);
     }
 
 
+    /**
+     * @param mixed $offset
+     * @param mixed $value
+     */
     public function offsetSet($offset, $value): void
     {
         $this->customServices[$offset] = $value;
     }
 
 
+    /**
+     * @param mixed $offset
+     */
     public function offsetUnset($offset): void
     {
         unset($this->customServices[$offset]);

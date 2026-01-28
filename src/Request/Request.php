@@ -161,6 +161,8 @@ class Request implements RequestInterface
 
 
     /**
+     * @param mixed|null $default
+     *
      * @return string|string[]|null
      */
     public function getQueryParam(string $key, $default = null)
@@ -299,8 +301,9 @@ class Request implements RequestInterface
     }
 
 
-    // PSR-7 ServerRequestInterface implementation - delegate to inner request
-
+    /**
+     * PSR-7 ServerRequestInterface implementation - delegate to inner request
+     */
     public function getProtocolVersion(): string
     {
         return $this->request->getProtocolVersion();
@@ -558,6 +561,7 @@ class Request implements RequestInterface
 
 
     /**
+     * @param string $name
      * @param mixed $default
      *
      * @return mixed
