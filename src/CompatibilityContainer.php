@@ -41,7 +41,10 @@ class CompatibilityContainer implements ContainerInterface, ArrayAccess
     }
 
 
-    public function get(string $id): mixed
+    /**
+     * @param string $id
+     */
+    public function get($id): mixed
     {
         // Handle special Slim services
         if ($id === 'router' && $this->router !== null) {
@@ -56,7 +59,10 @@ class CompatibilityContainer implements ContainerInterface, ArrayAccess
     }
 
 
-    public function has(string $id): bool
+    /**
+     * @param string $id
+     */
+    public function has($id): bool
     {
         if ($id === 'router' || $id === 'settings') {
             return true;
