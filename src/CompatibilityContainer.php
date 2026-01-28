@@ -16,23 +16,19 @@ class CompatibilityContainer implements ContainerInterface, ArrayAccess
 {
     private Container $netteContainer;
 
-    private ?SlimApp $app;
-
     private array $customServices = [];
 
     private ?RouterCompatibility $router = null;
 
 
-    public function __construct(Container $netteContainer, ?SlimApp $app = null)
+    public function __construct(Container $netteContainer)
     {
         $this->netteContainer = $netteContainer;
-        $this->app = $app;
     }
 
 
     public function setApp(SlimApp $app): void
     {
-        $this->app = $app;
         // Create router compatibility wrapper
         $routeCollector = $app->getRouteCollector();
         $this->router = new RouterCompatibility(
@@ -42,7 +38,7 @@ class CompatibilityContainer implements ContainerInterface, ArrayAccess
     }
 
 
-    public function get(string $id)
+    public function get(string $id): mixed
     {
         // Handle special Slim services
         if ($id === 'router' && $this->router !== null) {
@@ -53,11 +49,7 @@ class CompatibilityContainer implements ContainerInterface, ArrayAccess
             return $this->customServices['settings'];
         }
 
-        if (isset($this->customServices[$id])) {
-            return $this->customServices[$id];
-        }
-
-        return $this->netteContainer->getService($id);
+        return $this->customServices[$id] ?? $this->netteContainer->getService($id);
     }
 
 

@@ -166,7 +166,6 @@ class SlimApplicationFactory
 
         $this->registerHandlers(
             $compatContainer,
-            $slimApp,
             $this->configuration[self::HANDLERS],
         );
 
@@ -234,7 +233,6 @@ class SlimApplicationFactory
      */
     private function registerHandlers(
         CompatibilityContainer $container,
-        SlimApp $app,
         array $handlers
     ): void {
         foreach ($handlers as $handlerName => $handlerClass) {

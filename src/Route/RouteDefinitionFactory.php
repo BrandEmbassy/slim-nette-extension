@@ -2,6 +2,7 @@
 
 namespace BrandEmbassy\Slim\Route;
 
+use Psr\Http\Message\ResponseInterface;
 use BrandEmbassy\Slim\DI\ServiceProvider;
 use BrandEmbassy\Slim\Middleware\MiddlewareFactory;
 use BrandEmbassy\Slim\Request\Request;
@@ -40,12 +41,12 @@ class RouteDefinitionFactory
         $factory = $this;
         $route = function (
             ServerRequestInterface $psrRequest,
-            \Psr\Http\Message\ResponseInterface $psrResponse,
+            ResponseInterface $psrResponse,
             array $args
         ) use (
             $routeService,
             $factory
-        ): \Psr\Http\Message\ResponseInterface {
+        ): ResponseInterface {
             $route = $factory->getRoute($routeService);
 
             // Wrap PSR-7 request/response in our wrappers for backward compatibility

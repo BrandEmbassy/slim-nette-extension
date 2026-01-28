@@ -70,7 +70,7 @@ class Request implements RequestInterface
 
         // PHPStan: RouteContext::getRoute() returns RouteInterface|null but we need Route|null
         // At runtime, this will always be Route|null in Slim 4
-        return $route instanceof \Slim\Routing\Route ? $route : null;
+        return $route instanceof Route ? $route : null;
     }
 
 
