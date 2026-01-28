@@ -37,6 +37,8 @@ class RouterCompatibility
     /**
      * Build the path for a named route including the base path
      *
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingTraversableTypeHintSpecification
+     *
      * @param string $name        Route name
      * @param array  $data        Named argument replacement data
      * @param array  $queryParams Optional query string parameters
