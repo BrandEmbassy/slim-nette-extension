@@ -90,8 +90,9 @@ class Response implements ResponseInterface
     }
 
 
-    // PSR-7 ResponseInterface implementation - delegate to inner response
-
+    /**
+     * PSR-7 ResponseInterface implementation - delegate to inner response
+     */
     public function getProtocolVersion(): string
     {
         return $this->response->getProtocolVersion();
