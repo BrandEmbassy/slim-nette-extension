@@ -42,7 +42,6 @@ class RouteDefinitionFactory
         $route = function (
             ServerRequestInterface $psrRequest,
             ResponseInterface $psrResponse,
-            // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
             array $args
         ) use (
             $routeService,
