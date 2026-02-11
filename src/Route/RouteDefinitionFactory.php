@@ -37,7 +37,7 @@ class RouteDefinitionFactory
     {
         $routeService = $routeDefinitionData[RouteDefinition::SERVICE];
 
-        // Create PSR-15 compatible route handler that wraps Slim 3 style route
+        // Create PSR-15 compatible route handler that wraps the route callable
         $factory = $this;
         $route = function (
             ServerRequestInterface $psrRequest,
@@ -49,11 +49,11 @@ class RouteDefinitionFactory
         ): ResponseInterface {
             $route = $factory->getRoute($routeService);
 
-            // Wrap PSR-7 request/response in our wrappers for backward compatibility
+            // Wrap PSR-7 request/response in our wrappers
             $request = new Request($psrRequest);
             $response = new Response($psrResponse);
 
-            // Call Slim 3 style route
+            // Call the route handler
             $result = $route($request, $response);
 
             // Return inner PSR-7 response (result will always be our ResponseInterface)
