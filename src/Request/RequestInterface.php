@@ -9,7 +9,7 @@ use Slim\Routing\Route;
 interface RequestInterface extends ServerRequestInterface
 {
     /**
-     * Get the matched route for backward compatibility with Slim 3
+     * Get the matched route.
      */
     public function getRoute(): ?Route;
 

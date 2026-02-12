@@ -32,7 +32,7 @@ class MiddlewareFactory
 
 
     /**
-     * Creates a PSR-15 middleware adapter that wraps old Slim 3 style middleware
+     * Creates a PSR-15 middleware adapter from a legacy-style middleware identifier.
      */
     public function createFromIdentifier(string $middlewareIdentifier): callable
     {
@@ -50,7 +50,7 @@ class MiddlewareFactory
             $middleware = ServiceProvider::getService($container, $middlewareIdentifier);
             assert(is_callable($middleware));
 
-            // Wrap PSR-7 request in our Request wrapper for backward compatibility
+            // Wrap PSR-7 request in our Request wrapper
             $request = new Request($psrRequest);
 
             // Create a Response wrapper with an empty response
@@ -74,7 +74,7 @@ class MiddlewareFactory
                     }
                 }
 
-                // Wrap PSR-7 response in our Response wrapper for backward compatibility
+                // Wrap PSR-7 response in our Response wrapper
                 return new Response($psrResponse);
             };
 
