@@ -168,6 +168,10 @@ class SlimApplicationFactory
             $handlers,
             $responseFactory
         ): ResponseInterface {
+            // Note: displayErrorDetails, logErrors, logErrorDetails are required by Slim 4 error handler signature
+            // but unused here as we delegate to Slim 3-style handlers for backward compatibility
+            unset($displayErrorDetails, $logErrors, $logErrorDetails);
+
             $response = $responseFactory->create();
 
             if ($exception instanceof HttpNotFoundException && isset($handlers['notFoundHandler'])) {

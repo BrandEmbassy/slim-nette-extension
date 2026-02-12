@@ -25,10 +25,6 @@ return static function (ECSConfig $ecsConfig) use ($defaultEcsConfigurationSetup
         UnusedFunctionParameterSniff::class . '.FoundInImplementedInterfaceAfterLastUsed' => [
             __DIR__ . '/src/BrandEmbassyCodingStandard/PhpStan/Rules/Method/ImmutableWitherMethodRule.php',
         ],
-        UnusedFunctionParameterSniff::class . '.FoundAfterLastUsed' => [
-            __DIR__ . '/src/Route/RouteDefinitionFactory.php',
-            __DIR__ . '/src/SlimApplicationFactory.php',
-        ],
         'SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint' => [
             __DIR__ . '/src/BrandEmbassyCodingStandard/Sniffs/Classes/ClassesWithoutSelfReferencingSniff.php',
             __DIR__ . '/src/BrandEmbassyCodingStandard/Sniffs/Classes/FinalClassByAnnotationSniff.php',

@@ -47,6 +47,10 @@ class RouteDefinitionFactory
             $routeService,
             $factory
         ): ResponseInterface {
+            // Note: $args parameter required by Slim 4 route signature but unused in our implementation
+            // Route arguments are accessed via Request attributes instead
+            unset($args);
+
             $route = $factory->getRoute($routeService);
 
             // Wrap PSR-7 request/response in our wrappers

@@ -29,19 +29,10 @@ parameters:
             message: '#Dynamic call to static method .+::createFromGlobals\(\)#'
             path: src/Request/DefaultRequestFactory.php
         -
-            message: '#Strict comparison using !== between callable\(\): mixed and null will always evaluate to true#'
-            path: src/Route/RouteRegister.php
-        -
             message: '#.+ (does not specify its types|has no value type specified in iterable type|type has no value type specified)#'
         -
             message: '#Cognitive complexity for "BrandEmbassy\\Slim\\SlimApplicationFactory::create\(\)"#'
             path: src/SlimApplicationFactory.php
-        -
-            message: '#Cannot call method getCallable\(\) on Slim\\Routing\\Route\|null#'
-            path: tests/Request/RequestTest.php
-        -
-            message: '#Trying to invoke .+ but it might not be a callable#'
-            path: tests/Request/RequestTest.php
         -
             message: '#Parameter .+ of method .+::(withCookieParams|withQueryParams|withUploadedFiles)\(\) should be contravariant#'
             path: src/Request/Request.php
