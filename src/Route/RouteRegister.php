@@ -115,7 +115,7 @@ class RouteRegister
         );
 
         // Filter out any null values that might have been introduced
-        return array_filter($allMiddlewares, static fn($middleware): bool => $middleware !== null);
+        return array_filter($allMiddlewares, static fn(mixed $middleware): bool => $middleware !== null);
     }
 
 
