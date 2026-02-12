@@ -89,7 +89,10 @@ class RequestTest extends TestCase
 
         /** @var Response $response */
         // In Slim 4, route callables receive (request, response, args)
-        $responseFromRoute = ($request->getRoute()->getCallable())(
+        $route = $request->getRoute();
+        assert($route !== null, 'Route should be set after dispatching');
+
+        $responseFromRoute = ($route->getCallable())(
             $request->getInnerRequest(),
             $response->getInnerResponse(),
             $request->getRouteArguments()
