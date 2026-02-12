@@ -10,7 +10,6 @@ use BrandEmbassy\Slim\Route\OnlyNecessaryRoutesProvider;
 use BrandEmbassy\Slim\Route\RouteRegister;
 use LogicException;
 use Nette\DI\Container;
-use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Exception\HttpMethodNotAllowedException;
@@ -104,11 +103,6 @@ class SlimApplicationFactory
             SlimSettings::USE_APCU_CACHE,
             true,
         );
-        $disableUsingSlimContainer = (bool)$this->getSlimSettings(
-            SlimSettings::DISABLE_USING_SLIM_CONTAINER,
-            false,
-        );
-
         $routeApiNamesAlwaysInclude = (array)$this->getSlimSettings(
             SlimSettings::ROUTE_API_NAMES_ALWAYS_INCLUDE,
             [],
@@ -117,10 +111,6 @@ class SlimApplicationFactory
         if ($useApcuCache && (!function_exists('apcu_enabled') || !apcu_enabled())) {
             // @intentionally For cli scripts is APCU disabled by default or extension not installed
             $useApcuCache = false;
-        }
-
-        if ($disableUsingSlimContainer && !($this->container instanceof ContainerInterface)) {
-            throw new LogicException('Container must be instance of \Psr\Container\ContainerInterface');
         }
 
         $slimContainer = new SlimContainer($this->container);
