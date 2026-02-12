@@ -2,6 +2,7 @@
 
 namespace BrandEmbassyTest\Slim;
 
+use BrandEmbassy\Slim\SlimContainer;
 use BrandEmbassyTest\Slim\Sample\AfterRouteMiddleware;
 use BrandEmbassyTest\Slim\Sample\BeforeRequestMiddleware;
 use BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware;
@@ -12,7 +13,6 @@ use BrandEmbassyTest\Slim\Sample\OnlyApiGroupMiddleware;
 use BrandEmbassyTest\Slim\Tools\ResponseAssertions;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
-use Slim\Router;
 use function assert;
 use function count;
 
@@ -24,7 +24,10 @@ class SlimApplicationFactoryTest extends TestCase
     public function testShouldPassSettingsToSlimContainer(): void
     {
         $app = SlimAppTester::createSlimApp();
-        $settings = $app->getContainer()->get('settings');
+        $container = $app->getContainer();
+        assert($container instanceof SlimContainer);
+
+        $settings = $container->get('settings');
 
         Assert::assertSame('Sample', $settings['myCustomOption']);
     }
@@ -187,16 +190,14 @@ class SlimApplicationFactoryTest extends TestCase
     public function testRouteCanBeUnregistered(): void
     {
         $slimAppWithAllRoutes = SlimAppTester::createSlimApp(__DIR__ . '/config.neon');
-        $routerWithAllRoutes = $slimAppWithAllRoutes->getContainer()->get('router');
-        assert($routerWithAllRoutes instanceof Router);
+        $allRoutes = $slimAppWithAllRoutes->getRouteCollector()->getRoutes();
 
         $slimAppWithUnregisteredRoute = SlimAppTester::createSlimApp(__DIR__ . '/unregister-route-config.neon');
-        $routerWithUnregisteredRoute = $slimAppWithUnregisteredRoute->getContainer()->get('router');
-        assert($routerWithUnregisteredRoute instanceof Router);
+        $unregisteredRoutes = $slimAppWithUnregisteredRoute->getRouteCollector()->getRoutes();
 
-        $expectedRouteCount = count($routerWithAllRoutes->getRoutes()) - 1;
+        $expectedRouteCount = count($allRoutes) - 1;
 
-        Assert::assertCount($expectedRouteCount, $routerWithUnregisteredRoute->getRoutes());
+        Assert::assertCount($expectedRouteCount, $unregisteredRoutes);
     }
 
 
@@ -212,17 +213,14 @@ class SlimApplicationFactoryTest extends TestCase
     public function testRouteNameIsResolved(): void
     {
         $slimApp = SlimAppTester::createSlimApp();
-        $container = $slimApp->getContainer();
-
-        $router = $container->get('router');
-        assert($router instanceof Router);
+        $routeParser = $slimApp->getRouteCollector()->getRouteParser();
 
         Assert::assertSame(
             '/tests/api/channels/1234/users',
-            $router->urlFor('getChannelUsers', ['channelId' => '1234'])
+            $routeParser->urlFor('getChannelUsers', ['channelId' => '1234'])
         );
 
-        Assert::assertSame('/tests/api/channels', $router->urlFor('/api/channels'));
+        Assert::assertSame('/tests/api/channels', $routeParser->urlFor('/api/channels'));
     }
 
 

@@ -65,8 +65,6 @@ class SlimApplicationFactory
 
     private MiddlewareFactory $middlewareFactory;
 
-    private SlimContainerFactory $slimContainerFactory;
-
     private RouteRegister $routeRegister;
 
     private OnlyNecessaryRoutesProvider $onlyNecessaryRoutesProvider;
@@ -79,14 +77,12 @@ class SlimApplicationFactory
         array $configuration,
         Container $container,
         MiddlewareFactory $middlewareFactory,
-        SlimContainerFactory $slimContainerFactory,
         RouteRegister $routeRegister,
         OnlyNecessaryRoutesProvider $onlyNecessaryRoutesProvider
     ) {
         $this->configuration = $configuration;
         $this->container = $container;
         $this->middlewareFactory = $middlewareFactory;
-        $this->slimContainerFactory = $slimContainerFactory;
         $this->routeRegister = $routeRegister;
         $this->onlyNecessaryRoutesProvider = $onlyNecessaryRoutesProvider;
     }
@@ -127,30 +123,20 @@ class SlimApplicationFactory
             throw new LogicException('Container must be instance of \Psr\Container\ContainerInterface');
         }
 
-        // Create a compatibility container for backward compatibility
-        $compatContainer = new CompatibilityContainer($this->container);
+        $slimContainer = new SlimContainer($this->container);
 
-        // Store settings in the compatibility container
         if (isset($slimConfiguration[self::SETTINGS])) {
-            $compatContainer['settings'] = $slimConfiguration[self::SETTINGS];
+            $slimContainer->set('settings', $slimConfiguration[self::SETTINGS]);
         }
 
-        // Create response factory (using our ResponseFactory interface, not Slim's PSR-7 factory)
         $responseFactory = new DefaultResponseFactory();
         $psrResponseFactory = new ResponseFactory();
 
-        // Create custom SlimApp instance with the compatibility container
-        $slimApp = new SlimApp($psrResponseFactory, $compatContainer);
-
-        // Set the app reference in the container so it can provide the router
-        $compatContainer->setApp($slimApp);
+        $slimApp = new SlimApp($psrResponseFactory, $slimContainer);
 
         $routesToRegister = $this->configuration[self::ROUTES];
         if ($registerOnlyNecessaryRoutes) {
-            $configData = $this->slimContainerFactory->create($slimConfiguration);
-            /** @var Request $request */
-            $request = $configData['request'];
-            $requestUri = $request->getServerParam('REQUEST_URI');
+            $requestUri = $_SERVER['REQUEST_URI'] ?? null;
 
             $routesToRegister = $this->onlyNecessaryRoutesProvider->getRoutes(
                 $requestUri,
@@ -164,19 +150,14 @@ class SlimApplicationFactory
             $this->registerApi($slimApp, $apiNamespace, $routes, $detectTyposInRouteConfiguration);
         }
 
-        $this->registerHandlers(
-            $compatContainer,
-            $this->configuration[self::HANDLERS],
-        );
+        $handlers = $this->resolveHandlers($this->configuration[self::HANDLERS]);
 
-        // Add Slim 4 required middleware
-        // Add routing middleware first (inner layer - executes first)
+        // Add routing middleware (inner layer - executes first)
         $slimApp->addRoutingMiddleware();
 
         // Add error middleware (outer layer - catches exceptions)
         $errorMiddleware = $slimApp->addErrorMiddleware(true, true, true);
 
-        // Create a custom error handler that delegates to Slim 3 style handlers
         $customErrorHandler = function (
             ServerRequestInterface $request,
             Throwable $exception,
@@ -184,28 +165,27 @@ class SlimApplicationFactory
             bool $logErrors,
             bool $logErrorDetails
         ) use (
-            $compatContainer,
+            $handlers,
             $responseFactory
         ): ResponseInterface {
             $response = $responseFactory->create();
 
-            // Determine which handler to use based on exception type
-            if ($exception instanceof HttpNotFoundException && isset($compatContainer['notFoundHandler'])) {
-                $handler = $compatContainer['notFoundHandler'];
+            if ($exception instanceof HttpNotFoundException && isset($handlers['notFoundHandler'])) {
+                $handler = $handlers['notFoundHandler'];
                 $wrappedRequest = new Request($request);
 
                 return $handler($wrappedRequest, $response->withStatus(404), $exception)->getInnerResponse();
             }
 
-            if ($exception instanceof HttpMethodNotAllowedException && isset($compatContainer['notAllowedHandler'])) {
-                $handler = $compatContainer['notAllowedHandler'];
+            if ($exception instanceof HttpMethodNotAllowedException && isset($handlers['notAllowedHandler'])) {
+                $handler = $handlers['notAllowedHandler'];
                 $wrappedRequest = new Request($request);
 
                 return $handler($wrappedRequest, $response->withStatus(405), $exception)->getInnerResponse();
             }
 
-            if (isset($compatContainer['errorHandler'])) {
-                $handler = $compatContainer['errorHandler'];
+            if (isset($handlers['errorHandler'])) {
+                $handler = $handlers['errorHandler'];
                 $wrappedRequest = new Request($request);
 
                 return $handler($wrappedRequest, $response->withStatus(500), $exception)->getInnerResponse();
@@ -230,19 +210,21 @@ class SlimApplicationFactory
 
     /**
      * @param array<string, string> $handlers
+     *
+     * @return array<string, callable>
      */
-    private function registerHandlers(
-        CompatibilityContainer $container,
-        array $handlers
-    ): void {
+    private function resolveHandlers(array $handlers): array
+    {
+        $resolved = [];
+
         foreach ($handlers as $handlerName => $handlerClass) {
             $this->validateHandlerName($handlerName);
             $handlerService = ServiceProvider::getService($this->container, $handlerClass);
             assert(is_callable($handlerService));
-
-            // Store handlers in the compatibility container
-            $container[$handlerName] = $handlerService;
+            $resolved[$handlerName] = $handlerService;
         }
+
+        return $resolved;
     }
 
 

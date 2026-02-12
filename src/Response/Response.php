@@ -15,8 +15,8 @@ use function is_array;
 /**
  * @final
  *
- * Wrapper around PSR-7 ResponseInterface to provide backward compatibility
- * with Slim 3 response methods while using Slim 4.
+ * Wrapper around PSR-7 ResponseInterface providing convenience methods
+ * for common response operations.
  */
 class Response implements ResponseInterface
 {

@@ -22,8 +22,8 @@ use function str_contains;
 /**
  * @final
  *
- * Wrapper around PSR-7 ServerRequestInterface to provide backward compatibility
- * with Slim 3 request methods while using Slim 4.
+ * Wrapper around PSR-7 ServerRequestInterface providing convenience methods
+ * for common request operations.
  */
 class Request implements RequestInterface
 {
@@ -60,8 +60,7 @@ class Request implements RequestInterface
 
 
     /**
-     * Get the matched route for backward compatibility with Slim 3
-     * In Slim 4, routes are accessed via RouteContext
+     * Get the matched route.
      */
     public function getRoute(): ?Route
     {

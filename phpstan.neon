@@ -20,15 +20,6 @@ parameters:
             message: '#Cognitive complexity for "BrandEmbassy\\Slim\\Middleware\\MiddlewareFactory::createFromIdentifier\(\)" is \d+, keep it under 9#'
             path: src/Middleware/MiddlewareFactory.php
         -
-            message: '#Class Slim\\Router not found#'
-            path: tests/SlimApplicationFactoryTest.php
-        -
-            message: '#Call to method .+ on an unknown class Slim\\Router#'
-            path: tests/SlimApplicationFactoryTest.php
-        -
-            message: '#Cannot call method get\(\) on Psr\\Container\\ContainerInterface\|null#'
-            path: tests/SlimApplicationFactoryTest.php
-        -
             message: '#Anonymous function uses \$this assigned to variable \$factory#'
             path: src/Route/RouteDefinitionFactory.php
         -
@@ -57,7 +48,3 @@ parameters:
         -
             message: '#Return type \(mixed\) of method .+::getParsedBody\(\) should be covariant#'
             path: src/Request/Request.php
-        -
-            message: '#Method .+::urlFor\(\) has parameter \$(data|queryParams) with no value type specified#'
-            path: src/RouterCompatibility.php
-
