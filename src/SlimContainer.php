@@ -3,7 +3,9 @@
 namespace BrandEmbassy\Slim;
 
 use Nette\DI\Container;
+use Nette\DI\MissingServiceException;
 use Psr\Container\ContainerInterface;
+use function array_key_exists;
 
 /**
  * @final
@@ -38,7 +40,15 @@ class SlimContainer implements ContainerInterface
      */
     public function get($id): mixed
     {
-        return $this->services[$id] ?? $this->netteContainer->getService($id);
+        if (array_key_exists($id, $this->services)) {
+            return $this->services[$id];
+        }
+
+        try {
+            return $this->netteContainer->getService($id);
+        } catch (MissingServiceException $e) {
+            throw ServiceNotFoundException::fromPrevious($id, $e);
+        }
     }
 
 
@@ -47,7 +57,7 @@ class SlimContainer implements ContainerInterface
      */
     public function has($id): bool
     {
-        if (isset($this->services[$id])) {
+        if (array_key_exists($id, $this->services)) {
             return true;
         }
 
