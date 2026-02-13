@@ -29,4 +29,15 @@ interface ResponseInterface extends PsrResponseInterface
      * @return mixed[]
      */
     public function getParsedBodyAsArray(): array;
+
+
+    /**
+     * Returns the underlying PSR-7 response instance.
+     *
+     * This method enables gradual migration from Slim 3 to Slim 4. In the current
+     * Slim 3 implementation, the Response itself IS a PSR-7 response, so this
+     * simply returns $this. After migration to Slim 4 (composition-based), this
+     * will return the wrapped PSR-7 response.
+     */
+    public function getInnerResponse(): PsrResponseInterface;
 }

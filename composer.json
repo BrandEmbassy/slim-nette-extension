@@ -24,6 +24,7 @@
     },
     "require-dev": {
         "brandembassy/coding-standard": "^14.3",
+        "guzzlehttp/psr7": "^2.8",
         "marc-mabe/php-enum-phpstan": "^3.0",
         "mockery/mockery": "^1.2",
         "phpunit/phpunit": "^11.5",
