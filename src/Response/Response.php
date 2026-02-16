@@ -2,8 +2,8 @@
 
 namespace BrandEmbassy\Slim\Response;
 
+use JsonException;
 use Nette\Utils\Json;
-use Nette\Utils\JsonException;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
@@ -11,6 +11,8 @@ use Slim\Psr7\Factory\StreamFactory;
 use stdClass;
 use function assert;
 use function is_array;
+use function json_encode;
+use const JSON_THROW_ON_ERROR;
 
 /**
  * @final
@@ -54,10 +56,12 @@ class Response implements ResponseInterface
 
     /**
      * @param mixed[]|stdClass $data
+     *
+     * @throws JsonException
      */
     public function withJson($data, ?int $status = null, int $encodingOptions = 0): static
     {
-        $json = Json::encode($data, $encodingOptions);
+        $json = json_encode($data, $encodingOptions | JSON_THROW_ON_ERROR);
 
         // Create a new stream with the JSON content
         $streamFactory = new StreamFactory();

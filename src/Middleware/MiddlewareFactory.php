@@ -10,6 +10,7 @@ use Nette\DI\Container;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Slim\Routing\Route as SlimRoutingRoute;
 use function array_map;
 use function assert;
 use function is_callable;
@@ -49,6 +50,12 @@ class MiddlewareFactory
         ): PsrResponseInterface {
             $middleware = ServiceProvider::getService($container, $middlewareIdentifier);
             assert(is_callable($middleware));
+
+            // Bridge Slim 4 route to legacy 'route' attribute for backward compatibility
+            $slimRoute = $psrRequest->getAttribute('__route__');
+            if ($slimRoute instanceof SlimRoutingRoute && $psrRequest->getAttribute('route') === null) {
+                $psrRequest = $psrRequest->withAttribute('route', $slimRoute);
+            }
 
             // Wrap PSR-7 request in our Request wrapper
             $request = new Request($psrRequest);
