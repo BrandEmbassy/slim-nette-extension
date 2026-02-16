@@ -92,7 +92,10 @@ class RequestTest extends TestCase
         $route = $request->getRoute();
         assert($route !== null, 'Route should be set after dispatching');
 
-        $responseFromRoute = ($route->getCallable())(
+        $callable = $route->getCallable();
+        assert(is_callable($callable), 'Route callable must be callable');
+
+        $responseFromRoute = $callable(
             $request->getInnerRequest(),
             $response->getInnerResponse(),
             $request->getRouteArguments()
