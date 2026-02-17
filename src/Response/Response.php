@@ -70,7 +70,7 @@ class Response implements ResponseInterface
         $clone = clone $this;
         $clone->response = $this->response
             ->withBody($body)
-            ->withHeader('Content-Type', 'application/json');
+            ->withHeader('Content-Type', 'application/json;charset=utf-8');
 
         if ($status !== null) {
             $clone->response = $clone->response->withStatus($status);
