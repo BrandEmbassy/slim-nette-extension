@@ -2,10 +2,11 @@
 
 namespace BrandEmbassyTest\Slim\Request;
 
+use BrandEmbassy\Slim\Response\DefaultResponseFactory;
 use BrandEmbassy\Slim\Request\QueryParamMissingException;
 use BrandEmbassy\Slim\Request\RequestFieldMissingException;
 use BrandEmbassy\Slim\Request\RequestInterface;
-use BrandEmbassy\Slim\Response\DefaultResponseFactory;
+use BrandEmbassy\Slim\Response\Response;
 use BrandEmbassy\Slim\SlimApplicationFactory;
 use BrandEmbassyTest\Slim\Sample\CreateChannelUserRoute;
 use BrandEmbassyTest\Slim\SlimAppTester;
@@ -86,9 +87,23 @@ class RequestTest extends TestCase
         $response = $responseFactory->create();
         $response = $response->withHeader('hasBeenCalled', 'true');
 
-        $responseFromRoute = ($request->getRoute()->getCallable())($request, $response);
+        /** @var Response $response */
+        // In Slim 4, route callables receive (request, response, args)
+        $route = $request->getRoute();
+        assert($route !== null, 'Route should be set after dispatching');
 
-        Assert::assertSame(['true'], $responseFromRoute->getHeader('hasBeenCalled'));
+        $callable = $route->getCallable();
+        assert(is_callable($callable), 'Route callable must be callable');
+
+        $responseFromRoute = $callable(
+            $request->getInnerRequest(),
+            $response->getInnerResponse(),
+            $request->getRouteArguments()
+        );
+
+        // Wrap the PSR-7 response back in our Response wrapper for the assertion
+        $wrappedResponse = new Response($responseFromRoute);
+        Assert::assertSame(['true'], $wrappedResponse->getHeader('hasBeenCalled'));
     }
 
 
@@ -119,7 +134,7 @@ class RequestTest extends TestCase
         $this->prepareEnvironment($queryString);
 
         $container = SlimAppTester::createContainer();
-        $container->getByType(SlimApplicationFactory::class)->create()->run();
+        $container->getByType(SlimApplicationFactory::class)->create()->runAndReturnResponse();
 
         $updateChannelRoute = $container->getByType(CreateChannelUserRoute::class);
 

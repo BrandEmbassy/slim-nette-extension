@@ -2,7 +2,7 @@
 
 namespace BrandEmbassy\Slim\Response;
 
-use Slim\Http\Response as SlimResponse;
+use Slim\Psr7\Factory\ResponseFactory as Psr7ResponseFactory;
 
 /**
  * @final
@@ -11,6 +11,9 @@ class DefaultResponseFactory implements ResponseFactory
 {
     public function create(): ResponseInterface
     {
-        return new Response(new SlimResponse());
+        $psr7Factory = new Psr7ResponseFactory();
+        $psrResponse = $psr7Factory->createResponse();
+
+        return new Response($psrResponse);
     }
 }

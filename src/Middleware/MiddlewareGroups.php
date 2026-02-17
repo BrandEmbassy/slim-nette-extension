@@ -3,7 +3,7 @@
 namespace BrandEmbassy\Slim\Middleware;
 
 use function array_map;
-use function array_merge_recursive;
+use function array_merge;
 
 /**
  * @final
@@ -53,6 +53,6 @@ class MiddlewareGroups
             $groupNames,
         );
 
-        return array_merge_recursive(...$groupsToMerge);
+        return array_merge(...$groupsToMerge);
     }
 }

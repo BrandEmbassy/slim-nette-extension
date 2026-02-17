@@ -3,6 +3,7 @@
 namespace BrandEmbassyTest\Slim\Response;
 
 use BrandEmbassy\Slim\Response\DefaultResponseFactory;
+use BrandEmbassy\Slim\Response\Response;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 

@@ -2,8 +2,7 @@
 
 namespace BrandEmbassy\Slim\Request;
 
-use Slim\Http\Environment;
-use Slim\Http\Request as SlimRequest;
+use Slim\Psr7\Factory\ServerRequestFactory;
 
 /**
  * @final
@@ -12,8 +11,9 @@ class DefaultRequestFactory implements RequestFactory
 {
     public function create(): RequestInterface
     {
-        $slimRequest = SlimRequest::createFromEnvironment(new Environment($_SERVER));
+        $serverRequestFactory = new ServerRequestFactory();
+        $psrRequest = $serverRequestFactory->createFromGlobals();
 
-        return new Request($slimRequest);
+        return new Request($psrRequest);
     }
 }

@@ -2,21 +2,23 @@
 
 namespace BrandEmbassy\Slim\Response;
 
+use JsonException;
 use Nette\Utils\Json;
-use Nette\Utils\JsonException;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
-use Slim\Http\Body;
+use Slim\Psr7\Factory\StreamFactory;
 use stdClass;
 use function assert;
-use function fopen;
 use function is_array;
 use function json_encode;
 use const JSON_THROW_ON_ERROR;
 
 /**
  * @final
+ *
+ * Wrapper around PSR-7 ResponseInterface providing convenience methods
+ * for common response operations.
  */
 class Response implements ResponseInterface
 {
@@ -29,6 +31,9 @@ class Response implements ResponseInterface
     }
 
 
+    /**
+     * Get the inner PSR-7 response
+     */
     public function getInnerResponse(): PsrResponseInterface
     {
         return $this->response;
@@ -36,23 +41,36 @@ class Response implements ResponseInterface
 
 
     /**
+     * @return mixed[]
+     *
+     * @throws JsonException
+     */
+    public function getParsedBodyAsArray(): array
+    {
+        $parsedBody = Json::decode((string)$this->getBody(), Json::FORCE_ARRAY);
+        assert(is_array($parsedBody));
+
+        return $parsedBody;
+    }
+
+
+    /**
      * @param mixed[]|stdClass $data
+     *
+     * @throws JsonException
      */
     public function withJson($data, ?int $status = null, int $encodingOptions = 0): static
     {
-        $json = json_encode($data, JSON_THROW_ON_ERROR | $encodingOptions);
+        $json = json_encode($data, $encodingOptions | JSON_THROW_ON_ERROR);
 
-        $resource = fopen('php://temp', 'r+');
-        assert($resource !== false);
-
-        $body = new Body($resource);
-        $body->write($json);
-        $body->rewind();
+        // Create a new stream with the JSON content
+        $streamFactory = new StreamFactory();
+        $body = $streamFactory->createStream($json);
 
         $clone = clone $this;
         $clone->response = $this->response
-            ->withHeader('Content-Type', 'application/json;charset=utf-8')
-            ->withBody($body);
+            ->withBody($body)
+            ->withHeader('Content-Type', 'application/json;charset=utf-8');
 
         if ($status !== null) {
             $clone->response = $clone->response->withStatus($status);
@@ -69,24 +87,10 @@ class Response implements ResponseInterface
     {
         $clone = clone $this;
         $clone->response = $this->response
-            ->withStatus($statusCode)
-            ->withHeader('Location', (string)$url);
+            ->withHeader('Location', (string)$url)
+            ->withStatus($statusCode);
 
         return $clone;
-    }
-
-
-    /**
-     * @return mixed[]
-     *
-     * @throws JsonException
-     */
-    public function getParsedBodyAsArray(): array
-    {
-        $parsedBody = Json::decode((string)$this->getBody(), Json::FORCE_ARRAY);
-        assert(is_array($parsedBody));
-
-        return $parsedBody;
     }
 
 

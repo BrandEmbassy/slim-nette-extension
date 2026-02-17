@@ -4,17 +4,86 @@ namespace BrandEmbassy\Slim\Request;
 
 use DateTimeImmutable;
 use Psr\Http\Message\ServerRequestInterface;
-use Slim\Route;
+use Psr\Http\Message\StreamInterface;
+use Psr\Http\Message\UriInterface;
+use Slim\Routing\Route;
 
-interface RequestInterface extends ServerRequestInterface
+interface RequestInterface
 {
     /**
-     * Get the inner PSR-7 ServerRequestInterface
+     * Get the inner PSR-7 ServerRequestInterface for operations
+     * not covered by this interface.
      */
     public function getInnerRequest(): ServerRequestInterface;
 
 
-    public function getRoute(): Route;
+    public function getMethod(): string;
+
+
+    public function getUri(): UriInterface;
+
+
+    /**
+     * @return string[][]
+     */
+    public function getHeaders(): array;
+
+
+    public function hasHeader(string $name): bool;
+
+
+    /**
+     * @return string[]
+     */
+    public function getHeader(string $name): array;
+
+
+    public function getHeaderLine(string $name): string;
+
+
+    public function getBody(): StreamInterface;
+
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getAttributes(): array;
+
+
+    /**
+     * @deprecated use getAttributeStrict or findAttribute
+     *
+     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
+     *
+     * @param string $name
+     * @param mixed $default
+     *
+     * @return mixed
+     */
+    public function getAttribute($name, $default = null);
+
+
+    /**
+     * @param mixed $value
+     *
+     * @return static
+     */
+    public function withAttribute(string $name, $value);
+
+
+    /**
+     * @return mixed
+     */
+    public function getParsedBody();
+
+
+    /**
+     * @return string[]|string[][]
+     */
+    public function getQueryParams(): array;
+
+
+    public function getRoute(): ?Route;
 
 
     /**
@@ -102,19 +171,6 @@ interface RequestInterface extends ServerRequestInterface
 
 
     public function isHtml(): bool;
-
-
-    /**
-     * @deprecated use getAttributeStrict or findAttribute
-     *
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
-     *
-     * @param string $name
-     * @param mixed $default
-     *
-     * @return mixed
-     */
-    public function getAttribute($name, $default = null);
 
 
     /**
