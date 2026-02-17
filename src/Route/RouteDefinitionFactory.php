@@ -10,6 +10,7 @@ use LogicException;
 use Nette\DI\Container;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Slim\Routing\Route as SlimRoutingRoute;
 
 /**
  * @final
@@ -50,6 +51,12 @@ class RouteDefinitionFactory
             // Note: $args parameter required by Slim 4 route signature but unused in our implementation
             // Route arguments are accessed via Request attributes instead
             unset($args);
+
+            // Bridge Slim 4 route to legacy 'route' attribute for backward compatibility
+            $slimRoute = $psrRequest->getAttribute('__route__');
+            if ($slimRoute instanceof SlimRoutingRoute) {
+                $psrRequest = $psrRequest->withAttribute('route', $slimRoute);
+            }
 
             $route = $factory->getRoute($routeService);
 
