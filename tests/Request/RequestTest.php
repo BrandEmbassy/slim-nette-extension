@@ -5,7 +5,7 @@ namespace BrandEmbassyTest\Slim\Request;
 use BrandEmbassy\Slim\Request\QueryParamMissingException;
 use BrandEmbassy\Slim\Request\RequestFieldMissingException;
 use BrandEmbassy\Slim\Request\RequestInterface;
-use BrandEmbassy\Slim\Response\Response;
+use BrandEmbassy\Slim\Response\DefaultResponseFactory;
 use BrandEmbassy\Slim\SlimApplicationFactory;
 use BrandEmbassyTest\Slim\Sample\CreateChannelUserRoute;
 use BrandEmbassyTest\Slim\SlimAppTester;
@@ -82,10 +82,10 @@ class RequestTest extends TestCase
     public function testGetRoute(): void
     {
         $request = $this->getDispatchedRequest('?foo=bar&two=2&null=null&array[]=item1&array[]=item2');
-        $response = new Response();
+        $responseFactory = new DefaultResponseFactory();
+        $response = $responseFactory->create();
         $response = $response->withHeader('hasBeenCalled', 'true');
 
-        /** @var Response $response */
         $responseFromRoute = ($request->getRoute()->getCallable())($request, $response);
 
         Assert::assertSame(['true'], $responseFromRoute->getHeader('hasBeenCalled'));

@@ -8,6 +8,12 @@ use Slim\Route;
 
 interface RequestInterface extends ServerRequestInterface
 {
+    /**
+     * Get the inner PSR-7 ServerRequestInterface
+     */
+    public function getInnerRequest(): ServerRequestInterface;
+
+
     public function getRoute(): Route;
 
 
