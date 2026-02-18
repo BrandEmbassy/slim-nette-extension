@@ -16,4 +16,20 @@ parameters:
         -
             message: '#Cognitive complexity for "BrandEmbassy\\Slim\\Route\\OnlyNecessaryRoutesProvider::getRoutes\(\)" is 14, keep it under 9#'
             path: src/Route/OnlyNecessaryRoutesProvider.php
-
+        -
+            message: '#Cognitive complexity for "BrandEmbassy\\Slim\\Middleware\\MiddlewareFactory::createFromIdentifier\(\)" is \d+, keep it under 9#'
+            path: src/Middleware/MiddlewareFactory.php
+        -
+            message: '#Anonymous function uses \$this assigned to variable \$factory#'
+            path: src/Route/RouteDefinitionFactory.php
+        -
+            message: '#Call to internal static method .+::createFromGlobals\(\) from outside its root namespace#'
+            path: src/Request/DefaultRequestFactory.php
+        -
+            message: '#Dynamic call to static method .+::createFromGlobals\(\)#'
+            path: src/Request/DefaultRequestFactory.php
+        -
+            message: '#.+ (does not specify its types|has no value type specified in iterable type|type has no value type specified)#'
+        -
+            message: '#Cognitive complexity for "BrandEmbassy\\Slim\\SlimApplicationFactory::create\(\)"#'
+            path: src/SlimApplicationFactory.php

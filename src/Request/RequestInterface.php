@@ -4,11 +4,21 @@ namespace BrandEmbassy\Slim\Request;
 
 use DateTimeImmutable;
 use Psr\Http\Message\ServerRequestInterface;
-use Slim\Route;
+use Slim\Routing\Route;
 
+/**
+ * Extension of PSR-7 ServerRequestInterface with convenience methods
+ * for common request operations.
+ *
+ * All standard PSR-7 methods are inherited from ServerRequestInterface.
+ * Use getInnerRequest() for any PSR-7 operations not exposed here.
+ */
 interface RequestInterface extends ServerRequestInterface
 {
-    public function getRoute(): Route;
+    public function getInnerRequest(): ServerRequestInterface;
+
+
+    public function getRoute(): ?Route;
 
 
     /**
@@ -96,19 +106,6 @@ interface RequestInterface extends ServerRequestInterface
 
 
     public function isHtml(): bool;
-
-
-    /**
-     * @deprecated use getAttributeStrict or findAttribute
-     *
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
-     *
-     * @param string $name
-     * @param mixed $default
-     *
-     * @return mixed
-     */
-    public function getAttribute($name, $default = null);
 
 
     /**
