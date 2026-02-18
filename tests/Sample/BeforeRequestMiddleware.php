@@ -4,7 +4,7 @@ namespace BrandEmbassyTest\Slim\Sample;
 
 use BrandEmbassy\Slim\Middleware\Middleware;
 use BrandEmbassy\Slim\Request\RequestInterface;
-use BrandEmbassy\Slim\Response\ResponseInterface;
+use Psr\Http\Message\ResponseInterface;
 use BrandEmbassyTest\Slim\MiddlewareInvocationCounter;
 
 class BeforeRequestMiddleware implements Middleware

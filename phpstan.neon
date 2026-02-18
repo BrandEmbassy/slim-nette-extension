@@ -17,9 +17,6 @@ parameters:
             message: '#Cognitive complexity for "BrandEmbassy\\Slim\\Route\\OnlyNecessaryRoutesProvider::getRoutes\(\)" is 14, keep it under 9#'
             path: src/Route/OnlyNecessaryRoutesProvider.php
         -
-            message: '#Cognitive complexity for "BrandEmbassy\\Slim\\Middleware\\MiddlewareFactory::createFromIdentifier\(\)" is \d+, keep it under 9#'
-            path: src/Middleware/MiddlewareFactory.php
-        -
             message: '#Anonymous function uses \$this assigned to variable \$factory#'
             path: src/Route/RouteDefinitionFactory.php
         -

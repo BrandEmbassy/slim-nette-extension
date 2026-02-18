@@ -5,7 +5,6 @@ namespace BrandEmbassy\Slim;
 use BrandEmbassy\Slim\DI\ServiceProvider;
 use BrandEmbassy\Slim\Middleware\MiddlewareFactory;
 use BrandEmbassy\Slim\Request\Request;
-use BrandEmbassy\Slim\Response\DefaultResponseFactory;
 use BrandEmbassy\Slim\Route\OnlyNecessaryRoutesProvider;
 use BrandEmbassy\Slim\Route\RouteRegister;
 use LogicException;
@@ -16,6 +15,7 @@ use Slim\Exception\HttpMethodNotAllowedException;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Interfaces\RouteCollectorProxyInterface;
 use Slim\Psr7\Factory\ResponseFactory;
+use Slim\Psr7\Response;
 use Throwable;
 use function apcu_enabled;
 use function assert;
@@ -119,7 +119,6 @@ class SlimApplicationFactory
             $slimContainer->set('settings', $slimConfiguration[self::SETTINGS]);
         }
 
-        $responseFactory = new DefaultResponseFactory();
         $psrResponseFactory = new ResponseFactory();
 
         $slimApp = new SlimApp($psrResponseFactory, $slimContainer);
@@ -155,40 +154,39 @@ class SlimApplicationFactory
             bool $logErrors,
             bool $logErrorDetails
         ) use (
-            $handlers,
-            $responseFactory
+            $handlers
         ): ResponseInterface {
             // Note: displayErrorDetails, logErrors, logErrorDetails are required by Slim 4 error handler signature
             // but unused here as we delegate to Slim 3-style handlers for backward compatibility
             unset($displayErrorDetails, $logErrors, $logErrorDetails);
 
-            $response = $responseFactory->create();
+            $response = new Response();
 
             if ($exception instanceof HttpNotFoundException && isset($handlers['notFoundHandler'])) {
                 $handler = $handlers['notFoundHandler'];
                 $wrappedRequest = new Request($request);
 
-                return $handler($wrappedRequest, $response->withStatus(404), $exception)->getInnerResponse();
+                return $handler($wrappedRequest, $response->withStatus(404), $exception);
             }
 
             if ($exception instanceof HttpMethodNotAllowedException && isset($handlers['notAllowedHandler'])) {
                 $handler = $handlers['notAllowedHandler'];
                 $wrappedRequest = new Request($request);
 
-                return $handler($wrappedRequest, $response->withStatus(405), $exception)->getInnerResponse();
+                return $handler($wrappedRequest, $response->withStatus(405), $exception);
             }
 
             if (isset($handlers['errorHandler'])) {
                 $handler = $handlers['errorHandler'];
                 $wrappedRequest = new Request($request);
 
-                return $handler($wrappedRequest, $response->withStatus(500), $exception)->getInnerResponse();
+                return $handler($wrappedRequest, $response->withStatus(500), $exception);
             }
 
             // Fallback to default error response
             $response->getBody()->write('Internal Server Error');
 
-            return $response->getInnerResponse()->withStatus(500);
+            return $response->withStatus(500);
         };
 
         $errorMiddleware->setDefaultErrorHandler($customErrorHandler);
