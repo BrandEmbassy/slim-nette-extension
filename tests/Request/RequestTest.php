@@ -2,11 +2,9 @@
 
 namespace BrandEmbassyTest\Slim\Request;
 
-use BrandEmbassy\Slim\Response\DefaultResponseFactory;
 use BrandEmbassy\Slim\Request\QueryParamMissingException;
 use BrandEmbassy\Slim\Request\RequestFieldMissingException;
 use BrandEmbassy\Slim\Request\RequestInterface;
-use BrandEmbassy\Slim\Response\Response;
 use BrandEmbassy\Slim\SlimApplicationFactory;
 use BrandEmbassyTest\Slim\Sample\CreateChannelUserRoute;
 use BrandEmbassyTest\Slim\SlimAppTester;
@@ -83,11 +81,9 @@ class RequestTest extends TestCase
     public function testGetRoute(): void
     {
         $request = $this->getDispatchedRequest('?foo=bar&two=2&null=null&array[]=item1&array[]=item2');
-        $responseFactory = new DefaultResponseFactory();
-        $response = $responseFactory->create();
+        $response = new \Slim\Psr7\Response();
         $response = $response->withHeader('hasBeenCalled', 'true');
 
-        /** @var Response $response */
         // In Slim 4, route callables receive (request, response, args)
         $route = $request->getRoute();
         assert($route !== null, 'Route should be set after dispatching');
@@ -97,13 +93,11 @@ class RequestTest extends TestCase
 
         $responseFromRoute = $callable(
             $request->getInnerRequest(),
-            $response->getInnerResponse(),
+            $response,
             $request->getRouteArguments()
         );
 
-        // Wrap the PSR-7 response back in our Response wrapper for the assertion
-        $wrappedResponse = new Response($responseFromRoute);
-        Assert::assertSame(['true'], $wrappedResponse->getHeader('hasBeenCalled'));
+        Assert::assertSame(['true'], $responseFromRoute->getHeader('hasBeenCalled'));
     }
 
 

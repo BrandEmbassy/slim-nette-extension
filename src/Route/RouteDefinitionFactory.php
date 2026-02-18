@@ -5,7 +5,6 @@ namespace BrandEmbassy\Slim\Route;
 use BrandEmbassy\Slim\DI\ServiceProvider;
 use BrandEmbassy\Slim\Middleware\MiddlewareFactory;
 use BrandEmbassy\Slim\Request\Request;
-use BrandEmbassy\Slim\Response\Response;
 use LogicException;
 use Nette\DI\Container;
 use Psr\Http\Message\ResponseInterface;
@@ -60,15 +59,11 @@ class RouteDefinitionFactory
 
             $route = $factory->getRoute($routeService);
 
-            // Wrap PSR-7 request/response in our wrappers
+            // Wrap PSR-7 request in our wrapper, pass PSR-7 response directly
             $request = new Request($psrRequest);
-            $response = new Response($psrResponse);
 
-            // Call the route handler
-            $result = $route($request, $response);
-
-            // Return inner PSR-7 response (result will always be our ResponseInterface)
-            return $result->getInnerResponse();
+            // Call the route handler — returns PSR-7 ResponseInterface directly
+            return $route($request, $psrResponse);
         };
 
         $middlewares = $this->middlewareFactory->createFromIdentifiers(

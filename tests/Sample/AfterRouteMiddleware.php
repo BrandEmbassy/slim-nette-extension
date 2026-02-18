@@ -4,8 +4,8 @@ namespace BrandEmbassyTest\Slim\Sample;
 
 use BrandEmbassy\Slim\Middleware\Middleware;
 use BrandEmbassy\Slim\Request\RequestInterface;
-use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassyTest\Slim\MiddlewareInvocationCounter;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * @final

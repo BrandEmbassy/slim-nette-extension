@@ -3,7 +3,7 @@
 namespace BrandEmbassy\Slim;
 
 use BrandEmbassy\Slim\Request\RequestInterface;
-use BrandEmbassy\Slim\Response\ResponseInterface;
+use Psr\Http\Message\ResponseInterface;
 use Throwable;
 
 interface ErrorHandler

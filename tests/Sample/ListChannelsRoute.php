@@ -3,8 +3,11 @@
 namespace BrandEmbassyTest\Slim\Sample;
 
 use BrandEmbassy\Slim\Request\RequestInterface;
-use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassy\Slim\Route\Route;
+use Slim\Psr7\Factory\StreamFactory;
+use Psr\Http\Message\ResponseInterface;
+use function json_encode;
+use const JSON_THROW_ON_ERROR;
 
 /**
  * @final
@@ -13,7 +16,7 @@ class ListChannelsRoute implements Route
 {
     public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        return $response->withJson(
+        $body = (new StreamFactory())->createStream(json_encode(
             [
                 [
                     'id' => 1,
@@ -24,7 +27,12 @@ class ListChannelsRoute implements Route
                     'name' => 'Second channel',
                 ],
             ],
-            200
-        );
+            JSON_THROW_ON_ERROR,
+        ));
+
+        return $response
+            ->withBody($body)
+            ->withHeader('Content-Type', 'application/json;charset=utf-8')
+            ->withStatus(200);
     }
 }

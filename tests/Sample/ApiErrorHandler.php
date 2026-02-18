@@ -4,8 +4,11 @@ namespace BrandEmbassyTest\Slim\Sample;
 
 use BrandEmbassy\Slim\ErrorHandler;
 use BrandEmbassy\Slim\Request\RequestInterface;
-use BrandEmbassy\Slim\Response\ResponseInterface;
+use Slim\Psr7\Factory\StreamFactory;
+use Psr\Http\Message\ResponseInterface;
 use Throwable;
+use function json_encode;
+use const JSON_THROW_ON_ERROR;
 
 /**
  * @final
@@ -21,6 +24,11 @@ class ApiErrorHandler implements ErrorHandler
             ? $exception->getMessage()
             : 'Unknown error.';
 
-        return $response->withJson(['error' => $error], 500);
+        $body = (new StreamFactory())->createStream(json_encode(['error' => $error], JSON_THROW_ON_ERROR));
+
+        return $response
+            ->withBody($body)
+            ->withHeader('Content-Type', 'application/json;charset=utf-8')
+            ->withStatus(500);
     }
 }
