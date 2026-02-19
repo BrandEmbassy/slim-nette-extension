@@ -94,7 +94,11 @@ Now you can simply get `SlimApplicationFactory` class from your DI Container (or
 
 ```php
 $factory = $container->getByType(SlimApplicationFactory::class);
-$factory->create()->run();
+$app = $factory->create();
+$response = $app->runAndReturnResponse();
+
+$emitter = new \Slim\ResponseEmitter();
+$emitter->emit($response);
 ```
 
 ## Migrating from Slim 3 to Slim 4
@@ -119,15 +123,18 @@ For most users, the upgrade should be seamless:
 
 ### Breaking Changes
 
+- `Response` and `ResponseInterface` wrappers have been removed — route handlers now receive a plain PSR-7 `ResponseInterface` directly
+- `RequestInterface::getRoute()` now returns `?Route` (nullable)
+- `RequestInterface` gained new methods: `getInnerRequest()`, `getRoutingResults()`
 - If you were directly accessing Slim internals (like `Slim\Container` or `Slim\Router`), you'll need to update your code
 - Custom middleware that relied on Slim 3 specific features may need updates
-- The package now requires PHP 8.2+
+- `$app->run()` is replaced by `$app->runAndReturnResponse()` — you must emit the response yourself
 
 ### Backward Compatibility
 
 The following are maintained for backward compatibility:
-- Request and Response interfaces remain the same
-- Middleware signature remains the same (double-pass style)
+- Middleware signature remains the same (double-pass style `$request, $response, $next`)
+- Route handler signature remains the same (`$request, $response`)
 - Route and handler registration via NEON configuration is unchanged
 - Container access via `$app->getContainer()` works as before
 

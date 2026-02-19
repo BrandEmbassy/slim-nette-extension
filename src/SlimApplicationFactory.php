@@ -141,10 +141,11 @@ class SlimApplicationFactory
 
         $handlers = $this->resolveHandlers($this->configuration[self::HANDLERS]);
 
-        // Add routing middleware (inner layer - executes first)
+        // Slim 4 uses a LIFO middleware stack: middleware added later runs earlier on request.
+        // Routing middleware resolves the matched route before route handlers execute.
         $slimApp->addRoutingMiddleware();
 
-        // Add error middleware (outer layer - catches exceptions)
+        // Error middleware wraps everything — catches exceptions from routing and handlers.
         $errorMiddleware = $slimApp->addErrorMiddleware(true, true, true);
 
         $customErrorHandler = function (

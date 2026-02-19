@@ -5,7 +5,6 @@ namespace BrandEmbassy\Slim\Route;
 use BrandEmbassy\Slim\Middleware\AfterRouteMiddlewares;
 use BrandEmbassy\Slim\Middleware\BeforeRouteMiddlewares;
 use BrandEmbassy\Slim\Middleware\MiddlewareGroups;
-use LogicException;
 use Slim\Interfaces\RouteCollectorProxyInterface;
 use function array_keys;
 use function array_merge;
@@ -50,13 +49,9 @@ class RouteRegister
         string $apiNamespace,
         string $routePattern,
         array $routeData,
-        bool $detectTyposInRouteConfiguration = true,
-        ?RouteCollectorProxyInterface $router = null
+        bool $detectTyposInRouteConfiguration,
+        RouteCollectorProxyInterface $router
     ): void {
-        if ($router === null) {
-            throw new LogicException('Router must be provided to register routes');
-        }
-
         $urlPattern = $this->urlPatternResolver->resolve($apiNamespace, $routePattern);
         $resolveRoutePath = $this->urlPatternResolver->resolveRoutePath(
             $apiNamespace,

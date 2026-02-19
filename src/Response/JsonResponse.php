@@ -34,7 +34,7 @@ class JsonResponse
             ->withHeader('Content-Type', 'application/json;charset=utf-8');
 
         if ($status !== null) {
-            $response = $response->withStatus($status);
+            return $response->withStatus($status);
         }
 
         return $response;
