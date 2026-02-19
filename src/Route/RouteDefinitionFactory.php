@@ -8,6 +8,7 @@ use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use LogicException;
 use Nette\DI\Container;
+use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 
 /**
  * @final
@@ -38,7 +39,7 @@ class RouteDefinitionFactory
             ResponseInterface $response
         ) use (
             $routeDefinitionData
-        ): ResponseInterface {
+        ): PsrResponseInterface {
             $route = $this->getRoute($routeDefinitionData[RouteDefinition::SERVICE]);
 
             return $route($request, $response);

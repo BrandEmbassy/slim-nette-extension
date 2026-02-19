@@ -6,6 +6,7 @@ use BrandEmbassy\Slim\DI\ServiceProvider;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use Nette\DI\Container;
+use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use function array_map;
 use function assert;
 use function is_callable;
@@ -35,7 +36,7 @@ class MiddlewareFactory
         ) use (
             $middlewareIdentifier,
             $container
-        ): ResponseInterface {
+        ): PsrResponseInterface {
             $middleware = ServiceProvider::getService($container, $middlewareIdentifier);
             assert(is_callable($middleware));
 
