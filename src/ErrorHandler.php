@@ -3,7 +3,6 @@
 namespace BrandEmbassy\Slim;
 
 use BrandEmbassy\Slim\Request\RequestInterface;
-use BrandEmbassy\Slim\Response\ResponseInterface;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use Throwable;
 
@@ -11,7 +10,7 @@ interface ErrorHandler
 {
     public function __invoke(
         RequestInterface $request,
-        ResponseInterface $response,
+        PsrResponseInterface $response,
         ?Throwable $exception = null
     ): PsrResponseInterface;
 }

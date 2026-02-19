@@ -5,7 +5,6 @@ namespace BrandEmbassy\Slim\Route;
 use BrandEmbassy\Slim\DI\ServiceProvider;
 use BrandEmbassy\Slim\Middleware\MiddlewareFactory;
 use BrandEmbassy\Slim\Request\RequestInterface;
-use BrandEmbassy\Slim\Response\ResponseInterface;
 use LogicException;
 use Nette\DI\Container;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
@@ -36,7 +35,7 @@ class RouteDefinitionFactory
     {
         $route = function (
             RequestInterface $request,
-            ResponseInterface $response
+            PsrResponseInterface $response
         ) use (
             $routeDefinitionData
         ): PsrResponseInterface {

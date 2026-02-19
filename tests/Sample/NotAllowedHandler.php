@@ -3,7 +3,6 @@
 namespace BrandEmbassyTest\Slim\Sample;
 
 use BrandEmbassy\Slim\Request\RequestInterface;
-use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassyTest\Slim\Tools\JsonResponseTestTool;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 
@@ -14,7 +13,7 @@ use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
  */
 class NotAllowedHandler
 {
-    public function __invoke(RequestInterface $request, ResponseInterface $response): PsrResponseInterface
+    public function __invoke(RequestInterface $request, PsrResponseInterface $response): PsrResponseInterface
     {
         return JsonResponseTestTool::from($response, ['error' => 'Sample NotAllowedHandler here!'], 405);
     }

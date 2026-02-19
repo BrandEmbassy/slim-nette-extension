@@ -4,7 +4,6 @@ namespace BrandEmbassyTest\Slim\Sample;
 
 use BrandEmbassy\Slim\Middleware\Middleware;
 use BrandEmbassy\Slim\Request\RequestInterface;
-use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassyTest\Slim\Tools\JsonResponseTestTool;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 
@@ -16,7 +15,7 @@ class GoldenKeyAuthMiddleware implements Middleware
     public const ACCESS_TOKEN = 'uber-secret-token-made-of-pure-gold';
 
 
-    public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next): PsrResponseInterface
+    public function __invoke(RequestInterface $request, PsrResponseInterface $response, callable $next): PsrResponseInterface
     {
         $token = $request->getHeaderLine('X-Api-Key');
 

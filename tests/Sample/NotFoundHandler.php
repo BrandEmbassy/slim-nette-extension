@@ -4,7 +4,6 @@ namespace BrandEmbassyTest\Slim\Sample;
 
 use BrandEmbassy\Slim\ErrorHandler;
 use BrandEmbassy\Slim\Request\RequestInterface;
-use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassyTest\Slim\Tools\JsonResponseTestTool;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use Throwable;
@@ -16,7 +15,7 @@ class NotFoundHandler implements ErrorHandler
 {
     public function __invoke(
         RequestInterface $request,
-        ResponseInterface $response,
+        PsrResponseInterface $response,
         ?Throwable $exception = null
     ): PsrResponseInterface {
         return JsonResponseTestTool::from($response, ['error' => 'Sample NotFoundHandler here!'], 404);

@@ -4,7 +4,6 @@ namespace BrandEmbassy\Slim\Middleware;
 
 use BrandEmbassy\Slim\DI\ServiceProvider;
 use BrandEmbassy\Slim\Request\RequestInterface;
-use BrandEmbassy\Slim\Response\ResponseInterface;
 use Nette\DI\Container;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use function array_map;
@@ -31,7 +30,7 @@ class MiddlewareFactory
 
         return function (
             RequestInterface $request,
-            ResponseInterface $response,
+            PsrResponseInterface $response,
             callable $next
         ) use (
             $middlewareIdentifier,
