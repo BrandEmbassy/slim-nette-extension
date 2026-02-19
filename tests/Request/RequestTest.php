@@ -92,7 +92,7 @@ class RequestTest extends TestCase
         assert(is_callable($callable), 'Route callable must be callable');
 
         $responseFromRoute = $callable(
-            $request->getInnerRequest(),
+            $request,
             $response,
             $request->getRouteArguments()
         );

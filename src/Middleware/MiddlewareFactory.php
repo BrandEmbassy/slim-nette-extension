@@ -51,12 +51,9 @@ class MiddlewareFactory
             $response = new Response();
 
             // Create a $next callable that wraps the PSR-15 handler
-            $next = function ($req, $res) use ($handler): ResponseInterface {
-                // Get the inner PSR request if it's our wrapper
-                $innerRequest = $req instanceof Request ? $req->getInnerRequest() : $req;
-
+            $next = function (ServerRequestInterface $req, $res) use ($handler): ResponseInterface {
                 // Handle the request to get the response from the next layer
-                $handlerResponse = $handler->handle($innerRequest);
+                $handlerResponse = $handler->handle($req);
 
                 // Merge headers accumulated by legacy middleware onto the handler's response.
                 // Legacy middleware adds headers to $res before calling $next, so we need

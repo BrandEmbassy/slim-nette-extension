@@ -6,18 +6,12 @@ use DateTimeImmutable;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Routing\Route;
 
-interface RequestInterface
+interface RequestInterface extends ServerRequestInterface
 {
     /**
      * Get the matched route.
      */
     public function getRoute(): ?Route;
-
-
-    /**
-     * Get the inner PSR-7 ServerRequestInterface
-     */
-    public function getInnerRequest(): ServerRequestInterface;
 
 
     /**

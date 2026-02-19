@@ -7,6 +7,8 @@ use DateTime;
 use DateTimeImmutable;
 use InvalidArgumentException;
 use Psr\Http\Message\ServerRequestInterface;
+use Slim\Psr7\Headers;
+use Slim\Psr7\Request as SlimRequest;
 use Slim\Routing\Route;
 use Slim\Routing\RouteContext;
 use Slim\Routing\RoutingResults;
@@ -20,31 +22,51 @@ use function str_contains;
 /**
  * @final
  *
- * Wrapper around PSR-7 ServerRequestInterface providing convenience methods
- * for common request operations. Use getInnerRequest() for direct PSR-7 access.
+ * Extends Slim 4's PSR-7 Request with convenience methods for common
+ * request operations. All PSR-7 methods are inherited from the parent.
  */
-class Request implements RequestInterface
+class Request extends SlimRequest implements RequestInterface
 {
     /**
      * @var Dot<string, mixed[]>|null
      */
     protected ?Dot $dotAnnotatedRequestBody = null;
 
-    private ServerRequestInterface $request;
-
 
     public function __construct(ServerRequestInterface $request)
     {
-        $this->request = $request;
+        parent::__construct(
+            $request->getMethod(),
+            $request->getUri(),
+            new Headers($request->getHeaders()),
+            $request->getCookieParams(),
+            $request->getServerParams(),
+            $request->getBody(),
+            $request->getUploadedFiles(),
+        );
+
+        $parsedBody = $request->getParsedBody();
+
+        if ($parsedBody !== null) {
+            $this->parsedBody = $parsedBody;
+        }
+
+        foreach ($request->getAttributes() as $name => $value) {
+            $this->attributes[$name] = $value;
+        }
+
+        $queryParams = $request->getQueryParams();
+
+        if ($queryParams !== []) {
+            $this->queryParams = $queryParams;
+        }
     }
 
 
-    /**
-     * Get the inner PSR-7 request
-     */
-    public function getInnerRequest(): ServerRequestInterface
+    public function __clone()
     {
-        return $this->request;
+        parent::__clone();
+        $this->dotAnnotatedRequestBody = null;
     }
 
 
@@ -53,7 +75,7 @@ class Request implements RequestInterface
      */
     public function getRoutingResults(): RoutingResults
     {
-        return RouteContext::fromRequest($this->request)->getRoutingResults();
+        return RouteContext::fromRequest($this)->getRoutingResults();
     }
 
 
@@ -62,7 +84,7 @@ class Request implements RequestInterface
      */
     public function getRoute(): ?Route
     {
-        $routeContext = RouteContext::fromRequest($this->request);
+        $routeContext = RouteContext::fromRequest($this);
         $route = $routeContext->getRoute();
 
         // PHPStan: RouteContext::getRoute() returns RouteInterface|null but we need Route|null
@@ -112,7 +134,7 @@ class Request implements RequestInterface
      */
     public function getParsedBodyAsArray(): array
     {
-        return (array)$this->request->getParsedBody();
+        return (array)$this->getParsedBody();
     }
 
 
@@ -145,15 +167,6 @@ class Request implements RequestInterface
     public function hasField(string $fieldName): bool
     {
         return $this->getDotAnnotatedRequestBody()->has($fieldName);
-    }
-
-
-    /**
-     * @return string[]|string[][]
-     */
-    public function getQueryParams(): array
-    {
-        return $this->request->getQueryParams();
     }
 
 
@@ -247,7 +260,7 @@ class Request implements RequestInterface
 
     public function isHtml(): bool
     {
-        $acceptHeader = $this->request->getHeaderLine('accept');
+        $acceptHeader = $this->getHeaderLine('accept');
 
         return str_contains($acceptHeader, 'html');
     }
@@ -255,7 +268,7 @@ class Request implements RequestInterface
 
     public function hasAttribute(string $name): bool
     {
-        return array_key_exists($name, $this->request->getAttributes());
+        return array_key_exists($name, $this->getAttributes());
     }
 
 
@@ -266,7 +279,7 @@ class Request implements RequestInterface
      */
     public function findAttribute(string $name, $default = null)
     {
-        return $this->request->getAttribute($name, $default);
+        return $this->getAttribute($name, $default);
     }
 
 
@@ -278,10 +291,23 @@ class Request implements RequestInterface
     public function getAttributeStrict(string $name)
     {
         if ($this->hasAttribute($name)) {
-            return $this->request->getAttribute($name);
+            return $this->getAttribute($name);
         }
 
         throw RequestAttributeMissingException::create($name);
+    }
+
+
+    /**
+     * @param mixed|null $default
+     *
+     * @return mixed
+     */
+    public function getServerParam(string $key, $default = null)
+    {
+        $serverParams = $this->getServerParams();
+
+        return $serverParams[$key] ?? $default;
     }
 
 
@@ -295,34 +321,5 @@ class Request implements RequestInterface
         }
 
         return $this->dotAnnotatedRequestBody;
-    }
-
-
-    /**
-     * @deprecated use getAttributeStrict or findAttribute
-     *
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
-     *
-     * @param string $name
-     * @param mixed $default
-     *
-     * @return mixed
-     */
-    public function getAttribute($name, $default = null)
-    {
-        return $this->request->getAttribute($name, $default);
-    }
-
-
-    /**
-     * @param mixed|null $default
-     *
-     * @return mixed
-     */
-    public function getServerParam(string $key, $default = null)
-    {
-        $serverParams = $this->request->getServerParams();
-
-        return $serverParams[$key] ?? $default;
     }
 }
