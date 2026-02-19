@@ -30,9 +30,3 @@ parameters:
         -
             message: '#Cognitive complexity for "BrandEmbassy\\Slim\\SlimApplicationFactory::create\(\)"#'
             path: src/SlimApplicationFactory.php
-        -
-            message: '#Parameter .+ of method .+::(withCookieParams|withQueryParams|withUploadedFiles)\(\) should be contravariant#'
-            path: src/Request/Request.php
-        -
-            message: '#Return type \(mixed\) of method .+::getParsedBody\(\) should be covariant#'
-            path: src/Request/Request.php

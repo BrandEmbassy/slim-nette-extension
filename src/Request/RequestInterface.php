@@ -6,7 +6,7 @@ use DateTimeImmutable;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Routing\Route;
 
-interface RequestInterface extends ServerRequestInterface
+interface RequestInterface
 {
     /**
      * Get the matched route.
