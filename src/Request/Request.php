@@ -55,6 +55,16 @@ class Request extends SlimRequest implements RequestInterface
             $this->attributes[$name] = $value;
         }
 
+        // Bridge Slim 4 route to legacy 'route' attribute for backward compatibility.
+        // Slim 3 stored the route in 'route', Slim 4 stores it in '__route__'.
+        // Always override 'route' because test requests may have a pre-set
+        // 'route' attribute with empty arguments.
+        $slimRoute = $request->getAttribute('__route__');
+
+        if ($slimRoute instanceof Route) {
+            $this->attributes['route'] = $slimRoute;
+        }
+
         $queryParams = $request->getQueryParams();
 
         if ($queryParams !== []) {
