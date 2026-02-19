@@ -5,9 +5,11 @@ namespace BrandEmbassy\Slim\Route;
 use BrandEmbassy\Slim\DI\ServiceProvider;
 use BrandEmbassy\Slim\Middleware\MiddlewareFactory;
 use BrandEmbassy\Slim\Request\Request;
+use BrandEmbassy\Slim\Response\Response;
+use BrandEmbassy\Slim\Response\ResponseInterface;
 use LogicException;
 use Nette\DI\Container;
-use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
@@ -40,12 +42,12 @@ class RouteDefinitionFactory
         $factory = $this;
         $route = function (
             ServerRequestInterface $psrRequest,
-            ResponseInterface $psrResponse,
+            PsrResponseInterface $psrResponse,
             array $args
         ) use (
             $routeService,
             $factory
-        ): ResponseInterface {
+        ): PsrResponseInterface {
             // Note: $args parameter required by Slim 4 route signature but unused in our implementation
             // Route arguments are accessed via RouteContext instead
             unset($args);
@@ -55,8 +57,10 @@ class RouteDefinitionFactory
             // Wrap PSR-7 request in our Request wrapper
             $request = new Request($psrRequest);
 
-            // Call the route handler with plain PSR-7 response
-            return $route($request, $psrResponse);
+            // Use the passed response if it's already our type, otherwise create a new one
+            $response = $psrResponse instanceof ResponseInterface ? $psrResponse : new Response();
+
+            return $route($request, $response);
         };
 
         $middlewares = $this->middlewareFactory->createFromIdentifiers(

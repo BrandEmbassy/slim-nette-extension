@@ -3,7 +3,7 @@
 namespace BrandEmbassyTest\Slim\Sample;
 
 use BrandEmbassy\Slim\Request\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
+use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassy\Slim\Route\Route;
 use LogicException;
 

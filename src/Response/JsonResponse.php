@@ -15,7 +15,12 @@ use const JSON_THROW_ON_ERROR;
 class JsonResponse
 {
     /**
+     * @template T of ResponseInterface
+     *
+     * @param T $response
      * @param mixed[]|stdClass $data
+     *
+     * @return T
      *
      * @throws JsonException
      */

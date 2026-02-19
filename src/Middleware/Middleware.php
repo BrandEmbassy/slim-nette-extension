@@ -3,7 +3,7 @@
 namespace BrandEmbassy\Slim\Middleware;
 
 use BrandEmbassy\Slim\Request\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
+use BrandEmbassy\Slim\Response\ResponseInterface;
 
 interface Middleware
 {

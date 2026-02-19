@@ -6,7 +6,7 @@ use BrandEmbassy\Slim\Request\QueryParamMissingException;
 use BrandEmbassy\Slim\Request\RequestFieldMissingException;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\SlimApplicationFactory;
-use Slim\Psr7\Response;
+use BrandEmbassy\Slim\Response\Response;
 use BrandEmbassyTest\Slim\Sample\CreateChannelUserRoute;
 use BrandEmbassyTest\Slim\SlimAppTester;
 use BrandEmbassyTest\Slim\Tools\DateTimeAssertions;
