@@ -9,7 +9,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Slim\Psr7\Response;
-use Slim\Routing\Route as SlimRoutingRoute;
 use function array_map;
 use function assert;
 use function is_callable;
@@ -44,14 +43,6 @@ class MiddlewareFactory
         ): ResponseInterface {
             $middleware = ServiceProvider::getService($container, $middlewareIdentifier);
             assert(is_callable($middleware));
-
-            // Bridge Slim 4 route to legacy 'route' attribute for backward compatibility.
-            // Always override 'route' with the resolved '__route__' from RoutingMiddleware,
-            // because test requests may have a pre-set 'route' attribute with empty arguments.
-            $slimRoute = $psrRequest->getAttribute('__route__');
-            if ($slimRoute instanceof SlimRoutingRoute) {
-                $psrRequest = $psrRequest->withAttribute('route', $slimRoute);
-            }
 
             // Wrap PSR-7 request in our Request wrapper
             $request = new Request($psrRequest);
