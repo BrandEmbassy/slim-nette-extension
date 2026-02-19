@@ -2,11 +2,11 @@
 
 namespace BrandEmbassy\Slim\Response;
 
-use Slim\Http\Response as SlimResponse;
+use GuzzleHttp\Psr7\Response as GuzzleResponse;
 
 /**
  * @final
  */
-class Response extends SlimResponse implements ResponseInterface
+class Response extends GuzzleResponse implements ResponseInterface
 {
 }
