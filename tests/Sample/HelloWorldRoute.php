@@ -5,14 +5,16 @@ namespace BrandEmbassyTest\Slim\Sample;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassy\Slim\Route\Route;
+use BrandEmbassyTest\Slim\Tools\JsonResponseTestTool;
+use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 
 /**
  * @final
  */
 class HelloWorldRoute implements Route
 {
-    public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface
+    public function __invoke(RequestInterface $request, ResponseInterface $response): PsrResponseInterface
     {
-        return $response->withJson(['Hello World']);
+        return JsonResponseTestTool::from($response, ['Hello World']);
     }
 }

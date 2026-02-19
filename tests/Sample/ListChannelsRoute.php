@@ -5,15 +5,18 @@ namespace BrandEmbassyTest\Slim\Sample;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassy\Slim\Route\Route;
+use BrandEmbassyTest\Slim\Tools\JsonResponseTestTool;
+use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 
 /**
  * @final
  */
 class ListChannelsRoute implements Route
 {
-    public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface
+    public function __invoke(RequestInterface $request, ResponseInterface $response): PsrResponseInterface
     {
-        return $response->withJson(
+        return JsonResponseTestTool::from(
+            $response,
             [
                 [
                     'id' => 1,
@@ -24,7 +27,7 @@ class ListChannelsRoute implements Route
                     'name' => 'Second channel',
                 ],
             ],
-            200
+            200,
         );
     }
 }

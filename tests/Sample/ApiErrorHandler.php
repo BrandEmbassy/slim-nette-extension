@@ -5,6 +5,8 @@ namespace BrandEmbassyTest\Slim\Sample;
 use BrandEmbassy\Slim\ErrorHandler;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
+use BrandEmbassyTest\Slim\Tools\JsonResponseTestTool;
+use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use Throwable;
 
 /**
@@ -16,11 +18,11 @@ class ApiErrorHandler implements ErrorHandler
         RequestInterface $request,
         ResponseInterface $response,
         ?Throwable $exception = null
-    ): ResponseInterface {
+    ): PsrResponseInterface {
         $error = $exception !== null
             ? $exception->getMessage()
             : 'Unknown error.';
 
-        return $response->withJson(['error' => $error], 500);
+        return JsonResponseTestTool::from($response, ['error' => $error], 500);
     }
 }
