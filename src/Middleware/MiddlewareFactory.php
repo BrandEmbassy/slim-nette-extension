@@ -4,8 +4,8 @@ namespace BrandEmbassy\Slim\Middleware;
 
 use BrandEmbassy\Slim\DI\ServiceProvider;
 use BrandEmbassy\Slim\Request\Request;
-use Nette\DI\Container;
 use BrandEmbassy\Slim\Response\Response;
+use Nette\DI\Container;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
