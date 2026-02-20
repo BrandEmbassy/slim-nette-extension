@@ -2,22 +2,12 @@
 
 namespace BrandEmbassy\Slim\Request;
 
-use Adbar\Dot;
-use DateTime;
-use DateTimeImmutable;
-use InvalidArgumentException;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Psr7\Headers;
 use Slim\Psr7\Request as SlimRequest;
 use Slim\Routing\Route;
 use Slim\Routing\RouteContext;
 use Slim\Routing\RoutingResults;
-use function array_key_exists;
-use function assert;
-use function is_array;
-use function is_string;
-use function sprintf;
-use function str_contains;
 
 /**
  * @final
@@ -27,12 +17,6 @@ use function str_contains;
  */
 class Request extends SlimRequest implements RequestInterface
 {
-    /**
-     * @var Dot<string, mixed[]>|null
-     */
-    protected ?Dot $dotAnnotatedRequestBody = null;
-
-
     public function __construct(ServerRequestInterface $request)
     {
         parent::__construct(
@@ -70,13 +54,6 @@ class Request extends SlimRequest implements RequestInterface
         if ($queryParams !== []) {
             $this->queryParams = $queryParams;
         }
-    }
-
-
-    public function __clone()
-    {
-        parent::__clone();
-        $this->dotAnnotatedRequestBody = null;
     }
 
 
@@ -149,38 +126,6 @@ class Request extends SlimRequest implements RequestInterface
 
 
     /**
-     * @return mixed
-     *
-     * @throws RequestFieldMissingException
-     */
-    public function getField(string $fieldName)
-    {
-        if ($this->hasField($fieldName)) {
-            return $this->getDotAnnotatedRequestBody()->get($fieldName);
-        }
-
-        throw RequestFieldMissingException::create($fieldName);
-    }
-
-
-    /**
-     * @param mixed $default
-     *
-     * @return mixed
-     */
-    public function findField(string $fieldName, $default = null)
-    {
-        return $this->getDotAnnotatedRequestBody()->get($fieldName, $default);
-    }
-
-
-    public function hasField(string $fieldName): bool
-    {
-        return $this->getDotAnnotatedRequestBody()->has($fieldName);
-    }
-
-
-    /**
      * @param mixed|null $default
      *
      * @return string|string[]|null
@@ -194,121 +139,6 @@ class Request extends SlimRequest implements RequestInterface
 
 
     /**
-     * @return string|string[]|null
-     */
-    public function findQueryParam(string $key, ?string $default = null)
-    {
-        return $this->getQueryParam($key) ?? $default;
-    }
-
-
-    /**
-     * @return string|string[]
-     *
-     * @throws QueryParamMissingException
-     */
-    public function getQueryParamStrict(string $key)
-    {
-        $value = $this->findQueryParam($key);
-
-        if ($value !== null) {
-            return $value;
-        }
-
-        throw QueryParamMissingException::create($key);
-    }
-
-
-    public function findQueryParamAsString(string $key, ?string $default = null): ?string
-    {
-        $queryParam = $this->getQueryParam($key);
-        assert(!is_array($queryParam));
-
-        return $queryParam ?? $default;
-    }
-
-
-    /**
-     * @throws QueryParamMissingException
-     */
-    public function getQueryParamAsString(string $key): string
-    {
-        $value = $this->findQueryParamAsString($key);
-
-        if ($value !== null) {
-            return $value;
-        }
-
-        throw QueryParamMissingException::create($key);
-    }
-
-
-    public function hasQueryParam(string $key): bool
-    {
-        return array_key_exists($key, $this->getQueryParams());
-    }
-
-
-    /**
-     * @throws QueryParamMissingException
-     * @throws InvalidArgumentException
-     */
-    public function getDateTimeQueryParam(string $field, string $format = DateTime::ATOM): DateTimeImmutable
-    {
-        $datetimeParam = $this->getQueryParamStrict($field);
-        assert(is_string($datetimeParam));
-
-        $dateTime = DateTimeImmutable::createFromFormat($format, $datetimeParam);
-
-        if ($dateTime === false) {
-            throw new InvalidArgumentException(sprintf('Field %s is not in %s format', $field, $format));
-        }
-
-        return $dateTime;
-    }
-
-
-    public function isHtml(): bool
-    {
-        $acceptHeader = $this->getHeaderLine('accept');
-
-        return str_contains($acceptHeader, 'html');
-    }
-
-
-    public function hasAttribute(string $name): bool
-    {
-        return array_key_exists($name, $this->getAttributes());
-    }
-
-
-    /**
-     * @param mixed $default
-     *
-     * @return mixed
-     */
-    public function findAttribute(string $name, $default = null)
-    {
-        return $this->getAttribute($name, $default);
-    }
-
-
-    /**
-     * @return mixed
-     *
-     * @throws RequestAttributeMissingException
-     */
-    public function getAttributeStrict(string $name)
-    {
-        if ($this->hasAttribute($name)) {
-            return $this->getAttribute($name);
-        }
-
-        throw RequestAttributeMissingException::create($name);
-    }
-
-
-    /**
      * @param mixed|null $default
      *
      * @return mixed
@@ -318,18 +148,5 @@ class Request extends SlimRequest implements RequestInterface
         $serverParams = $this->getServerParams();
 
         return $serverParams[$key] ?? $default;
-    }
-
-
-    /**
-     * @return Dot<string, mixed[]>
-     */
-    private function getDotAnnotatedRequestBody(): Dot
-    {
-        if ($this->dotAnnotatedRequestBody === null) {
-            $this->dotAnnotatedRequestBody = new Dot($this->getParsedBodyAsArray());
-        }
-
-        return $this->dotAnnotatedRequestBody;
     }
 }
