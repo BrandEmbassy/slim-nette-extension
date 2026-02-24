@@ -4,7 +4,6 @@ namespace BrandEmbassy\Slim\Response;
 
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use Psr\Http\Message\UriInterface;
-use Slim\Http\StatusCode;
 use stdClass;
 
 interface ResponseInterface extends PsrResponseInterface
@@ -26,7 +25,7 @@ interface ResponseInterface extends PsrResponseInterface
      *
      * @return static
      */
-    public function withRedirect($url, int $statusCode = StatusCode::HTTP_FOUND);
+    public function withRedirect($url, int $statusCode = 302);
 
 
     /**

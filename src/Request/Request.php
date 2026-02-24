@@ -6,8 +6,12 @@ use Adbar\Dot;
 use DateTime;
 use DateTimeImmutable;
 use InvalidArgumentException;
-use Slim\Http\Request as SlimRequest;
-use Slim\Route;
+use Psr\Http\Message\ServerRequestInterface;
+use Slim\Psr7\Headers;
+use Slim\Psr7\Request as SlimRequest;
+use Slim\Routing\Route;
+use Slim\Routing\RouteContext;
+use Slim\Routing\RoutingResults;
 use function array_key_exists;
 use function assert;
 use function is_array;
@@ -16,21 +20,57 @@ use function sprintf;
 use function str_contains;
 
 /**
- * @method string[]|string[][] getQueryParams()
- * @method string|string[]|null getQueryParam(string $key, ?string $default = null)
- *
  * @final
+ *
+ * Extends Slim 4's PSR-7 Request with convenience methods for common
+ * request operations. All PSR-7 methods are inherited from the parent.
  */
 class Request extends SlimRequest implements RequestInterface
 {
-    private const ROUTE_INFO_ATTRIBUTE = 'routeInfo';
-
-    private const ROUTE_ATTRIBUTE = 'route';
-
     /**
      * @var Dot<string, mixed[]>|null
      */
-    protected $dotAnnotatedRequestBody;
+    protected ?Dot $dotAnnotatedRequestBody = null;
+
+
+    public function __construct(ServerRequestInterface $request)
+    {
+        parent::__construct(
+            $request->getMethod(),
+            $request->getUri(),
+            new Headers($request->getHeaders()),
+            $request->getCookieParams(),
+            $request->getServerParams(),
+            $request->getBody(),
+            $request->getUploadedFiles(),
+        );
+
+        $parsedBody = $request->getParsedBody();
+
+        if ($parsedBody !== null) {
+            $this->parsedBody = $parsedBody;
+        }
+
+        foreach ($request->getAttributes() as $name => $value) {
+            $this->attributes[$name] = $value;
+        }
+
+        // Bridge Slim 4 route to legacy 'route' attribute for backward compatibility.
+        // Slim 3 stored the route in 'route', Slim 4 stores it in '__route__'.
+        // Always override 'route' because test requests may have a pre-set
+        // 'route' attribute with empty arguments.
+        $slimRoute = $request->getAttribute('__route__');
+
+        if ($slimRoute instanceof Route) {
+            $this->attributes['route'] = $slimRoute;
+        }
+
+        $queryParams = $request->getQueryParams();
+
+        if ($queryParams !== []) {
+            $this->queryParams = $queryParams;
+        }
+    }
 
 
     public function __clone()
@@ -40,12 +80,26 @@ class Request extends SlimRequest implements RequestInterface
     }
 
 
-    public function getRoute(): Route
+    /**
+     * Get routing results from Slim 4's RouteContext
+     */
+    public function getRoutingResults(): RoutingResults
     {
-        $route = $this->getAttribute(self::ROUTE_ATTRIBUTE);
-        assert($route instanceof Route);
+        return RouteContext::fromRequest($this)->getRoutingResults();
+    }
 
-        return $route;
+
+    /**
+     * Get the matched route.
+     */
+    public function getRoute(): ?Route
+    {
+        $routeContext = RouteContext::fromRequest($this);
+        $route = $routeContext->getRoute();
+
+        // PHPStan: RouteContext::getRoute() returns RouteInterface|null but we need Route|null
+        // At runtime, this will always be Route|null in Slim 4
+        return $route instanceof Route ? $route : null;
     }
 
 
@@ -54,13 +108,9 @@ class Request extends SlimRequest implements RequestInterface
      */
     public function getRouteArguments(): array
     {
-        $routeInfoAttribute = $this->getAttribute(self::ROUTE_INFO_ATTRIBUTE);
+        $routingResults = $this->getRoutingResults();
 
-        if (is_array($routeInfoAttribute) && isset($routeInfoAttribute[2])) {
-            return $routeInfoAttribute[2];
-        }
-
-        return [];
+        return $routingResults->getRouteArguments();
     }
 
 
@@ -127,6 +177,19 @@ class Request extends SlimRequest implements RequestInterface
     public function hasField(string $fieldName): bool
     {
         return $this->getDotAnnotatedRequestBody()->has($fieldName);
+    }
+
+
+    /**
+     * @param mixed|null $default
+     *
+     * @return string|string[]|null
+     */
+    public function getQueryParam(string $key, $default = null)
+    {
+        $params = $this->getQueryParams();
+
+        return $params[$key] ?? $default;
     }
 
 
@@ -242,6 +305,19 @@ class Request extends SlimRequest implements RequestInterface
         }
 
         throw RequestAttributeMissingException::create($name);
+    }
+
+
+    /**
+     * @param mixed|null $default
+     *
+     * @return mixed
+     */
+    public function getServerParam(string $key, $default = null)
+    {
+        $serverParams = $this->getServerParams();
+
+        return $serverParams[$key] ?? $default;
     }
 
 

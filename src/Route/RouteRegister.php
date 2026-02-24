@@ -5,18 +5,17 @@ namespace BrandEmbassy\Slim\Route;
 use BrandEmbassy\Slim\Middleware\AfterRouteMiddlewares;
 use BrandEmbassy\Slim\Middleware\BeforeRouteMiddlewares;
 use BrandEmbassy\Slim\Middleware\MiddlewareGroups;
-use Slim\Interfaces\RouterInterface;
+use Slim\Interfaces\RouteCollectorProxyInterface;
 use function array_keys;
 use function array_merge;
 use function levenshtein;
+use function strtoupper;
 
 /**
  * @final
  */
 class RouteRegister
 {
-    private RouterInterface $router;
-
     private RouteDefinitionFactory $routeDefinitionFactory;
 
     private UrlPatternResolver $urlPatternResolver;
@@ -29,14 +28,12 @@ class RouteRegister
 
 
     public function __construct(
-        RouterInterface $router,
         RouteDefinitionFactory $routeDefinitionFactory,
         UrlPatternResolver $urlPatternResolver,
         BeforeRouteMiddlewares $beforeRouteMiddlewares,
         AfterRouteMiddlewares $afterRouteMiddlewares,
         MiddlewareGroups $middlewareGroups
     ) {
-        $this->router = $router;
         $this->routeDefinitionFactory = $routeDefinitionFactory;
         $this->urlPatternResolver = $urlPatternResolver;
         $this->beforeRouteMiddlewares = $beforeRouteMiddlewares;
@@ -52,7 +49,8 @@ class RouteRegister
         string $apiNamespace,
         string $routePattern,
         array $routeData,
-        bool $detectTyposInRouteConfiguration = true
+        bool $detectTyposInRouteConfiguration,
+        RouteCollectorProxyInterface $router
     ): void {
         $urlPattern = $this->urlPatternResolver->resolve($apiNamespace, $routePattern);
         $resolveRoutePath = $this->urlPatternResolver->resolveRoutePath(
@@ -73,8 +71,8 @@ class RouteRegister
 
             $routeName = $routeDefinition->getName() ?? $resolveRoutePath;
 
-            $routeToAdd = $this->router->map(
-                [$routeDefinition->getMethod()],
+            $routeToAdd = $router->map(
+                [strtoupper($routeDefinition->getMethod())],
                 $urlPattern,
                 $routeDefinition->getRoute(),
             );

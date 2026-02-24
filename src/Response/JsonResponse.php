@@ -3,11 +3,9 @@
 namespace BrandEmbassy\Slim\Response;
 
 use JsonException;
-use LogicException;
 use Psr\Http\Message\ResponseInterface;
-use Slim\Http\Body;
+use Slim\Psr7\Factory\StreamFactory;
 use stdClass;
-use function fopen;
 use function json_encode;
 use const JSON_THROW_ON_ERROR;
 
@@ -34,15 +32,7 @@ class JsonResponse
     ): ResponseInterface {
         $json = json_encode($data, $encodingOptions | JSON_THROW_ON_ERROR);
 
-        $stream = fopen('php://temp', 'r+');
-
-        if ($stream === false) {
-            throw new LogicException('Failed to open php://temp stream');
-        }
-
-        $body = new Body($stream);
-        $body->write($json);
-        $body->rewind();
+        $body = (new StreamFactory())->createStream($json);
 
         $response = $response
             ->withBody($body)

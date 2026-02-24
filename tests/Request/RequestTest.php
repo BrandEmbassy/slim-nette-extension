@@ -5,8 +5,8 @@ namespace BrandEmbassyTest\Slim\Request;
 use BrandEmbassy\Slim\Request\QueryParamMissingException;
 use BrandEmbassy\Slim\Request\RequestFieldMissingException;
 use BrandEmbassy\Slim\Request\RequestInterface;
-use BrandEmbassy\Slim\Response\Response;
 use BrandEmbassy\Slim\SlimApplicationFactory;
+use BrandEmbassy\Slim\Response\Response;
 use BrandEmbassyTest\Slim\Sample\CreateChannelUserRoute;
 use BrandEmbassyTest\Slim\SlimAppTester;
 use BrandEmbassyTest\Slim\Tools\DateTimeAssertions;
@@ -85,8 +85,17 @@ class RequestTest extends TestCase
         $response = new Response();
         $response = $response->withHeader('hasBeenCalled', 'true');
 
-        /** @var Response $response */
-        $responseFromRoute = ($request->getRoute()->getCallable())($request, $response);
+        $route = $request->getRoute();
+        assert($route !== null, 'Route should be set after dispatching');
+
+        $callable = $route->getCallable();
+        assert(is_callable($callable), 'Route callable must be callable');
+
+        $responseFromRoute = $callable(
+            $request,
+            $response,
+            $request->getRouteArguments()
+        );
 
         Assert::assertSame(['true'], $responseFromRoute->getHeader('hasBeenCalled'));
     }
@@ -119,7 +128,7 @@ class RequestTest extends TestCase
         $this->prepareEnvironment($queryString);
 
         $container = SlimAppTester::createContainer();
-        $container->getByType(SlimApplicationFactory::class)->create()->run();
+        $container->getByType(SlimApplicationFactory::class)->create()->runAndReturnResponse();
 
         $updateChannelRoute = $container->getByType(CreateChannelUserRoute::class);
 

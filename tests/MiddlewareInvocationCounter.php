@@ -2,7 +2,7 @@
 
 namespace BrandEmbassyTest\Slim;
 
-use BrandEmbassy\Slim\Response\ResponseInterface;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * @final
