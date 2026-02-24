@@ -7,7 +7,7 @@ use BrandEmbassy\Slim\Middleware\BeforeRouteMiddlewares;
 use BrandEmbassy\Slim\Middleware\MiddlewareGroups;
 use Slim\Interfaces\RouterInterface;
 use function array_keys;
-use function array_merge_recursive;
+use function array_merge;
 use function levenshtein;
 
 /**
@@ -102,7 +102,7 @@ class RouteRegister
             $routeDefinition->getMiddlewareGroups(),
         );
 
-        return array_merge_recursive(
+        return array_merge(
             $this->afterRouteMiddlewares->getMiddlewares(),
             $routeDefinition->getMiddlewares(),
             $middlewaresFromGroups,
