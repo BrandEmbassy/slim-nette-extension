@@ -10,6 +10,8 @@ use stdClass;
 interface ResponseInterface extends PsrResponseInterface
 {
     /**
+     * @deprecated Use JsonResponse::from() instead
+     *
      * @param mixed[]|stdClass $data
      *
      * @return static
@@ -18,6 +20,8 @@ interface ResponseInterface extends PsrResponseInterface
 
 
     /**
+     * @deprecated Use PSR-7 $response->withHeader('Location', $url)->withStatus($statusCode) instead
+     *
      * @param string|UriInterface $url
      *
      * @return static
@@ -26,6 +30,8 @@ interface ResponseInterface extends PsrResponseInterface
 
 
     /**
+     * @deprecated Will be removed in v6. Decode the response body directly.
+     *
      * @return mixed[]
      */
     public function getParsedBodyAsArray(): array;
