@@ -2,17 +2,8 @@
 
 namespace BrandEmbassy\Slim\Response;
 
-use JsonException;
-use Nette\Utils\Json;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use Psr\Http\Message\StreamInterface;
-use Psr\Http\Message\UriInterface;
-use Slim\Psr7\Factory\StreamFactory;
-use stdClass;
-use function assert;
-use function is_array;
-use function json_encode;
-use const JSON_THROW_ON_ERROR;
 
 /**
  * @final
@@ -37,60 +28,6 @@ class Response implements ResponseInterface
     public function getInnerResponse(): PsrResponseInterface
     {
         return $this->response;
-    }
-
-
-    /**
-     * @return mixed[]
-     *
-     * @throws JsonException
-     */
-    public function getParsedBodyAsArray(): array
-    {
-        $parsedBody = Json::decode((string)$this->getBody(), Json::FORCE_ARRAY);
-        assert(is_array($parsedBody));
-
-        return $parsedBody;
-    }
-
-
-    /**
-     * @param mixed[]|stdClass $data
-     *
-     * @throws JsonException
-     */
-    public function withJson($data, ?int $status = null, int $encodingOptions = 0): static
-    {
-        $json = json_encode($data, $encodingOptions | JSON_THROW_ON_ERROR);
-
-        // Create a new stream with the JSON content
-        $streamFactory = new StreamFactory();
-        $body = $streamFactory->createStream($json);
-
-        $clone = clone $this;
-        $clone->response = $this->response
-            ->withBody($body)
-            ->withHeader('Content-Type', 'application/json;charset=utf-8');
-
-        if ($status !== null) {
-            $clone->response = $clone->response->withStatus($status);
-        }
-
-        return $clone;
-    }
-
-
-    /**
-     * @param string|UriInterface $url
-     */
-    public function withRedirect($url, int $statusCode = 302): static
-    {
-        $clone = clone $this;
-        $clone->response = $this->response
-            ->withHeader('Location', (string)$url)
-            ->withStatus($statusCode);
-
-        return $clone;
     }
 
 

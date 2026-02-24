@@ -4,8 +4,8 @@ namespace BrandEmbassyTest\Slim\Sample;
 
 use BrandEmbassy\Slim\ErrorHandler;
 use BrandEmbassy\Slim\Request\RequestInterface;
-use BrandEmbassyTest\Slim\Tools\ResponseCreatorTestTool;
 use BrandEmbassy\Slim\Response\ResponseInterface;
+use BrandEmbassyTest\Slim\Tools\ResponseCreatorTestTool;
 use Throwable;
 
 /**

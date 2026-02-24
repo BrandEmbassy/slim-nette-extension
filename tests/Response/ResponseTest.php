@@ -2,23 +2,21 @@
 
 namespace BrandEmbassyTest\Slim\Response;
 
-use BrandEmbassy\Slim\Response\DefaultResponseFactory;
 use BrandEmbassy\Slim\Response\Response;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
+use Slim\Psr7\Response as Psr7Response;
 
 /**
  * @final
  */
 class ResponseTest extends TestCase
 {
-    public function testGetParsedBodyAsArray(): void
+    public function testGetInnerResponse(): void
     {
-        $parsedBody = ['foo' => 'bar'];
-        $responseFactory = new DefaultResponseFactory();
-        $response = $responseFactory->create();
-        $response = $response->withJson($parsedBody);
+        $psrResponse = new Psr7Response();
+        $response = new Response($psrResponse);
 
-        Assert::assertSame($parsedBody, $response->getParsedBodyAsArray());
+        Assert::assertSame($psrResponse, $response->getInnerResponse());
     }
 }
