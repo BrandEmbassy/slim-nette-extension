@@ -145,6 +145,9 @@ class SlimApplicationFactory
         // Add routing middleware (inner layer - executes first)
         $slimApp->addRoutingMiddleware();
 
+        // Add body parsing middleware so getParsedBody() works for JSON/form requests
+        $slimApp->addBodyParsingMiddleware();
+
         // Add error middleware (outer layer - catches exceptions)
         $errorMiddleware = $slimApp->addErrorMiddleware(true, true, true);
 
