@@ -3,6 +3,7 @@
 namespace BrandEmbassyTest\Slim\Sample;
 
 use BrandEmbassy\Slim\Request\RequestInterface;
+use BrandEmbassy\Slim\Response\JsonResponse;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassy\Slim\Route\Route;
 
@@ -11,9 +12,8 @@ use BrandEmbassy\Slim\Route\Route;
  */
 class CreateChannelRoute implements Route
 {
-
     public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        return $response->withJson(['status' => 'created'], 201);
+        return JsonResponse::from($response, ['status' => 'created'], 201);
     }
 }
