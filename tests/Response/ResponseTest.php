@@ -4,6 +4,7 @@ namespace BrandEmbassyTest\Slim\Response;
 
 use BrandEmbassy\Slim\Response\JsonResponse;
 use BrandEmbassy\Slim\Response\Response;
+use BrandEmbassy\Slim\Response\ResponseInterface;
 use Nette\Utils\Json;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
@@ -17,7 +18,7 @@ class ResponseTest extends TestCase
     {
         $response = new Response();
 
-        Assert::assertInstanceOf(\BrandEmbassy\Slim\Response\ResponseInterface::class, $response);
+        Assert::assertInstanceOf(ResponseInterface::class, $response);
         Assert::assertInstanceOf(\Psr\Http\Message\ResponseInterface::class, $response);
     }
 

@@ -4,6 +4,7 @@ namespace BrandEmbassy\Slim\Request;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
+use Psr\Http\Message\UploadedFileInterface;
 use Psr\Http\Message\UriInterface;
 use Slim\Routing\Route;
 use Slim\Routing\RouteContext;
@@ -236,6 +237,9 @@ class Request implements RequestInterface
     }
 
 
+    /**
+     * @param array<string, string> $cookies
+     */
     public function withCookieParams(array $cookies): static
     {
         $clone = clone $this;
@@ -267,7 +271,7 @@ class Request implements RequestInterface
 
 
     /**
-     * @return array<string, \Psr\Http\Message\UploadedFileInterface>
+     * @return array<string, UploadedFileInterface>
      */
     public function getUploadedFiles(): array
     {
@@ -275,6 +279,9 @@ class Request implements RequestInterface
     }
 
 
+    /**
+     * @param array<string, UploadedFileInterface> $uploadedFiles
+     */
     public function withUploadedFiles(array $uploadedFiles): static
     {
         $clone = clone $this;
