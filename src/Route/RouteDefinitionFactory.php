@@ -10,7 +10,6 @@ use LogicException;
 use Nette\DI\Container;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Slim\Routing\Route as SlimRoutingRoute;
 
 /**
  * @final
@@ -52,23 +51,17 @@ class RouteDefinitionFactory
             // Route arguments are accessed via Request attributes instead
             unset($args);
 
-            // Bridge Slim 4 route to legacy 'route' attribute for backward compatibility
-            $slimRoute = $psrRequest->getAttribute('__route__');
-            if ($slimRoute instanceof SlimRoutingRoute) {
-                $psrRequest = $psrRequest->withAttribute('route', $slimRoute);
-            }
-
             $route = $factory->getRoute($routeService);
 
-            // Wrap PSR-7 request/response in our wrappers
+            // Wrap PSR-7 request in our Request wrapper
             $request = new Request($psrRequest);
-            $response = new Response($psrResponse);
 
-            // Call the route handler
-            $result = $route($request, $response);
+            // Use the passed response if it's already our type, otherwise create a new one
+            $response = $psrResponse instanceof \BrandEmbassy\Slim\Response\ResponseInterface
+                ? $psrResponse
+                : new Response();
 
-            // Return inner PSR-7 response (result will always be our ResponseInterface)
-            return $result->getInnerResponse();
+            return $route($request, $response);
         };
 
         $middlewares = $this->middlewareFactory->createFromIdentifiers(
