@@ -119,6 +119,10 @@ For most users, the upgrade should be seamless:
 
 ### Breaking Changes
 
+- **RequestInterface**: 13 convenience methods removed (`getField`, `findField`, `hasField`, `findQueryParam`, `getQueryParamStrict`, `findQueryParamAsString`, `getQueryParamAsString`, `hasQueryParam`, `findAttribute`, `getAttributeStrict`, `hasAttribute`, `getDateTimeQueryParam`, `isHtml`, `getParsedBodyAsArray`)
+- **ResponseInterface**: 3 methods removed (`withJson()`, `withRedirect()`, `getParsedBodyAsArray()`) — use `JsonResponse::from()` instead of `withJson()`
+- **Exceptions removed**: `QueryParamMissingException`, `RequestFieldMissingException`, `RequestAttributeMissingException`
+- **Dependency removed**: `adbario/php-dot-notation` no longer needed
 - If you were directly accessing Slim internals (like `Slim\Container` or `Slim\Router`), you'll need to update your code
 - Custom middleware that relied on Slim 3 specific features may need updates
 - The package now requires PHP 8.2+
@@ -126,7 +130,8 @@ For most users, the upgrade should be seamless:
 ### Backward Compatibility
 
 The following are maintained for backward compatibility:
-- Request and Response interfaces remain the same
+- `getQueryParam()` on RequestInterface is deprecated but still available (190+ usages — migrate separately)
+- Route methods on RequestInterface remain: `getRoute()`, `getRouteArguments()`, `hasRouteArgument()`, `getRouteArgument()`, `findRouteArgument()`
 - Middleware signature remains the same (double-pass style)
 - Route and handler registration via NEON configuration is unchanged
 - Container access via `$app->getContainer()` works as before
