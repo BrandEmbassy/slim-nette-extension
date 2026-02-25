@@ -28,5 +28,11 @@ parameters:
         -
             message: '#.+ (does not specify its types|has no value type specified in iterable type|type has no value type specified)#'
         -
+            message: '#should be (contra|co)variant with#'
+            path: src/Request/Request.php
+        -
+            message: '#Call to static method .+::assertInstanceOf\(\) .+ will always evaluate to true#'
+            path: tests/Response/ResponseTest.php
+        -
             message: '#Cognitive complexity for "BrandEmbassy\\Slim\\SlimApplicationFactory::create\(\)"#'
             path: src/SlimApplicationFactory.php
