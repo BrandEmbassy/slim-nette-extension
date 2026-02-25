@@ -2,13 +2,12 @@
 
 namespace BrandEmbassy\Slim\Request;
 
-use DateTimeImmutable;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Routing\Route;
 
 /**
  * Extension of PSR-7 ServerRequestInterface with convenience methods
- * for common request operations.
+ * for route access and the deprecated getQueryParam.
  *
  * All standard PSR-7 methods are inherited from ServerRequestInterface.
  * Use getInnerRequest() for any PSR-7 operations not exposed here.
@@ -37,79 +36,7 @@ interface RequestInterface extends ServerRequestInterface
 
 
     /**
-     * @return mixed[]
-     */
-    public function getParsedBodyAsArray(): array;
-
-
-    /**
-     * @return mixed
-     */
-    public function getField(string $name);
-
-
-    /**
-     * @param mixed $default
-     *
-     * @return mixed
-     */
-    public function findField(string $fieldName, $default = null);
-
-
-    public function hasField(string $fieldName): bool;
-
-
-    /**
-     * @return string|string[]|null
-     */
-    public function findQueryParam(string $key, ?string $default = null);
-
-
-    /**
-     * @return string|string[]
-     *
-     * @throws QueryParamMissingException
-     */
-    public function getQueryParamStrict(string $key);
-
-
-    public function findQueryParamAsString(string $key, ?string $default = null): ?string;
-
-
-    /**
-     * @throws QueryParamMissingException
-     */
-    public function getQueryParamAsString(string $key): string;
-
-
-    public function hasAttribute(string $name): bool;
-
-
-    /**
-     * @param mixed $default
-     *
-     * @return mixed
-     */
-    public function findAttribute(string $name, $default = null);
-
-
-    /**
-     * @return mixed
-     */
-    public function getAttributeStrict(string $name);
-
-
-    public function hasQueryParam(string $key): bool;
-
-
-    public function getDateTimeQueryParam(string $key): DateTimeImmutable;
-
-
-    public function isHtml(): bool;
-
-
-    /**
-     * @deprecated use getQueryParamStrict or findQueryParam
+     * @deprecated use getQueryParams() from PSR-7 directly
      *
      * @param mixed|null $default
      *

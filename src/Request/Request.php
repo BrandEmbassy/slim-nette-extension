@@ -2,39 +2,24 @@
 
 namespace BrandEmbassy\Slim\Request;
 
-use Adbar\Dot;
-use DateTime;
-use DateTimeImmutable;
-use InvalidArgumentException;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
 use Slim\Routing\Route;
 use Slim\Routing\RouteContext;
 use Slim\Routing\RoutingResults;
-use function array_key_exists;
-use function assert;
-use function is_array;
-use function is_string;
-use function sprintf;
-use function str_contains;
 
 /**
  * @final
  *
  * Wrapper around PSR-7 ServerRequestInterface providing convenience methods
- * for common request operations.
+ * for route access and the deprecated getQueryParam.
  *
  * Implements ServerRequestInterface (via RequestInterface), delegating all
  * PSR-7 methods to the wrapped inner request.
  */
 class Request implements RequestInterface
 {
-    /**
-     * @var Dot<string, mixed[]>|null
-     */
-    protected ?Dot $dotAnnotatedRequestBody = null;
-
     private ServerRequestInterface $request;
 
 
@@ -315,7 +300,6 @@ class Request implements RequestInterface
     {
         $clone = clone $this;
         $clone->request = $this->request->withParsedBody($data);
-        $clone->dotAnnotatedRequestBody = null;
 
         return $clone;
     }
@@ -354,7 +338,6 @@ class Request implements RequestInterface
     {
         $clone = clone $this;
         $clone->request = $this->request->withAttribute($name, $value);
-        $clone->dotAnnotatedRequestBody = null;
 
         return $clone;
     }
@@ -427,47 +410,8 @@ class Request implements RequestInterface
 
 
     /**
-     * @return mixed[]
-     */
-    public function getParsedBodyAsArray(): array
-    {
-        return (array)$this->request->getParsedBody();
-    }
-
-
-    /**
-     * @return mixed
+     * @deprecated use getQueryParams() from PSR-7 directly
      *
-     * @throws RequestFieldMissingException
-     */
-    public function getField(string $fieldName)
-    {
-        if ($this->hasField($fieldName)) {
-            return $this->getDotAnnotatedRequestBody()->get($fieldName);
-        }
-
-        throw RequestFieldMissingException::create($fieldName);
-    }
-
-
-    /**
-     * @param mixed $default
-     *
-     * @return mixed
-     */
-    public function findField(string $fieldName, $default = null)
-    {
-        return $this->getDotAnnotatedRequestBody()->get($fieldName, $default);
-    }
-
-
-    public function hasField(string $fieldName): bool
-    {
-        return $this->getDotAnnotatedRequestBody()->has($fieldName);
-    }
-
-
-    /**
      * @param mixed|null $default
      *
      * @return string|string[]|null
@@ -477,133 +421,5 @@ class Request implements RequestInterface
         $params = $this->request->getQueryParams();
 
         return $params[$key] ?? $default;
-    }
-
-
-    /**
-     * @return string|string[]|null
-     */
-    public function findQueryParam(string $key, ?string $default = null)
-    {
-        return $this->getQueryParam($key) ?? $default;
-    }
-
-
-    /**
-     * @return string|string[]
-     *
-     * @throws QueryParamMissingException
-     */
-    public function getQueryParamStrict(string $key)
-    {
-        $value = $this->findQueryParam($key);
-
-        if ($value !== null) {
-            return $value;
-        }
-
-        throw QueryParamMissingException::create($key);
-    }
-
-
-    public function findQueryParamAsString(string $key, ?string $default = null): ?string
-    {
-        $queryParam = $this->getQueryParam($key);
-        assert(!is_array($queryParam));
-
-        return $queryParam ?? $default;
-    }
-
-
-    /**
-     * @throws QueryParamMissingException
-     */
-    public function getQueryParamAsString(string $key): string
-    {
-        $value = $this->findQueryParamAsString($key);
-
-        if ($value !== null) {
-            return $value;
-        }
-
-        throw QueryParamMissingException::create($key);
-    }
-
-
-    public function hasQueryParam(string $key): bool
-    {
-        return array_key_exists($key, $this->request->getQueryParams());
-    }
-
-
-    /**
-     * @throws QueryParamMissingException
-     * @throws InvalidArgumentException
-     */
-    public function getDateTimeQueryParam(string $field, string $format = DateTime::ATOM): DateTimeImmutable
-    {
-        $datetimeParam = $this->getQueryParamStrict($field);
-        assert(is_string($datetimeParam));
-
-        $dateTime = DateTimeImmutable::createFromFormat($format, $datetimeParam);
-
-        if ($dateTime === false) {
-            throw new InvalidArgumentException(sprintf('Field %s is not in %s format', $field, $format));
-        }
-
-        return $dateTime;
-    }
-
-
-    public function hasAttribute(string $name): bool
-    {
-        return array_key_exists($name, $this->getAttributes());
-    }
-
-
-    /**
-     * @param mixed $default
-     *
-     * @return mixed
-     */
-    public function findAttribute(string $name, $default = null)
-    {
-        return $this->getAttribute($name, $default);
-    }
-
-
-    /**
-     * @return mixed
-     *
-     * @throws RequestAttributeMissingException
-     */
-    public function getAttributeStrict(string $name)
-    {
-        if ($this->hasAttribute($name)) {
-            return $this->getAttribute($name);
-        }
-
-        throw RequestAttributeMissingException::create($name);
-    }
-
-
-    public function isHtml(): bool
-    {
-        $acceptHeader = $this->getHeaderLine('accept');
-
-        return str_contains($acceptHeader, 'html');
-    }
-
-
-    /**
-     * @return Dot<string, mixed[]>
-     */
-    private function getDotAnnotatedRequestBody(): Dot
-    {
-        if ($this->dotAnnotatedRequestBody === null) {
-            $this->dotAnnotatedRequestBody = new Dot($this->getParsedBodyAsArray());
-        }
-
-        return $this->dotAnnotatedRequestBody;
     }
 }
