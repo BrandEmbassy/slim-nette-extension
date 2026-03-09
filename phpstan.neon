@@ -20,13 +20,17 @@ parameters:
             message: '#Anonymous function uses \$this assigned to variable \$factory#'
             path: src/Route/RouteDefinitionFactory.php
         -
-            message: '#Call to internal static method .+::createFromGlobals\(\) from outside its root namespace#'
-            path: src/Request/DefaultRequestFactory.php
-        -
-            message: '#Dynamic call to static method .+::createFromGlobals\(\)#'
-            path: src/Request/DefaultRequestFactory.php
-        -
+            # callable[] and untyped array closure params/return types across middleware/route classes —
+            # full callable signature specification is not feasible here without breaking changes.
             message: '#.+ (does not specify its types|has no value type specified in iterable type|type has no value type specified)#'
+            paths:
+                - src/Middleware
+                - src/Route
+        -
+            # Test tooling uses untyped arrays for flexible JSON fixtures
+            message: '#.+ (does not specify its types|has no value type specified in iterable type|type has no value type specified)#'
+            paths:
+                - tests
         -
             message: '#Cognitive complexity for "BrandEmbassy\\Slim\\SlimApplicationFactory::create\(\)"#'
             path: src/SlimApplicationFactory.php
