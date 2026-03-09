@@ -20,17 +20,15 @@ parameters:
             message: '#Anonymous function uses \$this assigned to variable \$factory#'
             path: src/Route/RouteDefinitionFactory.php
         -
-            # callable[] and untyped array closure params/return types across middleware/route classes —
-            # full callable signature specification is not feasible here without breaking changes.
-            message: '#.+ (does not specify its types|has no value type specified in iterable type|type has no value type specified)#'
+            # Slim 4 generic classes (App, Route, RouteCollectorProxyInterface) carry a
+            # TContainerInterface type parameter. We intentionally omit the container type
+            # here because it would couple these files to the concrete container choice.
+            message: '#does not specify its types: TContainerInterface#'
             paths:
-                - src/Middleware
-                - src/Route
-        -
-            # Test tooling uses untyped arrays for flexible JSON fixtures
-            message: '#.+ (does not specify its types|has no value type specified in iterable type|type has no value type specified)#'
-            paths:
-                - tests
+                - src/Request/Request.php
+                - src/Request/RequestInterface.php
+                - src/SlimApp.php
+                - src/SlimApplicationFactory.php
         -
             message: '#Cognitive complexity for "BrandEmbassy\\Slim\\SlimApplicationFactory::create\(\)"#'
             path: src/SlimApplicationFactory.php
