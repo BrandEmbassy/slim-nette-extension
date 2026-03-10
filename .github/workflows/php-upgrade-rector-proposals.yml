@@ -1,0 +1,18 @@
+name: PHP Upgrade Rector Proposals
+
+on:
+  workflow_dispatch:
+    inputs:
+      PHP_TARGET_VERSION:
+        required: true
+        type: string
+        description: 'Target PHP version (e.g. 8.4)'
+        default: '8.4'
+
+jobs:
+  rector-php-upgrade:
+    uses: BrandEmbassy/github-actions/.github/workflows/php-upgrade-rector-proposals.yml@master
+    with:
+      PHP_TARGET_VERSION: ${{ inputs.PHP_TARGET_VERSION }}
+    secrets:
+      COMPOSER_TOKEN: ${{ secrets.COMPOSER_TOKEN }}
