@@ -5,7 +5,6 @@ namespace BrandEmbassy\Slim\Response;
 use LogicException;
 use Nette\Utils\Json;
 use Nette\Utils\JsonException;
-use Psr\Http\Message\ResponseInterface;
 use Slim\Http\Body;
 use function fopen;
 
