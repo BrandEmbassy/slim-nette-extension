@@ -2,14 +2,12 @@
 
 namespace BrandEmbassy\Slim\Response;
 
-use JsonException;
 use LogicException;
+use Nette\Utils\Json;
+use Nette\Utils\JsonException;
 use Psr\Http\Message\ResponseInterface;
 use Slim\Http\Body;
-use stdClass;
 use function fopen;
-use function json_encode;
-use const JSON_THROW_ON_ERROR;
 
 /**
  * @final
@@ -26,22 +24,16 @@ class JsonResponse
 
 
     /**
-     * @param T $response
-     * @param mixed[]|stdClass $data
-     *
-     * @return T
+     * @param mixed[] $data
      *
      * @throws JsonException
-     *
-     * @template T of ResponseInterface
      */
     public static function from(
         ResponseInterface $response,
-        array|stdClass $data,
+        array $data,
         ?int $status = null,
-        int $encodingOptions = 0,
     ): ResponseInterface {
-        $json = json_encode($data, $encodingOptions | JSON_THROW_ON_ERROR);
+        $json = Json::encode($data);
 
         $resource = fopen('php://temp', 'rb+');
 
@@ -55,12 +47,10 @@ class JsonResponse
 
         $response = $response
             ->withBody($body)
-            ->withHeader('Content-Type', 'application/json;charset=utf-8');
+            ->withHeader('Content-Type', 'application/json');
 
-        if ($status !== null) {
-            return $response->withStatus($status);
-        }
-
-        return $response;
+        return $status === null
+            ? $response
+            : $response->withStatus($status);
     }
 }
