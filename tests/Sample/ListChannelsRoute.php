@@ -3,6 +3,7 @@
 namespace BrandEmbassyTest\Slim\Sample;
 
 use BrandEmbassy\Slim\Request\RequestInterface;
+use BrandEmbassy\Slim\Response\JsonResponse;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassy\Slim\Route\Route;
 
@@ -13,7 +14,8 @@ class ListChannelsRoute implements Route
 {
     public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        return $response->withJson(
+        return JsonResponse::from(
+            $response,
             [
                 [
                     'id' => 1,
@@ -24,7 +26,7 @@ class ListChannelsRoute implements Route
                     'name' => 'Second channel',
                 ],
             ],
-            200
+            200,
         );
     }
 }
