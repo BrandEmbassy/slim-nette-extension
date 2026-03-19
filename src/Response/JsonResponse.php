@@ -15,7 +15,11 @@ use const JSON_THROW_ON_ERROR;
  * @final
  *
  * Stateless helper for writing JSON responses via PSR-7.
- * Preferred replacement for the deprecated ResponseInterface::withJson().
+ * Preferred replacement for the deprecated
+ * {@see \BrandEmbassy\Slim\Response\ResponseInterface::withJson()}.
+ *
+ * Unlike withJson(), this helper always enforces JSON_THROW_ON_ERROR
+ * to fail fast on encoding issues rather than producing silent errors.
  */
 class JsonResponse
 {
