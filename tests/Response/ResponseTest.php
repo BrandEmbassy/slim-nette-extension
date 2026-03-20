@@ -2,9 +2,9 @@
 
 namespace BrandEmbassyTest\Slim\Response;
 
-use BrandEmbassyTest\Slim\Tools\ResponseCreatorTestTool;
 use BrandEmbassy\Slim\Response\Response;
 use BrandEmbassy\Slim\Response\ResponseInterface;
+use BrandEmbassyTest\Slim\Tools\ResponseCreatorTestTool;
 use Nette\Utils\Json;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
