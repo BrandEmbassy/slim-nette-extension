@@ -33,19 +33,7 @@ class DoublePassMiddlewareAdapter implements MiddlewareInterface
     {
         $wrappedRequest = new Request($request);
         $response = new Response();
-
-        $next = static function (ServerRequestInterface $req, ResponseInterface $res) use ($handler): ResponseInterface {
-            $handlerResponse = $handler->handle($req);
-
-            // Merge headers accumulated by legacy middleware onto the handler's response.
-            // Legacy middleware adds headers to $res before calling $next, so we need
-            // to preserve those headers on the response returned by the PSR-15 handler.
-            foreach ($res->getHeaders() as $name => $values) {
-                $handlerResponse = $handlerResponse->withHeader($name, $values);
-            }
-
-            return $handlerResponse;
-        };
+        $next = new LegacyNextHandler($handler);
 
         return ($this->middleware)($wrappedRequest, $response, $next);
     }
