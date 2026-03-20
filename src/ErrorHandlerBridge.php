@@ -27,7 +27,6 @@ class ErrorHandlerBridge
     }
 
 
-    // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter
     public function __invoke(
         ServerRequestInterface $request,
         Throwable $exception,
