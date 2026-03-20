@@ -27,7 +27,6 @@ return static function (ECSConfig $ecsConfig) use ($defaultEcsConfigurationSetup
         ],
         UnusedFunctionParameterSniff::class . '.FoundAfterLastUsed' => [
             __DIR__ . '/src/ErrorHandlerBridge.php',
-            __DIR__ . '/src/Route/LegacyRouteAdapter.php',
         ],
         'SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint' => [
             __DIR__ . '/src/BrandEmbassyCodingStandard/Sniffs/Classes/ClassesWithoutSelfReferencingSniff.php',

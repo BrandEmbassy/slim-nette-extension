@@ -33,6 +33,10 @@ class LegacyRouteAdapter
         PsrResponseInterface $psrResponse,
         array $args,
     ): PsrResponseInterface {
+        foreach ($args as $name => $value) {
+            $psrRequest = $psrRequest->withAttribute($name, $value);
+        }
+
         $request = new Request($psrRequest);
         $response = $psrResponse instanceof ResponseInterface ? $psrResponse : new Response();
 
