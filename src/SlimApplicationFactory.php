@@ -106,15 +106,9 @@ class SlimApplicationFactory
             $useApcuCache = false;
         }
 
-        $slimContainer = new SlimContainer($this->container);
-
-        if (isset($slimConfiguration[self::SETTINGS])) {
-            $slimContainer->set('settings', $slimConfiguration[self::SETTINGS]);
-        }
-
         $psrResponseFactory = new ResponseFactory();
 
-        $slimApp = new SlimApp($psrResponseFactory, $slimContainer);
+        $slimApp = new SlimApp($psrResponseFactory, $this->container);
 
         $routesToRegister = $this->configuration[self::ROUTES];
         if ($registerOnlyNecessaryRoutes) {

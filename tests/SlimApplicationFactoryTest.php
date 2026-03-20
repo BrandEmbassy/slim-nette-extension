@@ -2,7 +2,6 @@
 
 namespace BrandEmbassyTest\Slim;
 
-use BrandEmbassy\Slim\SlimContainer;
 use BrandEmbassyTest\Slim\Sample\AfterRouteMiddleware;
 use BrandEmbassyTest\Slim\Sample\BeforeRequestMiddleware;
 use BrandEmbassyTest\Slim\Sample\BeforeRouteMiddleware;
@@ -13,7 +12,6 @@ use BrandEmbassyTest\Slim\Sample\OnlyApiGroupMiddleware;
 use BrandEmbassyTest\Slim\Tools\ResponseAssertions;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
-use function assert;
 use function count;
 
 /**
@@ -21,18 +19,6 @@ use function count;
  */
 class SlimApplicationFactoryTest extends TestCase
 {
-    public function testShouldPassSettingsToSlimContainer(): void
-    {
-        $app = SlimAppTester::createSlimApp();
-        $container = $app->getContainer();
-        assert($container instanceof SlimContainer);
-
-        $settings = $container->get('settings');
-
-        Assert::assertSame('Sample', $settings['myCustomOption']);
-    }
-
-
     /**
      * @dataProvider routeResponseDataProvider
      *
