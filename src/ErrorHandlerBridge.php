@@ -27,10 +27,7 @@ class ErrorHandlerBridge
     }
 
 
-    /**
-     * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
-     * @phpcsSuppress Generic.CodeAnalysis.UnusedFunctionParameter
-     */
+    // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter
     public function __invoke(
         ServerRequestInterface $request,
         Throwable $exception,

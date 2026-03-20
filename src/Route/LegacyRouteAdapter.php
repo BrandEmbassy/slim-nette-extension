@@ -26,11 +26,9 @@ class LegacyRouteAdapter
 
 
     /**
-     * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
-     * @phpcsSuppress Generic.CodeAnalysis.UnusedFunctionParameter
-     *
      * @param array<string, string> $args
      */
+    // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter
     public function __invoke(
         ServerRequestInterface $psrRequest,
         PsrResponseInterface $psrResponse,
