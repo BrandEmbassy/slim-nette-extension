@@ -2,7 +2,7 @@
 
 namespace BrandEmbassyTest\Slim\Response;
 
-use BrandEmbassy\Slim\Response\JsonResponse;
+use BrandEmbassyTest\Slim\Tools\ResponseCreatorTestTool;
 use BrandEmbassy\Slim\Response\Response;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
@@ -16,7 +16,7 @@ class ResponseTest extends TestCase
     {
         $parsedBody = ['foo' => 'bar'];
         $response = new Response();
-        $response = JsonResponse::from($response, $parsedBody);
+        $response = ResponseCreatorTestTool::createJsonResponse($response, $parsedBody, 200);
 
         Assert::assertSame($parsedBody, $response->getParsedBodyAsArray());
     }

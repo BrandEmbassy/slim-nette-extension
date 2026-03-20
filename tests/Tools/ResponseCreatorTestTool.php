@@ -1,36 +1,28 @@
 <?php declare(strict_types = 1);
 
-namespace BrandEmbassy\Slim\Response;
+namespace BrandEmbassyTest\Slim\Tools;
 
 use LogicException;
 use Nette\Utils\Json;
 use Nette\Utils\JsonException;
 use Slim\Http\Body;
+use BrandEmbassy\Slim\Response\ResponseInterface;
 use function fopen;
 
 /**
  * @final
- *
- * Stateless helper for writing JSON responses via PSR-7.
- * Preferred replacement for the deprecated
- * {@see \BrandEmbassy\Slim\Response\ResponseInterface::withJson()}.
  */
-class JsonResponse
+class ResponseCreatorTestTool
 {
-    private function __construct()
-    {
-    }
-
-
     /**
      * @param mixed[] $data
      *
      * @throws JsonException
      */
-    public static function from(
+    public static function createJsonResponse(
         ResponseInterface $response,
         array $data,
-        ?int $status = null,
+        int $status,
     ): ResponseInterface {
         $json = Json::encode($data);
 
@@ -44,12 +36,9 @@ class JsonResponse
         $body->write($json);
         $body->rewind();
 
-        $response = $response
+        return $response
             ->withBody($body)
-            ->withHeader('Content-Type', 'application/json');
-
-        return $status === null
-            ? $response
-            : $response->withStatus($status);
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus($status);
     }
 }

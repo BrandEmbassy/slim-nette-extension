@@ -3,7 +3,7 @@
 namespace BrandEmbassyTest\Slim\Sample;
 
 use BrandEmbassy\Slim\Request\RequestInterface;
-use BrandEmbassy\Slim\Response\JsonResponse;
+use BrandEmbassyTest\Slim\Tools\ResponseCreatorTestTool;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 
 /**
@@ -15,6 +15,6 @@ class NotAllowedHandler
 {
     public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        return JsonResponse::from($response, ['error' => 'Sample NotAllowedHandler here!'], 405);
+        return ResponseCreatorTestTool::createJsonResponse($response, ['error' => 'Sample NotAllowedHandler here!'], 405);
     }
 }
