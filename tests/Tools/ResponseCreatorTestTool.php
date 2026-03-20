@@ -4,7 +4,6 @@ namespace BrandEmbassyTest\Slim\Tools;
 
 use LogicException;
 use Nette\Utils\Json;
-use Nette\Utils\JsonException;
 use Slim\Http\Body;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use function fopen;
@@ -16,8 +15,6 @@ class ResponseCreatorTestTool
 {
     /**
      * @param mixed[] $data
-     *
-     * @throws JsonException
      */
     public static function createJsonResponse(
         ResponseInterface $response,
