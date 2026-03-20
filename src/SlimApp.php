@@ -5,7 +5,6 @@ namespace BrandEmbassy\Slim;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\App;
-use Slim\Factory\ServerRequestCreatorFactory;
 use Throwable;
 use function reset;
 
@@ -16,13 +15,8 @@ class SlimApp extends App
      *
      * @throws Throwable
      */
-    public function runAndReturnResponse(?ServerRequestInterface $request = null): ResponseInterface
+    public function runAndReturnResponse(ServerRequestInterface $request): ResponseInterface
     {
-        if (!$request instanceof ServerRequestInterface) {
-            $serverRequestCreator = ServerRequestCreatorFactory::create();
-            $request = $serverRequestCreator->createServerRequestFromGlobals();
-        }
-
         $response = $this->handle($request);
 
         $contentTypes = $response->getHeader('Content-Type');

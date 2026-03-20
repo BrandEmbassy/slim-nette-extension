@@ -9,6 +9,8 @@ use Nette\DI\Container;
 use Nette\DI\ContainerLoader;
 use Nette\DI\Extensions\ExtensionsExtension;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Slim\Factory\ServerRequestCreatorFactory;
 use function md5;
 
 /**
@@ -24,11 +26,19 @@ class SlimAppTester
     }
 
 
-    public static function runSlimApp(string $configPath = __DIR__ . '/config.neon'): ResponseInterface
-    {
+    public static function runSlimApp(
+        string $configPath = __DIR__ . '/config.neon',
+        ?ServerRequestInterface $request = null,
+    ): ResponseInterface {
         $slimApp = self::createSlimApp($configPath);
 
-        return $slimApp->runAndReturnResponse();
+        return $slimApp->runAndReturnResponse($request ?? self::createServerRequest());
+    }
+
+
+    public static function createServerRequest(): ServerRequestInterface
+    {
+        return ServerRequestCreatorFactory::create()->createServerRequestFromGlobals();
     }
 
 
