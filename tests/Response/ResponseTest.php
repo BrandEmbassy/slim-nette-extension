@@ -27,7 +27,7 @@ class ResponseTest extends TestCase
     {
         $parsedBody = ['foo' => 'bar'];
         $response = new Response();
-        $response = ResponseCreatorTestTool::createJsonResponse($response, $parsedBody);
+        $response = ResponseCreatorTestTool::createJsonResponse($response, $parsedBody, 200);
 
         $decoded = Json::decode((string)$response->getBody(), Json::FORCE_ARRAY);
         Assert::assertSame($parsedBody, $decoded);

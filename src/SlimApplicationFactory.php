@@ -186,10 +186,9 @@ class SlimApplicationFactory
                 return $handler($wrappedRequest, $response->withStatus(500), $exception);
             }
 
-            // Fallback to default error response
-            $response->getBody()->write('Internal Server Error');
+            $response->getBody()->write('{"error":"Internal Server Error"}');
 
-            return $response->withStatus(500);
+            return $response->withStatus(500)->withHeader('Content-Type', 'application/json;charset=utf-8');
         };
 
         $errorMiddleware->setDefaultErrorHandler($customErrorHandler);
@@ -249,7 +248,7 @@ class SlimApplicationFactory
         bool $detectTyposInRouteConfiguration
     ): void {
         foreach ($routes as $routePattern => $routeData) {
-            $this->routeRegister->register($apiNamespace, $routePattern, $routeData, $detectTyposInRouteConfiguration, $app);
+            $this->routeRegister->register($apiNamespace, $routePattern, $routeData, $app, $detectTyposInRouteConfiguration);
         }
     }
 

@@ -119,8 +119,9 @@ For most users, the upgrade should be seamless:
 
 ### Breaking Changes
 
-- **RequestInterface**: 13 convenience methods removed (`getField`, `findField`, `hasField`, `findQueryParam`, `getQueryParamStrict`, `findQueryParamAsString`, `getQueryParamAsString`, `hasQueryParam`, `findAttribute`, `getAttributeStrict`, `hasAttribute`, `getDateTimeQueryParam`, `isHtml`, `getParsedBodyAsArray`)
-- **ResponseInterface**: 3 methods removed (`withJson()`, `withRedirect()`, `getParsedBodyAsArray()`) — consumers need their own JSON response helper instead of `withJson()`
+- **RequestInterface**: 13 convenience methods removed (`getField`, `findField`, `hasField`, `findQueryParam`, `getQueryParamStrict`, `findQueryParamAsString`, `getQueryParamAsString`, `hasQueryParam`, `findAttribute`, `getAttributeStrict`, `hasAttribute`, `getDateTimeQueryParam`, `isHtml`, `getParsedBodyAsArray`). Use the underlying PSR-7 request methods directly (e.g. `getQueryParams()`, `getParsedBody()`, `getAttribute()`)
+- **ResponseInterface**: 3 methods removed (`withJson()`, `withRedirect()`, `getParsedBodyAsArray()`). Consumers need their own JSON response helper instead of `withJson()`, use `withHeader('Location', $url)->withStatus(302)` instead of `withRedirect()`
+- **JsonResponse removed**: The `BrandEmbassy\Slim\Response\JsonResponse` helper class has been removed. Consumers should implement their own JSON response utility
 - **Exceptions removed**: `QueryParamMissingException`, `RequestFieldMissingException`, `RequestAttributeMissingException`
 - **Dependency removed**: `adbario/php-dot-notation` no longer needed
 - If you were directly accessing Slim internals (like `Slim\Container` or `Slim\Router`), you'll need to update your code
@@ -130,6 +131,7 @@ For most users, the upgrade should be seamless:
 ### Backward Compatibility
 
 The following are maintained for backward compatibility:
+- Request and Response types remain PSR-7 compatible; core PSR-7 methods are unchanged
 - `getQueryParam()` on RequestInterface is deprecated but still available (190+ usages — migrate separately)
 - Route methods on RequestInterface remain: `getRoute()`, `getRouteArguments()`, `hasRouteArgument()`, `getRouteArgument()`, `findRouteArgument()`
 - Middleware signature remains the same (double-pass style)
