@@ -5,6 +5,7 @@ namespace BrandEmbassy\Slim\Route;
 use BrandEmbassy\Slim\Middleware\AfterRouteMiddlewares;
 use BrandEmbassy\Slim\Middleware\BeforeRouteMiddlewares;
 use BrandEmbassy\Slim\Middleware\MiddlewareGroups;
+use Psr\Http\Server\MiddlewareInterface;
 use Slim\Interfaces\RouteCollectorProxyInterface;
 use function array_keys;
 use function array_merge;
@@ -88,7 +89,7 @@ class RouteRegister
 
 
     /**
-     * @return callable[]
+     * @return MiddlewareInterface[]
      */
     private function getAllMiddlewares(string $version, RouteDefinition $routeDefinition): array
     {

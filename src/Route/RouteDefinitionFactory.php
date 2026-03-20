@@ -4,13 +4,8 @@ namespace BrandEmbassy\Slim\Route;
 
 use BrandEmbassy\Slim\DI\ServiceProvider;
 use BrandEmbassy\Slim\Middleware\MiddlewareFactory;
-use BrandEmbassy\Slim\Request\Request;
-use BrandEmbassy\Slim\Response\Response;
-use BrandEmbassy\Slim\Response\ResponseInterface;
 use LogicException;
 use Nette\DI\Container;
-use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * @final
@@ -36,32 +31,8 @@ class RouteDefinitionFactory
      */
     public function create(string $method, array $routeDefinitionData): RouteDefinition
     {
-        $routeService = $routeDefinitionData[RouteDefinition::SERVICE];
-
-        // Create PSR-15 compatible route handler that wraps the route callable
-        $factory = $this;
-        $route = function (
-            ServerRequestInterface $psrRequest,
-            PsrResponseInterface $psrResponse,
-            array $args
-        ) use (
-            $routeService,
-            $factory
-        ): PsrResponseInterface {
-            // Note: $args parameter required by Slim 4 route signature but unused in our implementation
-            // Route arguments are accessed via RouteContext instead
-            unset($args);
-
-            $route = $factory->getRoute($routeService);
-
-            // Wrap PSR-7 request in our Request wrapper
-            $request = new Request($psrRequest);
-
-            // Use the passed response if it's already our type, otherwise create a new one
-            $response = $psrResponse instanceof ResponseInterface ? $psrResponse : new Response();
-
-            return $route($request, $response);
-        };
+        $route = $this->getRoute($routeDefinitionData[RouteDefinition::SERVICE]);
+        $routeHandler = new LegacyRouteAdapter($route);
 
         $middlewares = $this->middlewareFactory->createFromIdentifiers(
             $routeDefinitionData[RouteDefinition::MIDDLEWARES],
@@ -69,7 +40,7 @@ class RouteDefinitionFactory
 
         return new RouteDefinition(
             $method,
-            $route,
+            $routeHandler,
             $middlewares,
             $routeDefinitionData[RouteDefinition::MIDDLEWARE_GROUPS],
             $routeDefinitionData[RouteDefinition::NAME],

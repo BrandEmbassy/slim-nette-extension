@@ -3,12 +3,8 @@
 namespace BrandEmbassy\Slim\Middleware;
 
 use BrandEmbassy\Slim\DI\ServiceProvider;
-use BrandEmbassy\Slim\Request\Request;
-use BrandEmbassy\Slim\Response\Response;
 use Nette\DI\Container;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Http\Server\MiddlewareInterface;
 use function array_map;
 use function assert;
 use function is_callable;
@@ -27,59 +23,24 @@ class MiddlewareFactory
     }
 
 
-    /**
-     * Creates a PSR-15 middleware adapter from a legacy-style middleware identifier.
-     */
-    public function createFromIdentifier(string $middlewareIdentifier): callable
+    public function createFromIdentifier(string $middlewareIdentifier): MiddlewareInterface
     {
-        $container = $this->container;
+        $middleware = ServiceProvider::getService($this->container, $middlewareIdentifier);
+        assert(is_callable($middleware));
 
-        return function (
-            ServerRequestInterface $psrRequest,
-            RequestHandlerInterface $handler
-        ) use (
-            $middlewareIdentifier,
-            $container
-        ): ResponseInterface {
-            $middleware = ServiceProvider::getService($container, $middlewareIdentifier);
-            assert(is_callable($middleware));
-
-            // Wrap PSR-7 request in our Request wrapper
-            $request = new Request($psrRequest);
-
-            // Create a fresh PSR-7 response for the middleware
-            $response = new Response();
-
-            // Create a $next callable that wraps the PSR-15 handler
-            $next = function (ServerRequestInterface $req, $res) use ($handler): ResponseInterface {
-                // Handle the request to get the response from the next layer
-                $handlerResponse = $handler->handle($req);
-
-                // Merge headers accumulated by legacy middleware onto the handler's response.
-                // Legacy middleware adds headers to $res before calling $next, so we need
-                // to preserve those headers on the response returned by the PSR-15 handler.
-                foreach ($res->getHeaders() as $name => $values) {
-                    $handlerResponse = $handlerResponse->withHeader($name, $values);
-                }
-
-                return $handlerResponse;
-            };
-
-            // Call the old-style middleware
-            return $middleware($request, $response, $next);
-        };
+        return new DoublePassMiddlewareAdapter($middleware);
     }
 
 
     /**
      * @param string[] $middlewareIdentifiers
      *
-     * @return callable[]
+     * @return MiddlewareInterface[]
      */
     public function createFromIdentifiers(array $middlewareIdentifiers): array
     {
         return array_map(
-            fn(string $middlewareIdentifier): callable => $this->createFromIdentifier($middlewareIdentifier),
+            fn(string $middlewareIdentifier): MiddlewareInterface => $this->createFromIdentifier($middlewareIdentifier),
             $middlewareIdentifiers,
         );
     }

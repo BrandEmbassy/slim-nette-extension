@@ -142,9 +142,8 @@ class SlimApplicationFactory
         $errorMiddleware = $slimApp->addErrorMiddleware(true, true, true);
         $errorMiddleware->setDefaultErrorHandler(new ErrorHandlerBridge($handlers));
 
-        foreach ($this->configuration[self::BEFORE_REQUEST_MIDDLEWARES] as $middleware) {
-            $middlewareService = $this->middlewareFactory->createFromIdentifier($middleware);
-            $slimApp->add($middlewareService);
+        foreach ($this->configuration[self::BEFORE_REQUEST_MIDDLEWARES] as $middlewareIdentifier) {
+            $slimApp->add($this->middlewareFactory->createFromIdentifier($middlewareIdentifier));
         }
 
         return $slimApp;
