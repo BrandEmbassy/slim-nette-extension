@@ -26,12 +26,14 @@ class LegacyRouteAdapter
 
 
     /**
+     * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
+     *
      * @param array<string, string> $args
      */
     public function __invoke(
         ServerRequestInterface $psrRequest,
         PsrResponseInterface $psrResponse,
-        array $_args,
+        array $args,
     ): PsrResponseInterface {
         $request = new Request($psrRequest);
         $response = $psrResponse instanceof ResponseInterface ? $psrResponse : new Response();

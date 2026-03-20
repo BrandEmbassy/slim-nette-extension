@@ -27,12 +27,15 @@ class ErrorHandlerBridge
     }
 
 
+    /**
+     * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
+     */
     public function __invoke(
         ServerRequestInterface $request,
         Throwable $exception,
-        bool $_displayErrorDetails,
-        bool $_logErrors,
-        bool $_logErrorDetails,
+        bool $displayErrorDetails,
+        bool $logErrors,
+        bool $logErrorDetails,
     ): ResponseInterface {
         $response = new Response();
         $wrappedRequest = new Request($request);
