@@ -59,7 +59,7 @@ class RequestTest extends TestCase
 
         $container = SlimAppTester::createContainer();
         $request = SlimAppTester::createServerRequest();
-        $container->getByType(SlimApplicationFactory::class)->create()->runAndReturnResponse($request);
+        $container->getByType(SlimApplicationFactory::class)->create()->handle($request);
 
         $updateChannelRoute = $container->getByType(CreateChannelUserRoute::class);
 

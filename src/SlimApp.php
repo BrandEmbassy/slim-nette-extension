@@ -5,19 +5,13 @@ namespace BrandEmbassy\Slim;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\App;
-use Throwable;
 use function reset;
 
 class SlimApp extends App
 {
-    /**
-     * Run the application and return the response.
-     *
-     * @throws Throwable
-     */
-    public function runAndReturnResponse(ServerRequestInterface $request): ResponseInterface
+    public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $response = $this->handle($request);
+        $response = parent::handle($request);
 
         $contentTypes = $response->getHeader('Content-Type');
         $contentType = reset($contentTypes);

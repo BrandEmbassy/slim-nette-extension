@@ -95,10 +95,7 @@ Now you can simply get `SlimApplicationFactory` class from your DI Container (or
 ```php
 $factory = $container->getByType(SlimApplicationFactory::class);
 $app = $factory->create();
-$response = $app->runAndReturnResponse();
-
-$emitter = new \Slim\ResponseEmitter();
-$emitter->emit($response);
+$app->run();
 ```
 
 ## Migrating from Slim 3 to Slim 4
@@ -128,7 +125,7 @@ For most users, the upgrade should be seamless:
 - `RequestInterface` gained new methods: `getInnerRequest()`, `getRoutingResults()`
 - If you were directly accessing Slim internals (like `Slim\Container` or `Slim\Router`), you'll need to update your code
 - Custom middleware that relied on Slim 3 specific features may need updates
-- `$app->run()` is replaced by `$app->runAndReturnResponse()` — you must emit the response yourself
+- `$app->run()` and `$app->handle()` now apply a Content-Type fix for empty responses
 
 ### Backward Compatibility
 

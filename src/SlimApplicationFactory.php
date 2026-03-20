@@ -126,7 +126,7 @@ class SlimApplicationFactory
             $this->registerApi($slimApp, $apiNamespace, $routes, $detectTyposInRouteConfiguration);
         }
 
-        $handlers = $this->resolveHandlers($this->configuration[self::HANDLERS]);
+        $handlers = $this->resolveHandlers();
 
         // Slim 4 uses a LIFO middleware stack: middleware added later runs earlier on request.
         // Routing middleware resolves the matched route before route handlers execute.
@@ -145,15 +145,13 @@ class SlimApplicationFactory
 
 
     /**
-     * @param array<string, string> $handlers
-     *
      * @return array<string, callable>
      */
-    private function resolveHandlers(array $handlers): array
+    private function resolveHandlers(): array
     {
         $resolved = [];
 
-        foreach ($handlers as $handlerName => $handlerClass) {
+        foreach ($this->configuration[self::HANDLERS] as $handlerName => $handlerClass) {
             $this->validateHandlerName($handlerName);
             $handlerService = ServiceProvider::getService($this->container, $handlerClass);
             assert(is_callable($handlerService));

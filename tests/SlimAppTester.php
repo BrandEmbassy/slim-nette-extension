@@ -32,7 +32,7 @@ class SlimAppTester
     ): ResponseInterface {
         $slimApp = self::createSlimApp($configPath);
 
-        return $slimApp->runAndReturnResponse($request ?? self::createServerRequest());
+        return $slimApp->handle($request ?? self::createServerRequest());
     }
 
 
