@@ -2,11 +2,9 @@
 
 namespace BrandEmbassyTest\Slim\Tools;
 
-use LogicException;
-use Nette\Utils\Json;
-use Slim\Http\Body;
 use BrandEmbassy\Slim\Response\ResponseInterface;
-use function fopen;
+use Nette\Utils\Json;
+use Slim\Psr7\Factory\StreamFactory;
 
 /**
  * @final
@@ -22,16 +20,7 @@ class ResponseCreatorTestTool
         int $status,
     ): ResponseInterface {
         $json = Json::encode($data);
-
-        $resource = fopen('php://temp', 'rb+');
-
-        if ($resource === false) {
-            throw new LogicException('Failed to open php://temp stream');
-        }
-
-        $body = new Body($resource);
-        $body->write($json);
-        $body->rewind();
+        $body = (new StreamFactory())->createStream($json);
 
         return $response
             ->withBody($body)

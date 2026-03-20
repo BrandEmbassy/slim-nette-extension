@@ -120,7 +120,7 @@ For most users, the upgrade should be seamless:
 ### Breaking Changes
 
 - **RequestInterface**: 13 convenience methods removed (`getField`, `findField`, `hasField`, `findQueryParam`, `getQueryParamStrict`, `findQueryParamAsString`, `getQueryParamAsString`, `hasQueryParam`, `findAttribute`, `getAttributeStrict`, `hasAttribute`, `getDateTimeQueryParam`, `isHtml`, `getParsedBodyAsArray`)
-- **ResponseInterface**: 3 methods removed (`withJson()`, `withRedirect()`, `getParsedBodyAsArray()`) — use `JsonResponse::from()` instead of `withJson()`
+- **ResponseInterface**: 3 methods removed (`withJson()`, `withRedirect()`, `getParsedBodyAsArray()`) — consumers need their own JSON response helper instead of `withJson()`
 - **Exceptions removed**: `QueryParamMissingException`, `RequestFieldMissingException`, `RequestAttributeMissingException`
 - **Dependency removed**: `adbario/php-dot-notation` no longer needed
 - If you were directly accessing Slim internals (like `Slim\Container` or `Slim\Router`), you'll need to update your code

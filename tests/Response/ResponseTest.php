@@ -2,7 +2,7 @@
 
 namespace BrandEmbassyTest\Slim\Response;
 
-use BrandEmbassy\Slim\Response\JsonResponse;
+use BrandEmbassyTest\Slim\Tools\ResponseCreatorTestTool;
 use BrandEmbassy\Slim\Response\Response;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use Nette\Utils\Json;
@@ -27,7 +27,7 @@ class ResponseTest extends TestCase
     {
         $parsedBody = ['foo' => 'bar'];
         $response = new Response();
-        $response = JsonResponse::from($response, $parsedBody);
+        $response = ResponseCreatorTestTool::createJsonResponse($response, $parsedBody);
 
         $decoded = Json::decode((string)$response->getBody(), Json::FORCE_ARRAY);
         Assert::assertSame($parsedBody, $decoded);
