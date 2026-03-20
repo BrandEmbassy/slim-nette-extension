@@ -27,6 +27,7 @@ class LegacyRouteAdapter
 
     /**
      * @phpcsSuppress SlevomatCodingStandard.Functions.UnusedParameter
+     * @phpcsSuppress Generic.CodeAnalysis.UnusedFunctionParameter
      *
      * @param array<string, string> $args
      */
