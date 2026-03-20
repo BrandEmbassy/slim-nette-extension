@@ -17,9 +17,6 @@ parameters:
             message: '#Cognitive complexity for "BrandEmbassy\\Slim\\Route\\OnlyNecessaryRoutesProvider::getRoutes\(\)" is 14, keep it under 9#'
             path: src/Route/OnlyNecessaryRoutesProvider.php
         -
-            message: '#Anonymous function uses \$this assigned to variable \$factory#'
-            path: src/Route/RouteDefinitionFactory.php
-        -
             # Slim 4 generic classes (App, Route, RouteCollectorProxyInterface) carry a
             # TContainerInterface type parameter. We intentionally omit the container type
             # here because it would couple these files to the concrete container choice.
@@ -30,6 +27,3 @@ parameters:
                 - src/Route/RouteRegister.php
                 - src/SlimApp.php
                 - src/SlimApplicationFactory.php
-        -
-            message: '#Cognitive complexity for "BrandEmbassy\\Slim\\SlimApplicationFactory::create\(\)"#'
-            path: src/SlimApplicationFactory.php

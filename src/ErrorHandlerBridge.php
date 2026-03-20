@@ -30,9 +30,9 @@ class ErrorHandlerBridge
     public function __invoke(
         ServerRequestInterface $request,
         Throwable $exception,
-        bool $displayErrorDetails,
-        bool $logErrors,
-        bool $logErrorDetails,
+        bool $_displayErrorDetails,
+        bool $_logErrors,
+        bool $_logErrorDetails,
     ): ResponseInterface {
         $response = new Response();
         $wrappedRequest = new Request($request);

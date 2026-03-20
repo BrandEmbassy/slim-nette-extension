@@ -31,7 +31,7 @@ class LegacyRouteAdapter
     public function __invoke(
         ServerRequestInterface $psrRequest,
         PsrResponseInterface $psrResponse,
-        array $args,
+        array $_args,
     ): PsrResponseInterface {
         $request = new Request($psrRequest);
         $response = $psrResponse instanceof ResponseInterface ? $psrResponse : new Response();

@@ -82,8 +82,6 @@ class SlimApplicationFactory
 
     public function create(): SlimApp
     {
-        /** @var array<string, mixed> $slimConfiguration */
-        $slimConfiguration = $this->configuration[self::SLIM_CONFIGURATION];
         $detectTyposInRouteConfiguration = (bool)$this->getSlimSettings(
             SlimSettings::DETECT_TYPOS_IN_ROUTE_CONFIGURATION,
             true,
@@ -106,9 +104,10 @@ class SlimApplicationFactory
             $useApcuCache = false;
         }
 
+        $slimContainer = new SlimContainer($this->container);
         $psrResponseFactory = new ResponseFactory();
 
-        $slimApp = new SlimApp($psrResponseFactory, $this->container);
+        $slimApp = new SlimApp($psrResponseFactory, $slimContainer);
 
         $routesToRegister = $this->configuration[self::ROUTES];
         if ($registerOnlyNecessaryRoutes) {
