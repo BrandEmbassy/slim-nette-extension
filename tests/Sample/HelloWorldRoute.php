@@ -3,6 +3,7 @@
 namespace BrandEmbassyTest\Slim\Sample;
 
 use BrandEmbassy\Slim\Request\RequestInterface;
+use BrandEmbassyTest\Slim\Tools\ResponseCreatorTestTool;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassy\Slim\Route\Route;
 
@@ -13,6 +14,6 @@ class HelloWorldRoute implements Route
 {
     public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        return $response->withJson(['Hello World']);
+        return ResponseCreatorTestTool::createJsonResponse($response, ['Hello World'], 200);
     }
 }

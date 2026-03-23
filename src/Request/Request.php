@@ -2,50 +2,81 @@
 
 namespace BrandEmbassy\Slim\Request;
 
-use Adbar\Dot;
-use DateTime;
-use DateTimeImmutable;
-use InvalidArgumentException;
-use Slim\Http\Request as SlimRequest;
-use Slim\Route;
-use function array_key_exists;
-use function assert;
-use function is_array;
-use function is_string;
-use function sprintf;
-use function str_contains;
+use Psr\Http\Message\ServerRequestInterface;
+use Slim\Psr7\Headers;
+use Slim\Psr7\Request as SlimRequest;
+use Slim\Routing\Route;
+use Slim\Routing\RouteContext;
+use Slim\Routing\RoutingResults;
 
 /**
- * @method string[]|string[][] getQueryParams()
- * @method string|string[]|null getQueryParam(string $key, ?string $default = null)
- *
  * @final
+ *
+ * Extends Slim 4's PSR-7 Request with convenience methods for common
+ * request operations. All PSR-7 methods are inherited from the parent.
  */
 class Request extends SlimRequest implements RequestInterface
 {
-    private const ROUTE_INFO_ATTRIBUTE = 'routeInfo';
-
-    private const ROUTE_ATTRIBUTE = 'route';
-
-    /**
-     * @var Dot<string, mixed[]>|null
-     */
-    protected $dotAnnotatedRequestBody;
-
-
-    public function __clone()
+    public function __construct(ServerRequestInterface $request)
     {
-        parent::__clone();
-        $this->dotAnnotatedRequestBody = null;
+        parent::__construct(
+            $request->getMethod(),
+            $request->getUri(),
+            new Headers($request->getHeaders()),
+            $request->getCookieParams(),
+            $request->getServerParams(),
+            $request->getBody(),
+            $request->getUploadedFiles(),
+        );
+
+        $parsedBody = $request->getParsedBody();
+
+        if ($parsedBody !== null) {
+            $this->parsedBody = $parsedBody;
+        }
+
+        foreach ($request->getAttributes() as $name => $value) {
+            $this->attributes[$name] = $value;
+        }
+
+        // Bridge Slim 4 route to legacy 'route' attribute for backward compatibility.
+        // Slim 3 stored the route in 'route', Slim 4 stores it in '__route__'.
+        // Always override 'route' because test requests may have a pre-set
+        // 'route' attribute with empty arguments.
+        $slimRoute = $request->getAttribute('__route__');
+
+        if ($slimRoute instanceof Route) {
+            $this->attributes['route'] = $slimRoute;
+        }
+
+        $queryParams = $request->getQueryParams();
+
+        if ($queryParams !== []) {
+            $this->queryParams = $queryParams;
+        }
     }
 
 
-    public function getRoute(): Route
+    /**
+     * Get routing results from Slim 4's RouteContext
+     */
+    public function getRoutingResults(): RoutingResults
     {
-        $route = $this->getAttribute(self::ROUTE_ATTRIBUTE);
-        assert($route instanceof Route);
+        return RouteContext::fromRequest($this)->getRoutingResults();
+    }
 
-        return $route;
+
+    /**
+     * Get the matched route.
+     */
+    public function getRoute(): ?Route
+    {
+        $routeContext = RouteContext::fromRequest($this);
+        $route = $routeContext->getRoute();
+
+        // PHPStan: RouteContext::getRoute() returns RouteInterface|null but we need Route|null
+        // At runtime, this will always be Route|null in Slim 4
+        return $route instanceof Route ? $route : null;
     }
 
 
@@ -54,13 +85,9 @@ class Request extends SlimRequest implements RequestInterface
      */
     public function getRouteArguments(): array
     {
-        $routeInfoAttribute = $this->getAttribute(self::ROUTE_INFO_ATTRIBUTE);
+        $routingResults = $this->getRoutingResults();
 
-        if (is_array($routeInfoAttribute) && isset($routeInfoAttribute[2])) {
-            return $routeInfoAttribute[2];
-        }
-
-        return [];
+        return $routingResults->getRouteArguments();
     }
 
 
@@ -99,161 +126,25 @@ class Request extends SlimRequest implements RequestInterface
 
 
     /**
-     * @return mixed
+     * @param mixed|null $default
      *
-     * @throws RequestFieldMissingException
-     */
-    public function getField(string $fieldName)
-    {
-        if ($this->hasField($fieldName)) {
-            return $this->getDotAnnotatedRequestBody()->get($fieldName);
-        }
-
-        throw RequestFieldMissingException::create($fieldName);
-    }
-
-
-    /**
-     * @param mixed $default
-     *
-     * @return mixed
-     */
-    public function findField(string $fieldName, $default = null)
-    {
-        return $this->getDotAnnotatedRequestBody()->get($fieldName, $default);
-    }
-
-
-    public function hasField(string $fieldName): bool
-    {
-        return $this->getDotAnnotatedRequestBody()->has($fieldName);
-    }
-
-
-    /**
      * @return string|string[]|null
      */
-    public function findQueryParam(string $key, ?string $default = null)
+    public function getQueryParam(string $key, $default = null)
     {
-        return $this->getQueryParam($key) ?? $default;
+        $params = $this->getQueryParams();
+
+        return $params[$key] ?? $default;
     }
 
 
     /**
-     * @return string|string[]
-     *
-     * @throws QueryParamMissingException
-     */
-    public function getQueryParamStrict(string $key)
-    {
-        $value = $this->findQueryParam($key);
-
-        if ($value !== null) {
-            return $value;
-        }
-
-        throw QueryParamMissingException::create($key);
-    }
-
-
-    public function findQueryParamAsString(string $key, ?string $default = null): ?string
-    {
-        $queryParam = $this->getQueryParam($key);
-        assert(!is_array($queryParam));
-
-        return $queryParam ?? $default;
-    }
-
-
-    /**
-     * @throws QueryParamMissingException
-     */
-    public function getQueryParamAsString(string $key): string
-    {
-        $value = $this->findQueryParamAsString($key);
-
-        if ($value !== null) {
-            return $value;
-        }
-
-        throw QueryParamMissingException::create($key);
-    }
-
-
-    public function hasQueryParam(string $key): bool
-    {
-        return array_key_exists($key, $this->getQueryParams());
-    }
-
-
-    /**
-     * @throws QueryParamMissingException
-     * @throws InvalidArgumentException
-     */
-    public function getDateTimeQueryParam(string $field, string $format = DateTime::ATOM): DateTimeImmutable
-    {
-        $datetimeParam = $this->getQueryParamStrict($field);
-        assert(is_string($datetimeParam));
-
-        $dateTime = DateTimeImmutable::createFromFormat($format, $datetimeParam);
-
-        if ($dateTime === false) {
-            throw new InvalidArgumentException(sprintf('Field %s is not in %s format', $field, $format));
-        }
-
-        return $dateTime;
-    }
-
-
-    public function isHtml(): bool
-    {
-        $acceptHeader = $this->getHeaderLine('accept');
-
-        return str_contains($acceptHeader, 'html');
-    }
-
-
-    public function hasAttribute(string $name): bool
-    {
-        return array_key_exists($name, $this->getAttributes());
-    }
-
-
-    /**
-     * @param mixed $default
+     * @param mixed|null $default
      *
      * @return mixed
      */
-    public function findAttribute(string $name, $default = null)
+    public function getServerParam(string $key, $default = null)
     {
-        return $this->getAttribute($name, $default);
-    }
-
-
-    /**
-     * @return mixed
-     *
-     * @throws RequestAttributeMissingException
-     */
-    public function getAttributeStrict(string $name)
-    {
-        if ($this->hasAttribute($name)) {
-            return $this->getAttribute($name);
-        }
-
-        throw RequestAttributeMissingException::create($name);
-    }
-
-
-    /**
-     * @return Dot<string, mixed[]>
-     */
-    private function getDotAnnotatedRequestBody(): Dot
-    {
-        if ($this->dotAnnotatedRequestBody === null) {
-            $this->dotAnnotatedRequestBody = new Dot($this->getParsedBodyAsArray());
-        }
-
-        return $this->dotAnnotatedRequestBody;
+        return $this->getServerParams()[$key] ?? $default;
     }
 }

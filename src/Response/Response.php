@@ -2,27 +2,14 @@
 
 namespace BrandEmbassy\Slim\Response;
 
-use Nette\Utils\Json;
-use Nette\Utils\JsonException;
-use Slim\Http\Response as SlimResponse;
-use function assert;
-use function is_array;
+use Slim\Psr7\Response as SlimResponse;
 
 /**
  * @final
+ *
+ * Extends Slim 4's PSR-7 Response.
+ * All PSR-7 methods are inherited from the parent.
  */
 class Response extends SlimResponse implements ResponseInterface
 {
-    /**
-     * @return mixed[]
-     *
-     * @throws JsonException
-     */
-    public function getParsedBodyAsArray(): array
-    {
-        $parsedBody = Json::decode((string)$this->getBody(), Json::FORCE_ARRAY);
-        assert(is_array($parsedBody));
-
-        return $parsedBody;
-    }
 }

@@ -2,6 +2,8 @@
 
 namespace BrandEmbassy\Slim\Route;
 
+use Psr\Http\Server\MiddlewareInterface;
+
 /**
  * @final
  */
@@ -33,7 +35,7 @@ class RouteDefinition
     private $route;
 
     /**
-     * @var callable[]
+     * @var MiddlewareInterface[]
      */
     private array $middlewares;
 
@@ -48,7 +50,7 @@ class RouteDefinition
 
 
     /**
-     * @param callable[] $middlewares
+     * @param MiddlewareInterface[] $middlewares
      * @param string[] $middlewareGroups
      */
     public function __construct(
@@ -81,7 +83,7 @@ class RouteDefinition
 
 
     /**
-     * @return callable[]
+     * @return MiddlewareInterface[]
      */
     public function getMiddlewares(): array
     {

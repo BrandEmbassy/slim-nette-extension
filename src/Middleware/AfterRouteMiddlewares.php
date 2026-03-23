@@ -2,13 +2,15 @@
 
 namespace BrandEmbassy\Slim\Middleware;
 
+use Psr\Http\Server\MiddlewareInterface;
+
 /**
  * @final
  */
 class AfterRouteMiddlewares
 {
     /**
-     * @var callable[]
+     * @var MiddlewareInterface[]
      */
     private array $middlewares;
 
@@ -23,7 +25,7 @@ class AfterRouteMiddlewares
 
 
     /**
-     * @return callable[]
+     * @return MiddlewareInterface[]
      */
     public function getMiddlewares(): array
     {

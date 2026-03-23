@@ -4,6 +4,7 @@ namespace BrandEmbassyTest\Slim\Sample;
 
 use BrandEmbassy\Slim\ErrorHandler;
 use BrandEmbassy\Slim\Request\RequestInterface;
+use BrandEmbassyTest\Slim\Tools\ResponseCreatorTestTool;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use Throwable;
 
@@ -17,6 +18,6 @@ class NotFoundHandler implements ErrorHandler
         ResponseInterface $response,
         ?Throwable $exception = null
     ): ResponseInterface {
-        return $response->withJson(['error' => 'Sample NotFoundHandler here!'], 404);
+        return ResponseCreatorTestTool::createJsonResponse($response, ['error' => 'Sample NotFoundHandler here!'], 404);
     }
 }

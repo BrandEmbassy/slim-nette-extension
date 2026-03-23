@@ -4,6 +4,7 @@ namespace BrandEmbassyTest\Slim\Sample;
 
 use BrandEmbassy\Slim\Middleware\Middleware;
 use BrandEmbassy\Slim\Request\RequestInterface;
+use BrandEmbassyTest\Slim\Tools\ResponseCreatorTestTool;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 
 /**
@@ -19,7 +20,7 @@ class GoldenKeyAuthMiddleware implements Middleware
         $token = $request->getHeaderLine('X-Api-Key');
 
         if ($token !== self::ACCESS_TOKEN) {
-            return $response->withJson(['error' => 'YOU SHALL NOT PASS!'], 401);
+            return ResponseCreatorTestTool::createJsonResponse($response, ['error' => 'YOU SHALL NOT PASS!'], 401);
         }
 
         return $next($request, $response);

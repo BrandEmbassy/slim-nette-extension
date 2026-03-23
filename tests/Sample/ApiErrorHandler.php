@@ -4,6 +4,7 @@ namespace BrandEmbassyTest\Slim\Sample;
 
 use BrandEmbassy\Slim\ErrorHandler;
 use BrandEmbassy\Slim\Request\RequestInterface;
+use BrandEmbassyTest\Slim\Tools\ResponseCreatorTestTool;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use Throwable;
 
@@ -21,6 +22,6 @@ class ApiErrorHandler implements ErrorHandler
             ? $exception->getMessage()
             : 'Unknown error.';
 
-        return $response->withJson(['error' => $error], 500);
+        return ResponseCreatorTestTool::createJsonResponse($response, ['error' => $error], 500);
     }
 }

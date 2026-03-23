@@ -4,8 +4,6 @@ namespace BrandEmbassy\Slim\Route;
 
 use BrandEmbassy\Slim\DI\ServiceProvider;
 use BrandEmbassy\Slim\Middleware\MiddlewareFactory;
-use BrandEmbassy\Slim\Request\RequestInterface;
-use BrandEmbassy\Slim\Response\ResponseInterface;
 use LogicException;
 use Nette\DI\Container;
 
@@ -33,16 +31,8 @@ class RouteDefinitionFactory
      */
     public function create(string $method, array $routeDefinitionData): RouteDefinition
     {
-        $route = function (
-            RequestInterface $request,
-            ResponseInterface $response
-        ) use (
-            $routeDefinitionData
-        ): ResponseInterface {
-            $route = $this->getRoute($routeDefinitionData[RouteDefinition::SERVICE]);
-
-            return $route($request, $response);
-        };
+        $route = $this->getRoute($routeDefinitionData[RouteDefinition::SERVICE]);
+        $routeHandler = new LegacyRouteAdapter($route);
 
         $middlewares = $this->middlewareFactory->createFromIdentifiers(
             $routeDefinitionData[RouteDefinition::MIDDLEWARES],
@@ -50,7 +40,7 @@ class RouteDefinitionFactory
 
         return new RouteDefinition(
             $method,
-            $route,
+            $routeHandler,
             $middlewares,
             $routeDefinitionData[RouteDefinition::MIDDLEWARE_GROUPS],
             $routeDefinitionData[RouteDefinition::NAME],
