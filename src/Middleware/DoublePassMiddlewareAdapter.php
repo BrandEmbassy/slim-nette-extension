@@ -6,7 +6,9 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use RuntimeException;
 use Slim\Psr7\Response;
+use Slim\Routing\RouteContext;
 
 /**
  * @final
@@ -30,9 +32,34 @@ class DoublePassMiddlewareAdapter implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        $request = self::copyRouteArgumentsToAttributes($request);
+
         $response = new Response();
         $next = new LegacyNextHandler($handler);
 
         return ($this->middleware)($request, $response, $next);
+    }
+
+
+    /**
+     * In Slim 4, route arguments are stored in RoutingResults (set by RoutingMiddleware),
+     * not as direct request attributes. Legacy middleware expects route arguments
+     * to be accessible via $request->getAttribute('argName'). This method bridges
+     * that gap by copying route arguments to direct request attributes.
+     */
+    private static function copyRouteArgumentsToAttributes(ServerRequestInterface $request): ServerRequestInterface
+    {
+        try {
+            $routeContext = RouteContext::fromRequest($request);
+            $routingResults = $routeContext->getRoutingResults();
+
+            foreach ($routingResults->getRouteArguments() as $name => $value) {
+                $request = $request->withAttribute($name, $value);
+            }
+        } catch (RuntimeException) {
+            // RouteContext not available yet (before routing middleware runs)
+        }
+
+        return $request;
     }
 }
