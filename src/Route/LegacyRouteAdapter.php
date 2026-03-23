@@ -2,16 +2,13 @@
 
 namespace BrandEmbassy\Slim\Route;
 
-use BrandEmbassy\Slim\Request\Request;
-use BrandEmbassy\Slim\Response\Response;
-use BrandEmbassy\Slim\Response\ResponseInterface;
-use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * @final
  *
- * Adapts a legacy Route callable (RequestInterface, ResponseInterface)
+ * Adapts a legacy Route callable (ServerRequestInterface, ResponseInterface)
  * to Slim 4's route handler signature (ServerRequestInterface, ResponseInterface, args).
  */
 class LegacyRouteAdapter
@@ -29,16 +26,13 @@ class LegacyRouteAdapter
      * @param array<string, string> $args
      */
     public function __invoke(
-        ServerRequestInterface $psrRequest,
-        PsrResponseInterface $psrResponse,
+        ServerRequestInterface $request,
+        ResponseInterface $response,
         array $args,
-    ): PsrResponseInterface {
+    ): ResponseInterface {
         foreach ($args as $name => $value) {
-            $psrRequest = $psrRequest->withAttribute($name, $value);
+            $request = $request->withAttribute($name, $value);
         }
-
-        $request = new Request($psrRequest);
-        $response = $psrResponse instanceof ResponseInterface ? $psrResponse : new Response();
 
         return ($this->route)($request, $response);
     }

@@ -22,8 +22,6 @@ parameters:
             # here because it would couple these files to the concrete container choice.
             message: '#does not specify its types: TContainerInterface#'
             paths:
-                - src/Request/Request.php
-                - src/Request/RequestInterface.php
                 - src/Route/RouteRegister.php
                 - src/SlimApp.php
                 - src/SlimApplicationFactory.php

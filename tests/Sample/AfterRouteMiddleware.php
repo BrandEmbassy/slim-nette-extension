@@ -3,9 +3,9 @@
 namespace BrandEmbassyTest\Slim\Sample;
 
 use BrandEmbassy\Slim\Middleware\Middleware;
-use BrandEmbassy\Slim\Request\RequestInterface;
-use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassyTest\Slim\MiddlewareInvocationCounter;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * @final
@@ -15,7 +15,7 @@ class AfterRouteMiddleware implements Middleware
     public const HEADER_NAME = 'after-route-middleware';
 
 
-    public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next): ResponseInterface
+    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next): ResponseInterface
     {
         $responseWithCounterHeader = MiddlewareInvocationCounter::invoke(self::HEADER_NAME, $response);
 

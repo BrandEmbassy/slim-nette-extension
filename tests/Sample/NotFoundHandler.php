@@ -3,9 +3,10 @@
 namespace BrandEmbassyTest\Slim\Sample;
 
 use BrandEmbassy\Slim\ErrorHandler;
-use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassyTest\Slim\Tools\ResponseCreatorTestTool;
-use BrandEmbassy\Slim\Response\ResponseInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Slim\Psr7\Response;
 use Throwable;
 
 /**
@@ -14,10 +15,12 @@ use Throwable;
 class NotFoundHandler implements ErrorHandler
 {
     public function __invoke(
-        RequestInterface $request,
-        ResponseInterface $response,
-        ?Throwable $exception = null
+        ServerRequestInterface $request,
+        Throwable $exception,
+        bool $displayErrorDetails,
+        bool $logErrors,
+        bool $logErrorDetails,
     ): ResponseInterface {
-        return ResponseCreatorTestTool::createJsonResponse($response, ['error' => 'Sample NotFoundHandler here!'], 404);
+        return ResponseCreatorTestTool::createJsonResponse(new Response(), ['error' => 'Sample NotFoundHandler here!'], 404);
     }
 }

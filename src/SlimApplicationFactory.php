@@ -8,6 +8,8 @@ use BrandEmbassy\Slim\Route\OnlyNecessaryRoutesProvider;
 use BrandEmbassy\Slim\Route\RouteRegister;
 use LogicException;
 use Nette\DI\Container;
+use Slim\Exception\HttpMethodNotAllowedException;
+use Slim\Exception\HttpNotFoundException;
 use Slim\Interfaces\RouteCollectorProxyInterface;
 use Slim\Psr7\Factory\ResponseFactory;
 use function apcu_enabled;
@@ -152,7 +154,18 @@ class SlimApplicationFactory
 
         $handlers = $this->resolveHandlers();
         $errorMiddleware = $slimApp->addErrorMiddleware(true, true, true);
-        $errorMiddleware->setDefaultErrorHandler(new ErrorHandlerBridge($handlers));
+
+        if (isset($handlers['errorHandler'])) {
+            $errorMiddleware->setDefaultErrorHandler($handlers['errorHandler']);
+        }
+
+        if (isset($handlers['notFoundHandler'])) {
+            $errorMiddleware->setErrorHandler(HttpNotFoundException::class, $handlers['notFoundHandler']);
+        }
+
+        if (isset($handlers['notAllowedHandler'])) {
+            $errorMiddleware->setErrorHandler(HttpMethodNotAllowedException::class, $handlers['notAllowedHandler']);
+        }
 
         foreach ($this->configuration[self::BEFORE_REQUEST_MIDDLEWARES] as $middlewareIdentifier) {
             $slimApp->add($this->middlewareFactory->createFromIdentifier($middlewareIdentifier));

@@ -2,8 +2,8 @@
 
 namespace BrandEmbassyTest\Slim\Tools;
 
-use BrandEmbassy\Slim\Response\ResponseInterface;
 use Nette\Utils\Json;
+use Psr\Http\Message\ResponseInterface;
 use Slim\Psr7\Factory\StreamFactory;
 
 /**

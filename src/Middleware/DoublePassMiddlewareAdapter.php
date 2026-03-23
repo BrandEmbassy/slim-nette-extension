@@ -2,12 +2,11 @@
 
 namespace BrandEmbassy\Slim\Middleware;
 
-use BrandEmbassy\Slim\Request\Request;
-use BrandEmbassy\Slim\Response\Response;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Slim\Psr7\Response;
 
 /**
  * @final
@@ -18,7 +17,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 class DoublePassMiddlewareAdapter implements MiddlewareInterface
 {
     /**
-     * @var callable(Request, Response, callable): ResponseInterface
+     * @var callable(ServerRequestInterface, ResponseInterface, callable): ResponseInterface
      */
     private $middleware;
 
@@ -31,10 +30,9 @@ class DoublePassMiddlewareAdapter implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $wrappedRequest = new Request($request);
         $response = new Response();
         $next = new LegacyNextHandler($handler);
 
-        return ($this->middleware)($wrappedRequest, $response, $next);
+        return ($this->middleware)($request, $response, $next);
     }
 }
