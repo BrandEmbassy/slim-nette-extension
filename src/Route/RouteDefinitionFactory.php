@@ -31,8 +31,9 @@ class RouteDefinitionFactory
      */
     public function create(string $method, array $routeDefinitionData): RouteDefinition
     {
-        $route = $this->getRoute($routeDefinitionData[RouteDefinition::SERVICE]);
-        $routeHandler = new LegacyRouteAdapter($route);
+        $serviceIdentifier = $routeDefinitionData[RouteDefinition::SERVICE];
+        $lazyRoute = new LazyRoute(fn(): Route => $this->getRoute($serviceIdentifier));
+        $routeHandler = new LegacyRouteAdapter($lazyRoute);
 
         $middlewares = $this->middlewareFactory->createFromIdentifiers(
             $routeDefinitionData[RouteDefinition::MIDDLEWARES],
