@@ -160,11 +160,11 @@ class SlimApplicationFactory
         }
 
         if (isset($handlers['notFoundHandler'])) {
-            $errorMiddleware->setErrorHandler(HttpNotFoundException::class, $handlers['notFoundHandler']);
+            $errorMiddleware->setErrorHandler(HttpNotFoundException::class, $handlers['notFoundHandler'], true);
         }
 
         if (isset($handlers['notAllowedHandler'])) {
-            $errorMiddleware->setErrorHandler(HttpMethodNotAllowedException::class, $handlers['notAllowedHandler']);
+            $errorMiddleware->setErrorHandler(HttpMethodNotAllowedException::class, $handlers['notAllowedHandler'], true);
         }
 
         foreach ($this->configuration[self::BEFORE_REQUEST_MIDDLEWARES] as $middlewareIdentifier) {
