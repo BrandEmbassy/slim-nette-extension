@@ -4,6 +4,8 @@ namespace BrandEmbassy\Slim\Middleware;
 
 use BrandEmbassy\Slim\DI\ServiceProvider;
 use Nette\DI\Container;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use function array_map;
 use function assert;
@@ -25,10 +27,23 @@ class MiddlewareFactory
 
     public function createFromIdentifier(string $middlewareIdentifier): MiddlewareInterface
     {
-        $middleware = ServiceProvider::getService($this->container, $middlewareIdentifier);
-        assert(is_callable($middleware));
+        $container = $this->container;
 
-        return new DoublePassMiddlewareAdapter($middleware);
+        return new DoublePassMiddlewareAdapter(
+            static function (
+                ServerRequestInterface $request,
+                ResponseInterface $response,
+                callable $next,
+            ) use (
+                $middlewareIdentifier,
+                $container
+            ): ResponseInterface {
+                $middleware = ServiceProvider::getService($container, $middlewareIdentifier);
+                assert(is_callable($middleware));
+
+                return $middleware($request, $response, $next);
+            },
+        );
     }
 
 
