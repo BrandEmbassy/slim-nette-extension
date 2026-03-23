@@ -2,13 +2,28 @@
 
 namespace BrandEmbassy\Slim;
 
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\App;
+use function assert;
 use function reset;
 
 class SlimApp extends App
 {
+    /**
+     * We always construct SlimApp with a container, so this override
+     * narrows the nullable return type from the parent.
+     */
+    public function getContainer(): ContainerInterface
+    {
+        $container = parent::getContainer();
+        assert($container !== null);
+
+        return $container;
+    }
+
+
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $response = parent::handle($request);

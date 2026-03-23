@@ -145,8 +145,6 @@ class Request extends SlimRequest implements RequestInterface
      */
     public function getServerParam(string $key, $default = null)
     {
-        $serverParams = $this->getServerParams();
-
-        return $serverParams[$key] ?? $default;
+        return $this->getServerParams()[$key] ?? $default;
     }
 }
