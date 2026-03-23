@@ -2,8 +2,9 @@
 
 namespace BrandEmbassy\Slim\Middleware;
 
+use Psr\Http\Server\MiddlewareInterface;
 use function array_map;
-use function array_merge_recursive;
+use function array_merge;
 
 /**
  * @final
@@ -11,7 +12,7 @@ use function array_merge_recursive;
 class MiddlewareGroups
 {
     /**
-     * @var array<string, callable[]>
+     * @var array<string, MiddlewareInterface[]>
      */
     private array $groups;
 
@@ -29,7 +30,7 @@ class MiddlewareGroups
 
 
     /**
-     * @return callable[]
+     * @return MiddlewareInterface[]
      */
     public function getMiddlewares(string $groupName): array
     {
@@ -40,7 +41,7 @@ class MiddlewareGroups
     /**
      * @param string[] $groupNames
      *
-     * @return callable[]
+     * @return MiddlewareInterface[]
      */
     public function getMiddlewaresForMultipleGroups(array $groupNames): array
     {
@@ -53,6 +54,6 @@ class MiddlewareGroups
             $groupNames,
         );
 
-        return array_merge_recursive(...$groupsToMerge);
+        return array_merge(...$groupsToMerge);
     }
 }
