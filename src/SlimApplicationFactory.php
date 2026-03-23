@@ -8,7 +8,10 @@ use BrandEmbassy\Slim\Route\OnlyNecessaryRoutesProvider;
 use BrandEmbassy\Slim\Route\RouteRegister;
 use LogicException;
 use Nette\DI\Container;
+use Slim\Exception\HttpMethodNotAllowedException;
+use Slim\Exception\HttpNotFoundException;
 use Slim\Interfaces\RouteCollectorProxyInterface;
+use Slim\Middleware\ErrorMiddleware;
 use Slim\Psr7\Factory\ResponseFactory;
 use function apcu_enabled;
 use function assert;
@@ -45,7 +48,6 @@ class SlimApplicationFactory
         'notFoundHandler',
         'notAllowedHandler',
         'errorHandler',
-        'phpErrorHandler',
     ];
 
     /**
@@ -125,15 +127,13 @@ class SlimApplicationFactory
             $this->registerApi($slimApp, $apiNamespace, $routes, $detectTyposInRouteConfiguration);
         }
 
-        $handlers = $this->resolveHandlers();
-
         // Slim 4 uses a LIFO middleware stack: middleware added later runs earlier on request.
         // Routing middleware resolves the matched route before route handlers execute.
         $slimApp->addRoutingMiddleware();
 
         // Error middleware wraps everything — catches exceptions from routing and handlers.
         $errorMiddleware = $slimApp->addErrorMiddleware(true, true, true);
-        $errorMiddleware->setDefaultErrorHandler(new ErrorHandlerBridge($handlers));
+        $this->registerErrorHandlers($errorMiddleware);
 
         foreach ($this->configuration[self::BEFORE_REQUEST_MIDDLEWARES] as $middlewareIdentifier) {
             $slimApp->add($this->middlewareFactory->createFromIdentifier($middlewareIdentifier));
@@ -143,21 +143,28 @@ class SlimApplicationFactory
     }
 
 
-    /**
-     * @return array<string, callable>
-     */
-    private function resolveHandlers(): array
+    private function registerErrorHandlers(ErrorMiddleware $errorMiddleware): void
     {
-        $resolved = [];
-
         foreach ($this->configuration[self::HANDLERS] as $handlerName => $handlerClass) {
             $this->validateHandlerName($handlerName);
             $handlerService = ServiceProvider::getService($this->container, $handlerClass);
             assert(is_callable($handlerService));
-            $resolved[$handlerName] = $handlerService;
-        }
 
-        return $resolved;
+            match ($handlerName) {
+                'errorHandler' => $errorMiddleware->setDefaultErrorHandler($handlerService),
+                'notFoundHandler' => $errorMiddleware->setErrorHandler(
+                    HttpNotFoundException::class,
+                    $handlerService,
+                ),
+                'notAllowedHandler' => $errorMiddleware->setErrorHandler(
+                    HttpMethodNotAllowedException::class,
+                    $handlerService,
+                ),
+                default =>
+
+                throw new LogicException('Unexpected handler name: ' . $handlerName),
+            };
+        }
     }
 
 

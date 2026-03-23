@@ -3,11 +3,10 @@
 namespace BrandEmbassy\Slim\Middleware;
 
 use BrandEmbassy\Slim\DI\ServiceProvider;
+use LogicException;
 use Nette\DI\Container;
 use Psr\Http\Server\MiddlewareInterface;
 use function array_map;
-use function assert;
-use function is_callable;
 
 /**
  * @final
@@ -26,9 +25,14 @@ class MiddlewareFactory
     public function createFromIdentifier(string $middlewareIdentifier): MiddlewareInterface
     {
         $middleware = ServiceProvider::getService($this->container, $middlewareIdentifier);
-        assert(is_callable($middleware));
 
-        return new DoublePassMiddlewareAdapter($middleware);
+        if ($middleware instanceof MiddlewareInterface) {
+            return $middleware;
+        }
+
+        throw new LogicException(
+            'Middleware service "' . $middlewareIdentifier . '" must implement ' . MiddlewareInterface::class,
+        );
     }
 
 

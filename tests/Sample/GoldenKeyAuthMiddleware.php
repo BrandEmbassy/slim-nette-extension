@@ -2,27 +2,28 @@
 
 namespace BrandEmbassyTest\Slim\Sample;
 
-use BrandEmbassy\Slim\Middleware\Middleware;
-use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassyTest\Slim\Tools\ResponseCreatorTestTool;
-use BrandEmbassy\Slim\Response\ResponseInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 /**
  * @final
  */
-class GoldenKeyAuthMiddleware implements Middleware
+class GoldenKeyAuthMiddleware implements MiddlewareInterface
 {
     public const ACCESS_TOKEN = 'uber-secret-token-made-of-pure-gold';
 
 
-    public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next): ResponseInterface
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $token = $request->getHeaderLine('X-Api-Key');
 
         if ($token !== self::ACCESS_TOKEN) {
-            return ResponseCreatorTestTool::createJsonResponse($response, ['error' => 'YOU SHALL NOT PASS!'], 401);
+            return ResponseCreatorTestTool::createJsonResponseFromScratch(['error' => 'YOU SHALL NOT PASS!'], 401);
         }
 
-        return $next($request, $response);
+        return $handler->handle($request);
     }
 }

@@ -2,17 +2,19 @@
 
 namespace BrandEmbassyTest\Slim\Sample;
 
-use BrandEmbassy\Slim\Request\RequestInterface;
-use BrandEmbassy\Slim\Response\ResponseInterface;
-use BrandEmbassy\Slim\Route\Route;
 use LogicException;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * @final
  */
-class ErrorThrowingRoute implements Route
+class ErrorThrowingRoute
 {
-    public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface
+    /**
+     * @param array<string, string> $args
+     */
+    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
         throw new LogicException("Error or not to error, that's the question!");
     }

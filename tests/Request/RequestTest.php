@@ -2,9 +2,10 @@
 
 namespace BrandEmbassyTest\Slim\Request;
 
-use BrandEmbassy\Slim\Request\RequestInterface;
+use Slim\Psr7\Response;
+use Psr\Http\Message\ServerRequestInterface;
+use BrandEmbassy\Slim\Request\Request;
 use BrandEmbassy\Slim\SlimApplicationFactory;
-use BrandEmbassy\Slim\Response\Response;
 use BrandEmbassyTest\Slim\Sample\CreateChannelUserRoute;
 use BrandEmbassyTest\Slim\SlimAppTester;
 use PHPUnit\Framework\Assert;
@@ -20,9 +21,8 @@ class RequestTest extends TestCase
 
     public function testGetRoute(): void
     {
-        $request = $this->getDispatchedRequest('?foo=bar&two=2&null=null&array[]=item1&array[]=item2');
-        $response = new Response();
-        $response = $response->withHeader('hasBeenCalled', 'true');
+        $serverRequest = $this->getDispatchedRequest('?foo=bar&two=2&null=null&array[]=item1&array[]=item2');
+        $request = new Request($serverRequest);
 
         $route = $request->getRoute();
         assert($route !== null, 'Route should be set after dispatching');
@@ -31,18 +31,19 @@ class RequestTest extends TestCase
         assert(is_callable($callable), 'Route callable must be callable');
 
         $responseFromRoute = $callable(
-            $request,
-            $response,
+            $serverRequest,
+            new Response(),
             $request->getRouteArguments()
         );
 
-        Assert::assertSame(['true'], $responseFromRoute->getHeader('hasBeenCalled'));
+        Assert::assertSame(200, $responseFromRoute->getStatusCode());
     }
 
 
     public function testRestResolvingAttributes(): void
     {
-        $request = $this->getDispatchedRequest();
+        $serverRequest = $this->getDispatchedRequest();
+        $request = new Request($serverRequest);
 
         Assert::assertSame('123', $request->getRouteArgument('channelId'));
         Assert::assertTrue($request->hasRouteArgument('channelId'));
@@ -53,7 +54,7 @@ class RequestTest extends TestCase
     }
 
 
-    private function getDispatchedRequest(string $queryString = ''): RequestInterface
+    private function getDispatchedRequest(string $queryString = ''): ServerRequestInterface
     {
         $this->prepareEnvironment($queryString);
 

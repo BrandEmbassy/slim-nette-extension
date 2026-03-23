@@ -2,8 +2,6 @@
 
 namespace BrandEmbassyTest\Slim;
 
-use Psr\Http\Message\ResponseInterface;
-
 /**
  * @final
  */
@@ -12,9 +10,9 @@ class MiddlewareInvocationCounter
     private static int $counter = 0;
 
 
-    public static function invoke(string $headerName, ResponseInterface $response): ResponseInterface
+    public static function getNextValue(): string
     {
-        return $response->withHeader($headerName, 'invoked-' . self::$counter++);
+        return 'invoked-' . self::$counter++;
     }
 
 

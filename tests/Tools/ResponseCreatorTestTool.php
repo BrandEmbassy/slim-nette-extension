@@ -2,9 +2,10 @@
 
 namespace BrandEmbassyTest\Slim\Tools;
 
-use BrandEmbassy\Slim\Response\ResponseInterface;
 use Nette\Utils\Json;
+use Psr\Http\Message\ResponseInterface;
 use Slim\Psr7\Factory\StreamFactory;
+use Slim\Psr7\Response;
 
 /**
  * @final
@@ -26,5 +27,16 @@ class ResponseCreatorTestTool
             ->withBody($body)
             ->withHeader('Content-Type', 'application/json')
             ->withStatus($status);
+    }
+
+
+    /**
+     * @param mixed[] $data
+     */
+    public static function createJsonResponseFromScratch(
+        array $data,
+        int $status,
+    ): ResponseInterface {
+        return self::createJsonResponse(new Response(), $data, $status);
     }
 }

@@ -2,19 +2,26 @@
 
 namespace BrandEmbassyTest\Slim\Sample;
 
-use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassyTest\Slim\Tools\ResponseCreatorTestTool;
-use BrandEmbassy\Slim\Response\ResponseInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Throwable;
 
 /**
- * Intentionally not extending ErrorHandler. Slim does not call this with 3rd param at __invoke method.
- *
  * @final
  */
 class NotAllowedHandler
 {
-    public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface
-    {
-        return ResponseCreatorTestTool::createJsonResponse($response, ['error' => 'Sample NotAllowedHandler here!'], 405);
+    public function __invoke(
+        ServerRequestInterface $request,
+        Throwable $exception,
+        bool $displayErrorDetails,
+        bool $logErrors,
+        bool $logErrorDetails,
+    ): ResponseInterface {
+        return ResponseCreatorTestTool::createJsonResponseFromScratch(
+            ['error' => 'Sample NotAllowedHandler here!'],
+            405,
+        );
     }
 }

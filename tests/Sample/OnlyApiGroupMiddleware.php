@@ -2,23 +2,25 @@
 
 namespace BrandEmbassyTest\Slim\Sample;
 
-use BrandEmbassy\Slim\Middleware\Middleware;
-use BrandEmbassy\Slim\Request\RequestInterface;
-use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassyTest\Slim\MiddlewareInvocationCounter;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 /**
  * @final
  */
-class OnlyApiGroupMiddleware implements Middleware
+class OnlyApiGroupMiddleware implements MiddlewareInterface
 {
     public const HEADER_NAME = 'only-api-group-middleware';
 
 
-    public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next): ResponseInterface
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $newResponse = MiddlewareInvocationCounter::invoke(self::HEADER_NAME, $response);
+        $counterValue = MiddlewareInvocationCounter::getNextValue();
+        $response = $handler->handle($request);
 
-        return $next($request, $newResponse);
+        return $response->withHeader(self::HEADER_NAME, $counterValue);
     }
 }

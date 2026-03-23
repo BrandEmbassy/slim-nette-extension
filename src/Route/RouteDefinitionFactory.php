@@ -6,6 +6,7 @@ use BrandEmbassy\Slim\DI\ServiceProvider;
 use BrandEmbassy\Slim\Middleware\MiddlewareFactory;
 use LogicException;
 use Nette\DI\Container;
+use function is_callable;
 
 /**
  * @final
@@ -32,7 +33,6 @@ class RouteDefinitionFactory
     public function create(string $method, array $routeDefinitionData): RouteDefinition
     {
         $route = $this->getRoute($routeDefinitionData[RouteDefinition::SERVICE]);
-        $routeHandler = new LegacyRouteAdapter($route);
 
         $middlewares = $this->middlewareFactory->createFromIdentifiers(
             $routeDefinitionData[RouteDefinition::MIDDLEWARES],
@@ -40,7 +40,7 @@ class RouteDefinitionFactory
 
         return new RouteDefinition(
             $method,
-            $routeHandler,
+            $route,
             $middlewares,
             $routeDefinitionData[RouteDefinition::MIDDLEWARE_GROUPS],
             $routeDefinitionData[RouteDefinition::NAME],
@@ -49,14 +49,14 @@ class RouteDefinitionFactory
     }
 
 
-    private function getRoute(string $routeIdentifier): Route
+    private function getRoute(string $routeIdentifier): callable
     {
         $route = ServiceProvider::getService($this->container, $routeIdentifier);
 
-        if ($route instanceof Route) {
+        if (is_callable($route)) {
             return $route;
         }
 
-        throw new LogicException('Defined route service should implement ' . Route::class);
+        throw new LogicException('Defined route service must be callable');
     }
 }

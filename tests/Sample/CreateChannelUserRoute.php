@@ -2,20 +2,22 @@
 
 namespace BrandEmbassyTest\Slim\Sample;
 
-use BrandEmbassy\Slim\Request\RequestInterface;
-use BrandEmbassy\Slim\Response\ResponseInterface;
-use BrandEmbassy\Slim\Route\Route;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use function assert;
 
 /**
  * @final
  */
-class CreateChannelUserRoute implements Route
+class CreateChannelUserRoute
 {
-    private ?RequestInterface $request = null;
+    private ?ServerRequestInterface $request = null;
 
 
-    public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface
+    /**
+     * @param array<string, string> $args
+     */
+    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
         $this->request = $request;
 
@@ -23,10 +25,10 @@ class CreateChannelUserRoute implements Route
     }
 
 
-    public function getRequest(): RequestInterface
+    public function getRequest(): ServerRequestInterface
     {
         $request = $this->request;
-        assert($request instanceof RequestInterface);
+        assert($request instanceof ServerRequestInterface);
 
         return $request;
     }

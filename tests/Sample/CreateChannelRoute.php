@@ -2,17 +2,19 @@
 
 namespace BrandEmbassyTest\Slim\Sample;
 
-use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassyTest\Slim\Tools\ResponseCreatorTestTool;
-use BrandEmbassy\Slim\Response\ResponseInterface;
-use BrandEmbassy\Slim\Route\Route;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * @final
  */
-class CreateChannelRoute implements Route
+class CreateChannelRoute
 {
-    public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface
+    /**
+     * @param array<string, string> $args
+     */
+    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
         return ResponseCreatorTestTool::createJsonResponse($response, ['status' => 'created'], 201);
     }
