@@ -22,13 +22,15 @@ class MiddlewareFactoryTest extends TestCase
 {
     public function testMiddlewareIsResolvedLazilyNotDuringCreation(): void
     {
-        $resolveCount = 0;
+        $counter = new class {
+            public int $value = 0;
+        };
 
         $container = $this->createMock(Container::class);
         $container->method('getByName')
             ->with('lazyMiddleware')
-            ->willReturnCallback(static function () use (&$resolveCount): callable {
-                $resolveCount++;
+            ->willReturnCallback(static function () use ($counter): callable {
+                $counter->value++;
 
                 return static function (
                     Request $request,
@@ -43,25 +45,27 @@ class MiddlewareFactoryTest extends TestCase
 
         $middleware = $factory->createFromIdentifier('lazyMiddleware');
 
-        Assert::assertSame(0, $resolveCount, 'Service must NOT be resolved during createFromIdentifier()');
+        Assert::assertSame(0, $counter->value, 'Service must NOT be resolved during createFromIdentifier()');
 
         $request = (new ServerRequestFactory())->createServerRequest('GET', '/test');
         $handler = $this->createMock(RequestHandlerInterface::class);
 
         $middleware->process($request, $handler);
 
-        Assert::assertSame(1, $resolveCount, 'Service must be resolved when middleware processes a request');
+        Assert::assertSame(1, $counter->value, 'Service must be resolved when middleware processes a request');
     }
 
 
     public function testMiddlewareIsResolvedOnEachRequest(): void
     {
-        $resolveCount = 0;
+        $counter = new class {
+            public int $value = 0;
+        };
 
         $container = $this->createMock(Container::class);
         $container->method('getByName')
-            ->willReturnCallback(static function () use (&$resolveCount): callable {
-                $resolveCount++;
+            ->willReturnCallback(static function () use ($counter): callable {
+                $counter->value++;
 
                 return static function (
                     Request $request,
@@ -81,7 +85,7 @@ class MiddlewareFactoryTest extends TestCase
         $middleware->process($request, $handler);
         $middleware->process($request, $handler);
 
-        Assert::assertSame(2, $resolveCount, 'Service must be resolved on each request');
+        Assert::assertSame(2, $counter->value, 'Service must be resolved on each request');
     }
 
 
