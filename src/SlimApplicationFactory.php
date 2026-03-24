@@ -82,6 +82,18 @@ class SlimApplicationFactory
 
     public function create(): SlimApp
     {
+        $slimContainer = new SlimContainer($this->container);
+        $slimApp = new SlimApp(new ResponseFactory(), $slimContainer);
+
+        $this->registerRoutes($slimApp);
+        $this->registerMiddlewares($slimApp);
+
+        return $slimApp;
+    }
+
+
+    private function registerRoutes(SlimApp $slimApp): void
+    {
         $detectTyposInRouteConfiguration = (bool)$this->getSlimSettings(
             SlimSettings::DETECT_TYPOS_IN_ROUTE_CONFIGURATION,
             true,
@@ -104,11 +116,6 @@ class SlimApplicationFactory
             $useApcuCache = false;
         }
 
-        $slimContainer = new SlimContainer($this->container);
-        $psrResponseFactory = new ResponseFactory();
-
-        $slimApp = new SlimApp($psrResponseFactory, $slimContainer);
-
         $routesToRegister = $this->configuration[self::ROUTES];
         if ($registerOnlyNecessaryRoutes) {
             $requestUri = $_SERVER['REQUEST_URI'] ?? null;
@@ -124,12 +131,6 @@ class SlimApplicationFactory
         foreach ($routesToRegister as $apiNamespace => $routes) {
             $this->registerApi($slimApp, $apiNamespace, $routes, $detectTyposInRouteConfiguration);
         }
-
-        $handlers = $this->resolveHandlers();
-
-        $this->registerMiddlewares($slimApp, $handlers);
-
-        return $slimApp;
     }
 
 
@@ -143,14 +144,13 @@ class SlimApplicationFactory
      *   3. Routing (resolves matched route)
      *   4. Body parsing (JSON, XML, form-urlencoded)
      *   5. Route-level middlewares + handler
-     *
-     * @param array<string, callable> $handlers
      */
-    private function registerMiddlewares(SlimApp $slimApp, array $handlers): void
+    private function registerMiddlewares(SlimApp $slimApp): void
     {
         $slimApp->addBodyParsingMiddleware();
         $slimApp->addRoutingMiddleware();
 
+        $handlers = $this->resolveHandlers();
         $errorMiddleware = $slimApp->addErrorMiddleware(true, true, true);
         $errorMiddleware->setDefaultErrorHandler(new ErrorHandlerBridge($handlers));
 
