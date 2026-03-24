@@ -127,22 +127,36 @@ class SlimApplicationFactory
 
         $handlers = $this->resolveHandlers();
 
-        // Slim 4 uses a LIFO middleware stack: middleware added later runs earlier on request.
-        // Body parsing replaces Slim 3's automatic JSON body parsing.
-        $slimApp->addBodyParsingMiddleware();
+        $this->registerMiddlewares($slimApp, $handlers);
 
-        // Routing middleware resolves the matched route before route handlers execute.
+        return $slimApp;
+    }
+
+
+    /**
+     * Registers all middleware in the correct order for Slim 4's LIFO stack.
+     * Last added = first to execute on request (outermost).
+     *
+     * Execution order on request:
+     *   1. beforeRequestMiddlewares (CORS, trace ID, …)
+     *   2. Error handling
+     *   3. Routing (resolves matched route)
+     *   4. Body parsing (JSON, XML, form-urlencoded)
+     *   5. Route-level middlewares + handler
+     *
+     * @param array<string, callable> $handlers
+     */
+    private function registerMiddlewares(SlimApp $slimApp, array $handlers): void
+    {
+        $slimApp->addBodyParsingMiddleware();
         $slimApp->addRoutingMiddleware();
 
-        // Error middleware wraps everything — catches exceptions from routing and handlers.
         $errorMiddleware = $slimApp->addErrorMiddleware(true, true, true);
         $errorMiddleware->setDefaultErrorHandler(new ErrorHandlerBridge($handlers));
 
         foreach ($this->configuration[self::BEFORE_REQUEST_MIDDLEWARES] as $middlewareIdentifier) {
             $slimApp->add($this->middlewareFactory->createFromIdentifier($middlewareIdentifier));
         }
-
-        return $slimApp;
     }
 
 
