@@ -10,8 +10,11 @@ use BrandEmbassyTest\Slim\Sample\GroupMiddleware;
 use BrandEmbassyTest\Slim\Sample\InvokeCounterMiddleware;
 use BrandEmbassyTest\Slim\Sample\OnlyApiGroupMiddleware;
 use BrandEmbassyTest\Slim\Tools\ResponseAssertions;
+use Nette\Utils\Json;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
+use Slim\Psr7\Factory\ServerRequestFactory;
+use Slim\Psr7\Factory\StreamFactory;
 use function count;
 
 /**
@@ -224,6 +227,22 @@ class SlimApplicationFactoryTest extends TestCase
         foreach ($headers as $name => $value) {
             $_SERVER[$name] = $value;
         }
+    }
+
+
+    public function testJsonBodyIsParsedForRouteHandlers(): void
+    {
+        $requestBody = ['status' => 'closed'];
+        $jsonBody = Json::encode($requestBody);
+
+        $request = (new ServerRequestFactory())
+            ->createServerRequest('PUT', '/tests/api/echo-body')
+            ->withHeader('Content-Type', 'application/json')
+            ->withBody((new StreamFactory())->createStream($jsonBody));
+
+        $response = SlimAppTester::runSlimApp(__DIR__ . '/config.neon', $request);
+
+        ResponseAssertions::assertJsonResponseEqualsArray($requestBody, $response, 200);
     }
 
 
