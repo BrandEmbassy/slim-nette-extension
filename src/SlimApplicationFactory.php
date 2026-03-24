@@ -82,6 +82,18 @@ class SlimApplicationFactory
 
     public function create(): SlimApp
     {
+        $slimContainer = new SlimContainer($this->container);
+        $slimApp = new SlimApp(new ResponseFactory(), $slimContainer);
+
+        $this->registerRoutes($slimApp);
+        $this->registerMiddlewares($slimApp);
+
+        return $slimApp;
+    }
+
+
+    private function registerRoutes(SlimApp $slimApp): void
+    {
         $detectTyposInRouteConfiguration = (bool)$this->getSlimSettings(
             SlimSettings::DETECT_TYPOS_IN_ROUTE_CONFIGURATION,
             true,
@@ -104,11 +116,6 @@ class SlimApplicationFactory
             $useApcuCache = false;
         }
 
-        $slimContainer = new SlimContainer($this->container);
-        $psrResponseFactory = new ResponseFactory();
-
-        $slimApp = new SlimApp($psrResponseFactory, $slimContainer);
-
         $routesToRegister = $this->configuration[self::ROUTES];
         if ($registerOnlyNecessaryRoutes) {
             $requestUri = $_SERVER['REQUEST_URI'] ?? null;
@@ -124,22 +131,32 @@ class SlimApplicationFactory
         foreach ($routesToRegister as $apiNamespace => $routes) {
             $this->registerApi($slimApp, $apiNamespace, $routes, $detectTyposInRouteConfiguration);
         }
+    }
 
-        $handlers = $this->resolveHandlers();
 
-        // Slim 4 uses a LIFO middleware stack: middleware added later runs earlier on request.
-        // Routing middleware resolves the matched route before route handlers execute.
+    /**
+     * Registers all middleware in the correct order for Slim 4's LIFO stack.
+     * Last added = first to execute on request (outermost).
+     *
+     * Execution order on request:
+     *   1. beforeRequestMiddlewares (CORS, trace ID, …)
+     *   2. Error handling
+     *   3. Routing (resolves matched route)
+     *   4. Body parsing (JSON, XML, form-urlencoded)
+     *   5. Route-level middlewares + handler
+     */
+    private function registerMiddlewares(SlimApp $slimApp): void
+    {
+        $slimApp->addBodyParsingMiddleware();
         $slimApp->addRoutingMiddleware();
 
-        // Error middleware wraps everything — catches exceptions from routing and handlers.
+        $handlers = $this->resolveHandlers();
         $errorMiddleware = $slimApp->addErrorMiddleware(true, true, true);
         $errorMiddleware->setDefaultErrorHandler(new ErrorHandlerBridge($handlers));
 
         foreach ($this->configuration[self::BEFORE_REQUEST_MIDDLEWARES] as $middlewareIdentifier) {
             $slimApp->add($this->middlewareFactory->createFromIdentifier($middlewareIdentifier));
         }
-
-        return $slimApp;
     }
 
 
