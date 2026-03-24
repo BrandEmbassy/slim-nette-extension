@@ -128,6 +128,9 @@ class SlimApplicationFactory
         $handlers = $this->resolveHandlers();
 
         // Slim 4 uses a LIFO middleware stack: middleware added later runs earlier on request.
+        // Body parsing replaces Slim 3's automatic JSON body parsing.
+        $slimApp->addBodyParsingMiddleware();
+
         // Routing middleware resolves the matched route before route handlers execute.
         $slimApp->addRoutingMiddleware();
 
