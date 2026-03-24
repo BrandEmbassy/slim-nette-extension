@@ -32,13 +32,7 @@ class MiddlewareFactoryTest extends TestCase
             ->willReturnCallback(static function () use ($counter): callable {
                 $counter->value++;
 
-                return static function (
-                    Request $request,
-                    Response $response,
-                    callable $next,
-                ): ResponseInterface {
-                    return $response;
-                };
+                return static fn(Request $request, Response $response, callable $next): ResponseInterface => $response;
             });
 
         $factory = new MiddlewareFactory($container);
@@ -67,13 +61,7 @@ class MiddlewareFactoryTest extends TestCase
             ->willReturnCallback(static function () use ($counter): callable {
                 $counter->value++;
 
-                return static function (
-                    Request $request,
-                    Response $response,
-                    callable $next,
-                ): ResponseInterface {
-                    return $response;
-                };
+                return static fn(Request $request, Response $response, callable $next): ResponseInterface => $response;
             });
 
         $factory = new MiddlewareFactory($container);
