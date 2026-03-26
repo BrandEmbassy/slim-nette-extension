@@ -3,9 +3,9 @@
 namespace BrandEmbassyTest\Slim\Sample;
 
 use BrandEmbassy\Slim\Middleware\Middleware;
-use BrandEmbassyTest\Slim\Tools\ResponseCreatorTestTool;
-use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassy\Slim\Request\RequestInterface;
+use BrandEmbassy\Slim\Response\ResponseInterface;
+use BrandEmbassyTest\Slim\Tools\ResponseCreatorTestTool;
 
 /**
  * @final

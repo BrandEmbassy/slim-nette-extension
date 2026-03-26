@@ -2,9 +2,9 @@
 
 namespace BrandEmbassyTest\Slim\Sample;
 
-use BrandEmbassy\Slim\Route\Route;
-use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassy\Slim\Request\RequestInterface;
+use BrandEmbassy\Slim\Response\ResponseInterface;
+use BrandEmbassy\Slim\Route\Route;
 use function assert;
 
 /**
