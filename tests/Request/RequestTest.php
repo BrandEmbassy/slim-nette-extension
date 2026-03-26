@@ -2,6 +2,7 @@
 
 namespace BrandEmbassyTest\Slim\Request;
 
+use Psr\Http\Message\ServerRequestInterface;
 use BrandEmbassy\Slim\SlimApplicationFactory;
 use BrandEmbassyTest\Slim\Sample\CreateChannelUserRoute;
 use BrandEmbassyTest\Slim\SlimAppTester;
@@ -35,10 +36,7 @@ class RequestTest extends TestCase
     }
 
 
-    /**
-     * @return \Psr\Http\Message\ServerRequestInterface
-     */
-    private function getDispatchedRequest(string $queryString = ''): \Psr\Http\Message\ServerRequestInterface
+    private function getDispatchedRequest(string $queryString = ''): ServerRequestInterface
     {
         $this->prepareEnvironment($queryString);
 

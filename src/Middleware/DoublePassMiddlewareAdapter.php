@@ -36,10 +36,10 @@ class DoublePassMiddlewareAdapter implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): PsrResponseInterface
     {
-        $request = self::copyRouteArgumentsToAttributes($request);
+        $request = $this->copyRouteArgumentsToAttributes($request);
 
-        $wrappedRequest = self::wrapRequest($request);
-        $wrappedResponse = self::wrapResponse(new Response());
+        $wrappedRequest = $this->wrapRequest($request);
+        $wrappedResponse = $this->wrapResponse(new Response());
         $next = new LegacyNextHandler($handler);
 
         return ($this->middleware)($wrappedRequest, $wrappedResponse, $next);
@@ -52,7 +52,7 @@ class DoublePassMiddlewareAdapter implements MiddlewareInterface
      * to be accessible via $request->getAttribute('argName'). This method bridges
      * that gap by copying route arguments to direct request attributes.
      */
-    private static function copyRouteArgumentsToAttributes(ServerRequestInterface $request): ServerRequestInterface
+    private function copyRouteArgumentsToAttributes(ServerRequestInterface $request): ServerRequestInterface
     {
         $routingResults = $request->getAttribute(RouteContext::ROUTING_RESULTS);
 
@@ -68,7 +68,7 @@ class DoublePassMiddlewareAdapter implements MiddlewareInterface
     }
 
 
-    private static function wrapRequest(ServerRequestInterface $request): RequestInterface
+    private function wrapRequest(ServerRequestInterface $request): RequestInterface
     {
         if ($request instanceof RequestInterface) {
             return $request;
@@ -78,7 +78,7 @@ class DoublePassMiddlewareAdapter implements MiddlewareInterface
     }
 
 
-    private static function wrapResponse(PsrResponseInterface $response): ResponseInterface
+    private function wrapResponse(PsrResponseInterface $response): ResponseInterface
     {
         if ($response instanceof ResponseInterface) {
             return $response;

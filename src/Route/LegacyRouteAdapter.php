@@ -39,13 +39,13 @@ class LegacyRouteAdapter
         }
 
         return ($this->route)(
-            self::wrapRequest($request),
-            self::wrapResponse($response),
+            $this->wrapRequest($request),
+            $this->wrapResponse($response),
         );
     }
 
 
-    private static function wrapRequest(ServerRequestInterface $request): RequestInterface
+    private function wrapRequest(ServerRequestInterface $request): RequestInterface
     {
         if ($request instanceof RequestInterface) {
             return $request;
@@ -55,7 +55,7 @@ class LegacyRouteAdapter
     }
 
 
-    private static function wrapResponse(PsrResponseInterface $response): ResponseInterface
+    private function wrapResponse(PsrResponseInterface $response): ResponseInterface
     {
         if ($response instanceof ResponseInterface) {
             return $response;
