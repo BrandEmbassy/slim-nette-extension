@@ -6,9 +6,9 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use RuntimeException;
 use Slim\Psr7\Response;
 use Slim\Routing\RouteContext;
+use Slim\Routing\RoutingResults;
 
 /**
  * @final
@@ -49,15 +49,14 @@ class DoublePassMiddlewareAdapter implements MiddlewareInterface
      */
     private static function copyRouteArgumentsToAttributes(ServerRequestInterface $request): ServerRequestInterface
     {
-        try {
-            $routeContext = RouteContext::fromRequest($request);
-            $routingResults = $routeContext->getRoutingResults();
+        $routingResults = $request->getAttribute(RouteContext::ROUTING_RESULTS);
 
-            foreach ($routingResults->getRouteArguments() as $name => $value) {
-                $request = $request->withAttribute($name, $value);
-            }
-        } catch (RuntimeException) {
-            // RouteContext not available yet (before routing middleware runs)
+        if (!$routingResults instanceof RoutingResults) {
+            return $request;
+        }
+
+        foreach ($routingResults->getRouteArguments() as $name => $value) {
+            $request = $request->withAttribute($name, $value);
         }
 
         return $request;

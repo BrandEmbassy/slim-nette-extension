@@ -3,8 +3,6 @@
 namespace BrandEmbassyTest\Slim\Middleware;
 
 use BrandEmbassy\Slim\Middleware\MiddlewareFactory;
-use BrandEmbassy\Slim\Request\Request;
-use BrandEmbassy\Slim\Response\Response;
 use Nette\DI\Container;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
@@ -32,7 +30,7 @@ class MiddlewareFactoryTest extends TestCase
             ->willReturnCallback(static function () use ($counter): callable {
                 $counter->value++;
 
-                return static fn(Request $request, Response $response, callable $next): ResponseInterface => $response;
+                return static fn(ServerRequestInterface $request, ResponseInterface $response, callable $next): ResponseInterface => $response;
             });
 
         $factory = new MiddlewareFactory($container);
@@ -61,7 +59,7 @@ class MiddlewareFactoryTest extends TestCase
             ->willReturnCallback(static function () use ($counter): callable {
                 $counter->value++;
 
-                return static fn(Request $request, Response $response, callable $next): ResponseInterface => $response;
+                return static fn(ServerRequestInterface $request, ResponseInterface $response, callable $next): ResponseInterface => $response;
             });
 
         $factory = new MiddlewareFactory($container);
