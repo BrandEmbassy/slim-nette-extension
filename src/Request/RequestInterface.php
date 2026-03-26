@@ -3,15 +3,43 @@
 namespace BrandEmbassy\Slim\Request;
 
 use Psr\Http\Message\ServerRequestInterface;
+use Slim\Routing\Route;
 
-/**
- * Backwards-compatible alias for ServerRequestInterface.
- *
- * Kept so that existing route handlers and middleware in platform-backend
- * do not need a mass rename. New code should type-hint ServerRequestInterface directly.
- *
- * @deprecated Use Psr\Http\Message\ServerRequestInterface directly.
- */
 interface RequestInterface extends ServerRequestInterface
 {
+    /**
+     * Get the matched route.
+     */
+    public function getRoute(): ?Route;
+
+
+    /**
+     * @return array<string, string>
+     */
+    public function getRouteArguments(): array;
+
+
+    public function hasRouteArgument(string $argument): bool;
+
+
+    public function getRouteArgument(string $argument): string;
+
+
+    public function findRouteArgument(string $argument, ?string $default = null): ?string;
+
+
+    /**
+     * @return mixed[]
+     */
+    public function getParsedBodyAsArray(): array;
+
+
+    /**
+     * @deprecated use getQueryParams() from PSR-7
+     *
+     * @param mixed|null $default
+     *
+     * @return mixed
+     */
+    public function getQueryParam(string $key, $default = null);
 }

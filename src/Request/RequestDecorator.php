@@ -5,6 +5,9 @@ namespace BrandEmbassy\Slim\Request;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
+use Slim\Routing\Route;
+use Slim\Routing\RouteContext;
+use Slim\Routing\RoutingResults;
 
 /**
  * @final
@@ -19,6 +22,73 @@ class RequestDecorator implements RequestInterface
     public function __construct(
         private readonly ServerRequestInterface $inner
     ) {
+    }
+
+
+    public function getRoute(): ?Route
+    {
+        $routeContext = RouteContext::fromRequest($this->inner);
+        $route = $routeContext->getRoute();
+
+        return $route instanceof Route ? $route : null;
+    }
+
+
+    /**
+     * @return array<string, string>
+     */
+    public function getRouteArguments(): array
+    {
+        return $this->getRoutingResults()->getRouteArguments();
+    }
+
+
+    public function hasRouteArgument(string $argument): bool
+    {
+        return isset($this->getRouteArguments()[$argument]);
+    }
+
+
+    /**
+     * @throws RouteArgumentMissingException
+     */
+    public function getRouteArgument(string $argument): string
+    {
+        if ($this->hasRouteArgument($argument)) {
+            return $this->getRouteArguments()[$argument];
+        }
+
+        throw RouteArgumentMissingException::create($argument);
+    }
+
+
+    public function findRouteArgument(string $argument, ?string $default = null): ?string
+    {
+        return $this->getRouteArguments()[$argument] ?? $default;
+    }
+
+
+    /**
+     * @return mixed[]
+     */
+    public function getParsedBodyAsArray(): array
+    {
+        return (array)$this->getParsedBody();
+    }
+
+
+    /**
+     * @deprecated use getQueryParams() from PSR-7
+     *
+     * @param mixed|null $default
+     *
+     * @return mixed
+     */
+    public function getQueryParam(string $key, $default = null)
+    {
+        $params = $this->getQueryParams();
+
+        return $params[$key] ?? $default;
     }
 
 
@@ -247,5 +317,11 @@ class RequestDecorator implements RequestInterface
     public function withBody(StreamInterface $body): static
     {
         return new self($this->inner->withBody($body));
+    }
+
+
+    private function getRoutingResults(): RoutingResults
+    {
+        return RouteContext::fromRequest($this->inner)->getRoutingResults();
     }
 }
