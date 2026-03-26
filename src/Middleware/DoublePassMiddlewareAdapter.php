@@ -2,12 +2,17 @@
 
 namespace BrandEmbassy\Slim\Middleware;
 
-use BrandEmbassy\Slim\Request\Request;
-use BrandEmbassy\Slim\Response\Response;
-use Psr\Http\Message\ResponseInterface;
+use BrandEmbassy\Slim\Request\RequestDecorator;
+use BrandEmbassy\Slim\Request\RequestInterface;
+use BrandEmbassy\Slim\Response\ResponseDecorator;
+use BrandEmbassy\Slim\Response\ResponseInterface;
+use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Slim\Psr7\Response;
+use Slim\Routing\RouteContext;
+use Slim\Routing\RoutingResults;
 
 /**
  * @final
@@ -18,7 +23,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 class DoublePassMiddlewareAdapter implements MiddlewareInterface
 {
     /**
-     * @var callable(Request, Response, callable): ResponseInterface
+     * @var callable(RequestInterface, ResponseInterface, callable): PsrResponseInterface
      */
     private $middleware;
 
@@ -29,12 +34,56 @@ class DoublePassMiddlewareAdapter implements MiddlewareInterface
     }
 
 
-    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): PsrResponseInterface
     {
-        $wrappedRequest = new Request($request);
-        $response = new Response();
+        $request = $this->copyRouteArgumentsToAttributes($request);
+
+        $wrappedRequest = $this->wrapRequest($request);
+        $wrappedResponse = $this->wrapResponse(new Response());
         $next = new LegacyNextHandler($handler);
 
-        return ($this->middleware)($wrappedRequest, $response, $next);
+        return ($this->middleware)($wrappedRequest, $wrappedResponse, $next);
+    }
+
+
+    /**
+     * In Slim 4, route arguments are stored in RoutingResults (set by RoutingMiddleware),
+     * not as direct request attributes. Legacy middleware expects route arguments
+     * to be accessible via $request->getAttribute('argName'). This method bridges
+     * that gap by copying route arguments to direct request attributes.
+     */
+    private function copyRouteArgumentsToAttributes(ServerRequestInterface $request): ServerRequestInterface
+    {
+        $routingResults = $request->getAttribute(RouteContext::ROUTING_RESULTS);
+
+        if (!$routingResults instanceof RoutingResults) {
+            return $request;
+        }
+
+        foreach ($routingResults->getRouteArguments() as $name => $value) {
+            $request = $request->withAttribute($name, $value);
+        }
+
+        return $request;
+    }
+
+
+    private function wrapRequest(ServerRequestInterface $request): RequestInterface
+    {
+        if ($request instanceof RequestInterface) {
+            return $request;
+        }
+
+        return new RequestDecorator($request);
+    }
+
+
+    private function wrapResponse(PsrResponseInterface $response): ResponseInterface
+    {
+        if ($response instanceof ResponseInterface) {
+            return $response;
+        }
+
+        return new ResponseDecorator($response);
     }
 }

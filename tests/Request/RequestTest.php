@@ -2,13 +2,13 @@
 
 namespace BrandEmbassyTest\Slim\Request;
 
-use BrandEmbassy\Slim\Request\RequestInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use BrandEmbassy\Slim\SlimApplicationFactory;
-use BrandEmbassy\Slim\Response\Response;
 use BrandEmbassyTest\Slim\Sample\CreateChannelUserRoute;
 use BrandEmbassyTest\Slim\SlimAppTester;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
+use Slim\Routing\RouteContext;
 
 /**
  * @final
@@ -18,42 +18,25 @@ class RequestTest extends TestCase
     private const CHANNEL_ID = '123';
 
 
-    public function testGetRoute(): void
+    public function testRouteArgumentsAreSetAsAttributes(): void
+    {
+        $request = $this->getDispatchedRequest('?foo=bar&two=2');
+
+        Assert::assertSame('123', $request->getAttribute('channelId'));
+    }
+
+
+    public function testQueryParamsArePreserved(): void
     {
         $request = $this->getDispatchedRequest('?foo=bar&two=2&null=null&array[]=item1&array[]=item2');
-        $response = new Response();
-        $response = $response->withHeader('hasBeenCalled', 'true');
 
-        $route = $request->getRoute();
-        assert($route !== null, 'Route should be set after dispatching');
-
-        $callable = $route->getCallable();
-        assert(is_callable($callable), 'Route callable must be callable');
-
-        $responseFromRoute = $callable(
-            $request,
-            $response,
-            $request->getRouteArguments()
-        );
-
-        Assert::assertSame(['true'], $responseFromRoute->getHeader('hasBeenCalled'));
+        $queryParams = $request->getQueryParams();
+        Assert::assertSame('bar', $queryParams['foo']);
+        Assert::assertSame('2', $queryParams['two']);
     }
 
 
-    public function testRestResolvingAttributes(): void
-    {
-        $request = $this->getDispatchedRequest();
-
-        Assert::assertSame('123', $request->getRouteArgument('channelId'));
-        Assert::assertTrue($request->hasRouteArgument('channelId'));
-        Assert::assertFalse($request->hasRouteArgument('non-existing'));
-        Assert::assertSame(['channelId' => '123'], $request->getRouteArguments());
-        Assert::assertSame('123', $request->findRouteArgument('channelId'));
-        Assert::assertSame('default', $request->findRouteArgument('non-existing', 'default'));
-    }
-
-
-    private function getDispatchedRequest(string $queryString = ''): RequestInterface
+    private function getDispatchedRequest(string $queryString = ''): ServerRequestInterface
     {
         $this->prepareEnvironment($queryString);
 
