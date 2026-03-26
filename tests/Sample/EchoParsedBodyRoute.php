@@ -2,10 +2,10 @@
 
 namespace BrandEmbassyTest\Slim\Sample;
 
+use BrandEmbassy\Slim\Request\RequestInterface;
+use BrandEmbassy\Slim\Response\ResponseInterface;
 use BrandEmbassy\Slim\Route\Route;
 use BrandEmbassyTest\Slim\Tools\ResponseCreatorTestTool;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use function assert;
 use function is_array;
 
@@ -14,7 +14,7 @@ use function is_array;
  */
 class EchoParsedBodyRoute implements Route
 {
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+    public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
         $parsedBody = $request->getParsedBody();
         assert(is_array($parsedBody));

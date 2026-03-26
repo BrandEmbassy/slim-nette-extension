@@ -2,9 +2,9 @@
 
 namespace BrandEmbassy\Slim\Route;
 
+use BrandEmbassy\Slim\Request\RequestInterface;
+use BrandEmbassy\Slim\Response\ResponseInterface;
 use Closure;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use function assert;
 
 /**
@@ -33,7 +33,7 @@ class LazyRoute implements Route
     }
 
 
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+    public function __invoke(RequestInterface $request, ResponseInterface $response): ResponseInterface
     {
         if ($this->resolvedRoute === null) {
             assert($this->factory !== null);

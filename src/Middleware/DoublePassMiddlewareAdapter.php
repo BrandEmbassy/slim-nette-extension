@@ -2,7 +2,11 @@
 
 namespace BrandEmbassy\Slim\Middleware;
 
-use Psr\Http\Message\ResponseInterface;
+use BrandEmbassy\Slim\Request\RequestDecorator;
+use BrandEmbassy\Slim\Request\RequestInterface;
+use BrandEmbassy\Slim\Response\ResponseDecorator;
+use BrandEmbassy\Slim\Response\ResponseInterface;
+use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -19,7 +23,7 @@ use Slim\Routing\RoutingResults;
 class DoublePassMiddlewareAdapter implements MiddlewareInterface
 {
     /**
-     * @var callable(ServerRequestInterface, ResponseInterface, callable): ResponseInterface
+     * @var callable(RequestInterface, ResponseInterface, callable): PsrResponseInterface
      */
     private $middleware;
 
@@ -30,14 +34,15 @@ class DoublePassMiddlewareAdapter implements MiddlewareInterface
     }
 
 
-    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): PsrResponseInterface
     {
         $request = self::copyRouteArgumentsToAttributes($request);
 
-        $response = new Response();
+        $wrappedRequest = self::wrapRequest($request);
+        $wrappedResponse = self::wrapResponse(new Response());
         $next = new LegacyNextHandler($handler);
 
-        return ($this->middleware)($request, $response, $next);
+        return ($this->middleware)($wrappedRequest, $wrappedResponse, $next);
     }
 
 
@@ -60,5 +65,25 @@ class DoublePassMiddlewareAdapter implements MiddlewareInterface
         }
 
         return $request;
+    }
+
+
+    private static function wrapRequest(ServerRequestInterface $request): RequestInterface
+    {
+        if ($request instanceof RequestInterface) {
+            return $request;
+        }
+
+        return new RequestDecorator($request);
+    }
+
+
+    private static function wrapResponse(PsrResponseInterface $response): ResponseInterface
+    {
+        if ($response instanceof ResponseInterface) {
+            return $response;
+        }
+
+        return new ResponseDecorator($response);
     }
 }

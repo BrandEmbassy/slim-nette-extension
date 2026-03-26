@@ -2,7 +2,9 @@
 
 namespace BrandEmbassy\Slim\Middleware;
 
-use Psr\Http\Message\ResponseInterface;
+use BrandEmbassy\Slim\Response\ResponseDecorator;
+use BrandEmbassy\Slim\Response\ResponseInterface;
+use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
@@ -23,7 +25,7 @@ class LegacyNextHandler
     }
 
 
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+    public function __invoke(ServerRequestInterface $request, PsrResponseInterface $response): ResponseInterface
     {
         $handlerResponse = $this->handler->handle($request);
 
@@ -33,6 +35,10 @@ class LegacyNextHandler
             $handlerResponse = $handlerResponse->withHeader($name, $values);
         }
 
-        return $handlerResponse;
+        if ($handlerResponse instanceof ResponseInterface) {
+            return $handlerResponse;
+        }
+
+        return new ResponseDecorator($handlerResponse);
     }
 }
