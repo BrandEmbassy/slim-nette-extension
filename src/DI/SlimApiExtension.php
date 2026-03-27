@@ -6,8 +6,6 @@ use BrandEmbassy\Slim\Middleware\AfterRouteMiddlewares;
 use BrandEmbassy\Slim\Middleware\BeforeRouteMiddlewares;
 use BrandEmbassy\Slim\Middleware\MiddlewareFactory;
 use BrandEmbassy\Slim\Middleware\MiddlewareGroups;
-use BrandEmbassy\Slim\Request\DefaultRequestFactory;
-use BrandEmbassy\Slim\Request\RequestFactory;
 use BrandEmbassy\Slim\Route\OnlyNecessaryRoutesProvider;
 use BrandEmbassy\Slim\Route\RouteDefinition;
 use BrandEmbassy\Slim\Route\RouteDefinitionFactory;
@@ -88,10 +86,6 @@ class SlimApiExtension extends CompilerExtension
 
         $builder->addDefinition($this->prefix('routeRegister'))
             ->setFactory(RouteRegister::class);
-
-        $builder->addDefinition($this->prefix('requestFactory'))
-            ->setType(RequestFactory::class)
-            ->setFactory(DefaultRequestFactory::class);
 
         $builder->addDefinition($this->prefix('middlewareFactory'))
             ->setFactory(MiddlewareFactory::class);
