@@ -6,10 +6,13 @@ use BrandEmbassy\Slim\DI\ServiceProvider;
 use BrandEmbassy\Slim\Middleware\MiddlewareFactory;
 use BrandEmbassy\Slim\Route\OnlyNecessaryRoutesProvider;
 use BrandEmbassy\Slim\Route\RouteRegister;
+use BrandEmbassy\Slim\Routing\SlashSafeRouteResolver;
 use LogicException;
 use Nette\DI\Container;
+use Slim\CallableResolver;
 use Slim\Interfaces\RouteCollectorProxyInterface;
 use Slim\Psr7\Factory\ResponseFactory;
+use Slim\Routing\RouteCollector;
 use function apcu_enabled;
 use function assert;
 use function function_exists;
@@ -83,7 +86,12 @@ class SlimApplicationFactory
     public function create(): SlimApp
     {
         $slimContainer = new SlimContainer($this->container);
-        $slimApp = new SlimApp(new ResponseFactory(), $slimContainer);
+        $responseFactory = new ResponseFactory();
+        $callableResolver = new CallableResolver($slimContainer);
+        $routeCollector = new RouteCollector($responseFactory, $callableResolver, $slimContainer);
+        $routeResolver = new SlashSafeRouteResolver($routeCollector);
+
+        $slimApp = new SlimApp($responseFactory, $slimContainer, $callableResolver, $routeCollector, $routeResolver);
 
         $this->registerRoutes($slimApp);
         $this->registerMiddlewares($slimApp);
