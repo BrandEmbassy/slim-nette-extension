@@ -246,6 +246,15 @@ class SlimApplicationFactoryTest extends TestCase
     }
 
 
+    public function testRouteWithEncodedSlashInParameterIsDispatched(): void
+    {
+        $this->prepareEnvironment('POST', '/tests/api/channels/abc%2Fdef/users');
+        $response = SlimAppTester::runSlimApp();
+
+        ResponseAssertions::assertResponseStatusCode(200, $response);
+    }
+
+
     public function testRouteConfigWillFailWhenMisconfigured(): void
     {
         $this->expectExceptionMessage(
