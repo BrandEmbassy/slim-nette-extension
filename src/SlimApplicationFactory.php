@@ -87,11 +87,14 @@ class SlimApplicationFactory
     {
         $slimContainer = new SlimContainer($this->container);
         $responseFactory = new ResponseFactory();
-        $callableResolver = new CallableResolver($slimContainer);
-        $routeCollector = new RouteCollector($responseFactory, $callableResolver, $slimContainer);
-        $routeResolver = new SlashSafeRouteResolver($routeCollector);
+        $routeCollector = new RouteCollector($responseFactory, new CallableResolver($slimContainer), $slimContainer);
 
-        $slimApp = new SlimApp($responseFactory, $slimContainer, $callableResolver, $routeCollector, $routeResolver);
+        $slimApp = new SlimApp(
+            responseFactory: $responseFactory,
+            container: $slimContainer,
+            routeCollector: $routeCollector,
+            routeResolver: new SlashSafeRouteResolver($routeCollector),
+        );
 
         $this->registerRoutes($slimApp);
         $this->registerMiddlewares($slimApp);
