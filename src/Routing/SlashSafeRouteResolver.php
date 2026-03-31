@@ -2,10 +2,8 @@
 
 namespace BrandEmbassy\Slim\Routing;
 
-use Slim\Interfaces\RouteCollectorInterface;
-use Slim\Interfaces\RouteInterface;
-use Slim\Interfaces\RouteResolverInterface;
 use Slim\Routing\Dispatcher;
+use Slim\Routing\RouteResolver;
 use Slim\Routing\RoutingResults;
 use function preg_match;
 use function preg_replace_callback;
@@ -23,17 +21,9 @@ use function rawurldecode;
  * This resolver decodes all percent-encoded triplets except %2F, so FastRoute
  * sees %2F as part of the segment — not as a path separator.
  */
-class SlashSafeRouteResolver implements RouteResolverInterface
+class SlashSafeRouteResolver extends RouteResolver
 {
     private const ENCODED_SLASH_PATTERN = '/%2f/i';
-
-    private RouteCollectorInterface $routeCollector;
-
-
-    public function __construct(RouteCollectorInterface $routeCollector)
-    {
-        $this->routeCollector = $routeCollector;
-    }
 
 
     public function computeRoutingResults(string $uri, string $method): RoutingResults
@@ -45,12 +35,6 @@ class SlashSafeRouteResolver implements RouteResolverInterface
         }
 
         return (new Dispatcher($this->routeCollector))->dispatch($method, $uri);
-    }
-
-
-    public function resolveRoute(string $identifier): RouteInterface
-    {
-        return $this->routeCollector->lookupRoute($identifier);
     }
 
 
