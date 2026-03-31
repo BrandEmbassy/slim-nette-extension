@@ -5,7 +5,12 @@ namespace BrandEmbassyTest\Slim\Routing;
 use BrandEmbassy\Slim\Routing\SlashSafeRouteResolver;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
-use Slim\Interfaces\RouteCollectorInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Slim\CallableResolver;
+use Slim\Psr7\Factory\ResponseFactory;
+use Slim\Routing\RouteCollector;
+use Slim\Routing\RoutingResults;
 
 /**
  * @final
@@ -13,56 +18,96 @@ use Slim\Interfaces\RouteCollectorInterface;
 class SlashSafeRouteResolverTest extends TestCase
 {
     /**
-     * @dataProvider provideUriCases
+     * @dataProvider provideMatchingUriCases
      */
-    public function testComputeRoutingResultsPreservesEncodedSlashes(
-        string $inputUri,
-        string $expectedDispatchedUri,
-    ): void {
-        $dispatcher = new CapturingDispatcher();
-        $routeCollector = $this->createMock(RouteCollectorInterface::class);
-        $resolver = new SlashSafeRouteResolver($routeCollector, $dispatcher);
+    public function testRouteWithEncodedSlashIsMatched(string $uri, string $expectedRawParamValue): void
+    {
+        $resolver = $this->createResolverWithRoute('GET', '/items/{id}');
 
-        $resolver->computeRoutingResults($inputUri, 'GET');
+        $result = $resolver->computeRoutingResults($uri, 'GET');
 
-        Assert::assertSame($expectedDispatchedUri, $dispatcher->getLastDispatchedUri());
+        Assert::assertSame(RoutingResults::FOUND, $result->getRouteStatus());
+        Assert::assertSame($expectedRawParamValue, $result->getRouteArguments(false)['id']);
     }
 
 
     /**
      * @return array<string, array{string, string}>
      */
-    public static function provideUriCases(): array
+    public static function provideMatchingUriCases(): array
     {
         return [
-            'encoded slash %2F preserved' => [
-                '/channels/123/threads/abc%2Fdef/sender-actions',
-                '/channels/123/threads/abc%2Fdef/sender-actions',
+            'plain parameter' => [
+                '/items/simple',
+                'simple',
             ],
-            'encoded slash %2f lowercase preserved' => [
-                '/channels/123/threads/abc%2fdef/sender-actions',
-                '/channels/123/threads/abc%2Fdef/sender-actions',
+            'encoded slash %2F preserved in parameter' => [
+                '/items/abc%2Fdef',
+                'abc%2Fdef',
+            ],
+            'encoded slash %2f lowercase normalized to uppercase' => [
+                '/items/abc%2fdef',
+                'abc%2Fdef',
             ],
             'other percent-encoded chars decoded normally' => [
-                '/channels/123/threads/hello%20world/actions',
-                '/channels/123/threads/hello world/actions',
+                '/items/hello%20world',
+                'hello world',
             ],
-            'mixed encoded slash and other encoding' => [
-                '/channels/123/threads/abc%2Fdef%20ghi/actions',
-                '/channels/123/threads/abc%2Fdef ghi/actions',
-            ],
-            'no encoding passes through' => [
-                '/channels/123/threads/plain/actions',
-                '/channels/123/threads/plain/actions',
-            ],
-            'empty uri gets leading slash' => [
-                '',
-                '/',
+            'mixed encoded slash and space' => [
+                '/items/abc%2Fdef%20ghi',
+                'abc%2Fdef ghi',
             ],
             'multiple encoded slashes preserved' => [
-                '/path/a%2Fb%2Fc',
-                '/path/a%2Fb%2Fc',
+                '/items/a%2Fb%2Fc',
+                'a%2Fb%2Fc',
+            ],
+            'encoded curly braces decoded normally' => [
+                '/items/%7B%7Bsome-value%7D%7D',
+                '{{some-value}}',
             ],
         ];
+    }
+
+
+    public function testRouteWithEncodedSlashReturnsNotFoundWithDefaultResolver(): void
+    {
+        $responseFactory = new ResponseFactory();
+        $callableResolver = new CallableResolver();
+        $routeCollector = new RouteCollector($responseFactory, $callableResolver);
+
+        $routeCollector->map(['GET'], '/items/{id}', $this->createDummyHandler());
+
+        $defaultResult = (new \Slim\Routing\RouteResolver($routeCollector))
+            ->computeRoutingResults('/items/abc%2Fdef', 'GET');
+
+        Assert::assertSame(RoutingResults::NOT_FOUND, $defaultResult->getRouteStatus());
+
+        $safeResult = (new SlashSafeRouteResolver($routeCollector))
+            ->computeRoutingResults('/items/abc%2Fdef', 'GET');
+
+        Assert::assertSame(RoutingResults::FOUND, $safeResult->getRouteStatus());
+    }
+
+
+    private function createResolverWithRoute(string $method, string $pattern): SlashSafeRouteResolver
+    {
+        $responseFactory = new ResponseFactory();
+        $callableResolver = new CallableResolver();
+        $routeCollector = new RouteCollector($responseFactory, $callableResolver);
+
+        $routeCollector->map([$method], $pattern, $this->createDummyHandler());
+
+        return new SlashSafeRouteResolver($routeCollector);
+    }
+
+
+    /**
+     * @return callable(ServerRequestInterface, ResponseInterface): ResponseInterface
+     */
+    private function createDummyHandler(): callable
+    {
+        return static function (ServerRequestInterface $request, ResponseInterface $response): ResponseInterface {
+            return $response;
+        };
     }
 }

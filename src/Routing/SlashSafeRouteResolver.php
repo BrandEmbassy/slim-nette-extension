@@ -2,14 +2,12 @@
 
 namespace BrandEmbassy\Slim\Routing;
 
-use Slim\Interfaces\DispatcherInterface;
 use Slim\Interfaces\RouteCollectorInterface;
 use Slim\Interfaces\RouteInterface;
 use Slim\Interfaces\RouteResolverInterface;
 use Slim\Routing\Dispatcher;
 use Slim\Routing\RoutingResults;
-use function rawurldecode;
-use function str_replace;
+use function preg_replace_callback;
 
 /**
  * @final
@@ -20,56 +18,55 @@ use function str_replace;
  * to FastRoute. This decodes %2F into literal /, which breaks route matching for
  * parameters containing encoded slashes (e.g. base64-encoded identifiers).
  *
- * This resolver temporarily replaces %2F with a placeholder before decoding,
- * then restores it, so FastRoute sees %2F as part of the segment — not as
- * a path separator.
+ * This resolver decodes all percent-encoded triplets except %2F, so FastRoute
+ * sees %2F as part of the segment — not as a path separator.
  */
 class SlashSafeRouteResolver implements RouteResolverInterface
 {
-    private const ENCODED_SLASH = '%2F';
-
-    private const ENCODED_SLASH_UPPER = '%2f';
-
-    private const PLACEHOLDER = '{{ENCODED_SLASH}}';
+    private const ENCODED_SLASH_PATTERN = '/%2f/i';
 
     private RouteCollectorInterface $routeCollector;
 
-    private DispatcherInterface $dispatcher;
 
-
-    public function __construct(
-        RouteCollectorInterface $routeCollector,
-        ?DispatcherInterface $dispatcher = null,
-    ) {
+    public function __construct(RouteCollectorInterface $routeCollector)
+    {
         $this->routeCollector = $routeCollector;
-        $this->dispatcher = $dispatcher ?? new Dispatcher($routeCollector);
     }
 
 
     public function computeRoutingResults(string $uri, string $method): RoutingResults
     {
-        // Protect encoded slashes from rawurldecode
-        $uri = str_replace(
-            [self::ENCODED_SLASH, self::ENCODED_SLASH_UPPER],
-            [self::PLACEHOLDER, self::PLACEHOLDER],
-            $uri,
-        );
-
-        $uri = rawurldecode($uri);
-
-        // Restore encoded slashes
-        $uri = str_replace(self::PLACEHOLDER, self::ENCODED_SLASH, $uri);
+        $uri = $this->rawurldecodeSafe($uri);
 
         if ($uri === '' || $uri[0] !== '/') {
             $uri = '/' . $uri;
         }
 
-        return $this->dispatcher->dispatch($method, $uri);
+        return (new Dispatcher($this->routeCollector))->dispatch($method, $uri);
     }
 
 
     public function resolveRoute(string $identifier): RouteInterface
     {
         return $this->routeCollector->lookupRoute($identifier);
+    }
+
+
+    /**
+     * Decodes all percent-encoded triplets except %2F (encoded forward slash).
+     */
+    private function rawurldecodeSafe(string $uri): string
+    {
+        return (string)preg_replace_callback(
+            '/%[0-9A-Fa-f]{2}/',
+            static function (array $match): string {
+                if (preg_match(self::ENCODED_SLASH_PATTERN, $match[0]) === 1) {
+                    return '%2F';
+                }
+
+                return rawurldecode($match[0]);
+            },
+            $uri,
+        );
     }
 }
