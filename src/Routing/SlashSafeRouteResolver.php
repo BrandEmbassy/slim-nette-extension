@@ -27,7 +27,9 @@ use function str_replace;
 class SlashSafeRouteResolver implements RouteResolverInterface
 {
     private const ENCODED_SLASH = '%2F';
+
     private const ENCODED_SLASH_UPPER = '%2f';
+
     private const PLACEHOLDER = '{{ENCODED_SLASH}}';
 
     private RouteCollectorInterface $routeCollector;
