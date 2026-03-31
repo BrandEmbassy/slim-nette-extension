@@ -46,9 +46,9 @@ class SlashSafeRouteResolverTest extends TestCase
                 '/items/abc%2Fdef',
                 'abc%2Fdef',
             ],
-            'encoded slash %2f lowercase normalized to uppercase' => [
+            'encoded slash %2f lowercase preserved as-is' => [
                 '/items/abc%2fdef',
-                'abc%2Fdef',
+                'abc%2fdef',
             ],
             'other percent-encoded chars decoded normally' => [
                 '/items/hello%20world',
@@ -67,6 +67,16 @@ class SlashSafeRouteResolverTest extends TestCase
                 '{{some-value}}',
             ],
         ];
+    }
+
+
+    public function testEmptyUriGetsLeadingSlash(): void
+    {
+        $resolver = $this->createResolverWithRoute('GET', '/');
+
+        $result = $resolver->computeRoutingResults('', 'GET');
+
+        Assert::assertSame(RoutingResults::FOUND, $result->getRouteStatus());
     }
 
 

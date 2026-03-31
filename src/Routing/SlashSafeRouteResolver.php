@@ -47,7 +47,7 @@ class SlashSafeRouteResolver extends RouteResolver
             '/%[0-9A-Fa-f]{2}/',
             static function (array $match): string {
                 if (preg_match(self::ENCODED_SLASH_PATTERN, $match[0]) === 1) {
-                    return '%2F';
+                    return $match[0];
                 }
 
                 return rawurldecode($match[0]);

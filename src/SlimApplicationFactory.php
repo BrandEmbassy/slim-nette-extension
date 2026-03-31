@@ -90,10 +90,11 @@ class SlimApplicationFactory
         $routeCollector = new RouteCollector($responseFactory, new CallableResolver($slimContainer), $slimContainer);
 
         $slimApp = new SlimApp(
-            responseFactory: $responseFactory,
-            container: $slimContainer,
-            routeCollector: $routeCollector,
-            routeResolver: new SlashSafeRouteResolver($routeCollector),
+            $responseFactory,
+            $slimContainer,
+            null,
+            $routeCollector,
+            new SlashSafeRouteResolver($routeCollector),
         );
 
         $this->registerRoutes($slimApp);
