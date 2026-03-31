@@ -10,6 +10,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Slim\CallableResolver;
 use Slim\Psr7\Factory\ResponseFactory;
 use Slim\Routing\RouteCollector;
+use Slim\Routing\RouteResolver;
 use Slim\Routing\RoutingResults;
 
 /**
@@ -77,7 +78,7 @@ class SlashSafeRouteResolverTest extends TestCase
 
         $routeCollector->map(['GET'], '/items/{id}', $this->createDummyHandler());
 
-        $defaultResult = (new \Slim\Routing\RouteResolver($routeCollector))
+        $defaultResult = (new RouteResolver($routeCollector))
             ->computeRoutingResults('/items/abc%2Fdef', 'GET');
 
         Assert::assertSame(RoutingResults::NOT_FOUND, $defaultResult->getRouteStatus());
@@ -106,8 +107,6 @@ class SlashSafeRouteResolverTest extends TestCase
      */
     private function createDummyHandler(): callable
     {
-        return static function (ServerRequestInterface $request, ResponseInterface $response): ResponseInterface {
-            return $response;
-        };
+        return static fn(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface => $response;
     }
 }

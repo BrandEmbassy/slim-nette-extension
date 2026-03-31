@@ -7,7 +7,9 @@ use Slim\Interfaces\RouteInterface;
 use Slim\Interfaces\RouteResolverInterface;
 use Slim\Routing\Dispatcher;
 use Slim\Routing\RoutingResults;
+use function preg_match;
 use function preg_replace_callback;
+use function rawurldecode;
 
 /**
  * @final
