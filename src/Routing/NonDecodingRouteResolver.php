@@ -20,7 +20,7 @@ use Slim\Routing\RoutingResults;
  * This resolver matches Slim 3's behavior: the URI is passed to FastRoute as-is,
  * preserving all percent-encoded characters in route parameters.
  */
-class SlashSafeRouteResolver extends RouteResolver
+class NonDecodingRouteResolver extends RouteResolver
 {
     public function computeRoutingResults(string $uri, string $method): RoutingResults
     {

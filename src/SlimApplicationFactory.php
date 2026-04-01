@@ -6,7 +6,7 @@ use BrandEmbassy\Slim\DI\ServiceProvider;
 use BrandEmbassy\Slim\Middleware\MiddlewareFactory;
 use BrandEmbassy\Slim\Route\OnlyNecessaryRoutesProvider;
 use BrandEmbassy\Slim\Route\RouteRegister;
-use BrandEmbassy\Slim\Routing\SlashSafeRouteResolver;
+use BrandEmbassy\Slim\Routing\NonDecodingRouteResolver;
 use LogicException;
 use Nette\DI\Container;
 use Slim\CallableResolver;
@@ -94,7 +94,7 @@ class SlimApplicationFactory
             $slimContainer,
             null,
             $routeCollector,
-            new SlashSafeRouteResolver($routeCollector),
+            new NonDecodingRouteResolver($routeCollector),
         );
 
         $this->registerRoutes($slimApp);

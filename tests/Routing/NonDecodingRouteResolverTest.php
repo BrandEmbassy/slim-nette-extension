@@ -2,7 +2,7 @@
 
 namespace BrandEmbassyTest\Slim\Routing;
 
-use BrandEmbassy\Slim\Routing\SlashSafeRouteResolver;
+use BrandEmbassy\Slim\Routing\NonDecodingRouteResolver;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
@@ -16,7 +16,7 @@ use Slim\Routing\RoutingResults;
 /**
  * @final
  */
-class SlashSafeRouteResolverTest extends TestCase
+class NonDecodingRouteResolverTest extends TestCase
 {
     /**
      * @dataProvider provideMatchingUriCases
@@ -97,14 +97,14 @@ class SlashSafeRouteResolverTest extends TestCase
 
         Assert::assertSame(RoutingResults::NOT_FOUND, $defaultResult->getRouteStatus());
 
-        $safeResult = (new SlashSafeRouteResolver($routeCollector))
+        $safeResult = (new NonDecodingRouteResolver($routeCollector))
             ->computeRoutingResults('/items/abc%2Fdef', 'GET');
 
         Assert::assertSame(RoutingResults::FOUND, $safeResult->getRouteStatus());
     }
 
 
-    private function createResolverWithRoute(string $method, string $pattern): SlashSafeRouteResolver
+    private function createResolverWithRoute(string $method, string $pattern): NonDecodingRouteResolver
     {
         $responseFactory = new ResponseFactory();
         $callableResolver = new CallableResolver();
@@ -112,7 +112,7 @@ class SlashSafeRouteResolverTest extends TestCase
 
         $routeCollector->map([$method], $pattern, $this->createDummyHandler());
 
-        return new SlashSafeRouteResolver($routeCollector);
+        return new NonDecodingRouteResolver($routeCollector);
     }
 
 
