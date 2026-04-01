@@ -12,9 +12,10 @@ use Slim\Routing\RoutingResults;
  * Custom RouteResolver that skips rawurldecode() on the URI before dispatching.
  *
  * Slim 4's default RouteResolver calls rawurldecode() on the URI before dispatching
- * to FastRoute. This decodes percent-encoded characters (%2F, %3A, %2B, etc.) into
- * their literal forms, which breaks route matching for parameters containing encoded
- * special characters (e.g. base64-encoded URN identifiers).
+ * to FastRoute. This decodes percent-encoded characters (%2F, %3A, %2B, %3D, etc.)
+ * into their literal forms. Decoding %2F into "/" can change path segmentation and
+ * thus break route matching; decoding other characters can corrupt the values of
+ * matched route parameters (e.g. base64-encoded or URN-like identifiers).
  *
  * This resolver matches Slim 3's behavior: the URI is passed to FastRoute as-is,
  * preserving all percent-encoded characters in route parameters.
