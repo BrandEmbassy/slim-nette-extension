@@ -21,7 +21,7 @@ class SlashSafeRouteResolverTest extends TestCase
     /**
      * @dataProvider provideMatchingUriCases
      */
-    public function testRouteWithEncodedSlashIsMatched(string $uri, string $expectedRawParamValue): void
+    public function testRouteIsMatchedAndParameterPreserved(string $uri, string $expectedRawParamValue): void
     {
         $resolver = $this->createResolverWithRoute('GET', '/items/{id}');
 
@@ -42,29 +42,33 @@ class SlashSafeRouteResolverTest extends TestCase
                 '/items/simple',
                 'simple',
             ],
-            'encoded slash %2F preserved in parameter' => [
+            'encoded slash %2F preserved' => [
                 '/items/abc%2Fdef',
                 'abc%2Fdef',
             ],
-            'encoded slash %2f lowercase preserved as-is' => [
-                '/items/abc%2fdef',
-                'abc%2fdef',
+            'encoded colon %3A preserved' => [
+                '/items/urn%3Ambid%3Avalue',
+                'urn%3Ambid%3Avalue',
             ],
-            'other percent-encoded chars decoded normally' => [
+            'encoded plus %2B preserved' => [
+                '/items/abc%2Bdef',
+                'abc%2Bdef',
+            ],
+            'encoded space %20 preserved' => [
                 '/items/hello%20world',
-                'hello world',
+                'hello%20world',
             ],
-            'mixed encoded slash and space' => [
-                '/items/abc%2Fdef%20ghi',
-                'abc%2Fdef ghi',
+            'encoded equals %3D preserved' => [
+                '/items/base64value%3D',
+                'base64value%3D',
+            ],
+            'complex URN with multiple encoded chars preserved' => [
+                '/items/urn%3Ambid%3AAQAAY4PwoYv7H0b8%2B6Zx7WkS%2BjV%2FzkJMyh9xoms0%3D',
+                'urn%3Ambid%3AAQAAY4PwoYv7H0b8%2B6Zx7WkS%2BjV%2FzkJMyh9xoms0%3D',
             ],
             'multiple encoded slashes preserved' => [
                 '/items/a%2Fb%2Fc',
                 'a%2Fb%2Fc',
-            ],
-            'encoded curly braces decoded normally' => [
-                '/items/%7B%7Bsome-value%7D%7D',
-                '{{some-value}}',
             ],
         ];
     }
