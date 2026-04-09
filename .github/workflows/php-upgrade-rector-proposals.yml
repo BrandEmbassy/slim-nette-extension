@@ -11,9 +11,89 @@ on:
 
 jobs:
   rector-php-upgrade:
-    uses: BrandEmbassy/github-actions/.github/workflows/php-upgrade-rector-proposals.yml@master
-    with:
-      PHP_TARGET_VERSION: ${{ inputs.PHP_TARGET_VERSION }}
-      RECTOR_PATHS: 'src tests'
-    secrets:
-      COMPOSER_TOKEN: ${{ secrets.COMPOSER_TOKEN }}
+    name: Rector PHP Upgrade Proposals (PHP ${{ inputs.PHP_TARGET_VERSION }})
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect extensions from composer.json
+        id: composer-meta
+        run: |
+          extensions=$(jq -r '.require | keys[] | select(startswith("ext-")) | sub("ext-"; "")' composer.json | paste -sd, -)
+          echo "extensions=$extensions" >> $GITHUB_OUTPUT
+
+      - name: Setup PHP ${{ inputs.PHP_TARGET_VERSION }}
+        uses: shivammathur/setup-php@2.35.1
+        with:
+          php-version: ${{ inputs.PHP_TARGET_VERSION }}
+          extensions: ${{ steps.composer-meta.outputs.extensions }}
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Configure composer token
+        run: composer config github-oauth.github.com "${{ secrets.COMPOSER_TOKEN }}"
+
+      - name: Install dependencies
+        run: composer install --no-progress --prefer-dist
+
+      - name: Install Rector if not present
+        run: |
+          if [ -f vendor/bin/rector ]; then
+            echo "Rector already installed in vendor"
+          else
+            echo "Rector not found in vendor, installing..."
+            composer require --dev rector/rector --with-all-dependencies --no-interaction
+          fi
+
+      - name: Generate temporary Rector configuration
+        run: |
+          TARGET="${{ inputs.PHP_TARGET_VERSION }}"
+          PHP_SET_ARG="php${TARGET//.}"
+          PHP_VERSION_CONST="PHP_${TARGET//.}"
+
+          {
+            echo "<?php"
+            echo ""
+            echo "declare(strict_types=1);"
+            echo ""
+            echo "use Rector\Config\RectorConfig;"
+            echo "use Rector\ValueObject\PhpVersion;"
+            echo ""
+            echo "return RectorConfig::configure()"
+            echo "    ->withPhpSets(${PHP_SET_ARG}: true)"
+            echo "    ->withPhpVersion(PhpVersion::${PHP_VERSION_CONST})"
+            echo "    ->withPaths(["
+            echo "        __DIR__ . '/src',"
+            echo "        __DIR__ . '/tests',"
+            echo "    ]);"
+          } > rector-php-upgrade.php
+
+          echo "Generated rector-php-upgrade.php:"
+          cat rector-php-upgrade.php
+
+      - name: Run Rector (dry-run)
+        run: |
+          vendor/bin/rector process --config rector-php-upgrade.php --dry-run 2>&1 | tee rector-output.txt
+          exit_code=${PIPESTATUS[0]}
+          if [ "$exit_code" -ne 0 ] && [ "$exit_code" -ne 2 ]; then
+            exit "$exit_code"
+          fi
+
+      - name: Upload Rector proposals
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rector-proposals
+          path: rector-output.txt
+          retention-days: 30
