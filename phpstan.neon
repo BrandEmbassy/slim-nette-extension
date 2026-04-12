@@ -14,6 +14,11 @@ parameters:
 
     ignoreErrors:
         -
+            # Request is a pure PSR-7 delegation wrapper — @param annotations
+            # are required by ECS but narrower than PSR-7's bare `array` parameters.
+            message: '#should be contravariant with parameter#'
+            path: src/Request/Request.php
+        -
             message: '#Cognitive complexity for "BrandEmbassy\\Slim\\Route\\OnlyNecessaryRoutesProvider::getRoutes\(\)" is 14, keep it under 9#'
             path: src/Route/OnlyNecessaryRoutesProvider.php
         -

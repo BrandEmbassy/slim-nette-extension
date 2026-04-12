@@ -3,6 +3,7 @@
 namespace BrandEmbassy\Slim\Route;
 
 use BrandEmbassy\Slim\Request\Request;
+use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\Response;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
@@ -29,17 +30,37 @@ class LegacyRouteAdapter
      * @param array<string, string> $args
      */
     public function __invoke(
-        ServerRequestInterface $psrRequest,
-        PsrResponseInterface $psrResponse,
+        ServerRequestInterface $request,
+        PsrResponseInterface $response,
         array $args,
     ): PsrResponseInterface {
         foreach ($args as $name => $value) {
-            $psrRequest = $psrRequest->withAttribute($name, $value);
+            $request = $request->withAttribute($name, $value);
         }
 
-        $request = new Request($psrRequest);
-        $response = $psrResponse instanceof ResponseInterface ? $psrResponse : new Response();
+        return ($this->route)(
+            $this->wrapRequest($request),
+            $this->wrapResponse($response),
+        );
+    }
 
-        return ($this->route)($request, $response);
+
+    private function wrapRequest(ServerRequestInterface $request): RequestInterface
+    {
+        if ($request instanceof RequestInterface) {
+            return $request;
+        }
+
+        return new Request($request);
+    }
+
+
+    private function wrapResponse(PsrResponseInterface $response): ResponseInterface
+    {
+        if ($response instanceof ResponseInterface) {
+            return $response;
+        }
+
+        return new Response($response);
     }
 }
