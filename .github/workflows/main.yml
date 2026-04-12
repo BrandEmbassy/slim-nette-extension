@@ -35,7 +35,9 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
 
       - name: Install dependencies
-        run: composer install --prefer-dist
+        run: |
+          composer config github-oauth.github.com ${{ secrets.COMPOSER_TOKEN }}
+          composer install --prefer-dist
 
       - name: Run phpstan
         run: composer phpstan
