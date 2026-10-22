@@ -19,12 +19,17 @@ class RouteDefinition
 
     public const NAME = 'name';
 
+    public const PERMISSIONS = 'permissions';
+
+    public const REQUIRED_PERMISSIONS_ATTRIBUTE = 'requiredPermissions';
+
     public const ALL_DEFINED_KEYS = [
         self::SERVICE,
         self::MIDDLEWARES,
         self::MIDDLEWARE_GROUPS,
         self::IGNORE_VERSION_MIDDLEWARE_GROUP,
         self::NAME,
+        self::PERMISSIONS,
     ];
 
     private string $method;
@@ -48,10 +53,16 @@ class RouteDefinition
 
     private bool $ignoreVersionMiddlewareGroup;
 
+    /**
+     * @var string[]|null
+     */
+    private ?array $permissions;
+
 
     /**
      * @param MiddlewareInterface[] $middlewares
      * @param string[] $middlewareGroups
+     * @param string[]|null $permissions
      */
     public function __construct(
         string $method,
@@ -59,7 +70,8 @@ class RouteDefinition
         array $middlewares,
         array $middlewareGroups,
         ?string $name,
-        bool $ignoreVersionMiddlewareGroup
+        bool $ignoreVersionMiddlewareGroup,
+        ?array $permissions = null
     ) {
         $this->method = $method;
         $this->route = $route;
@@ -67,6 +79,7 @@ class RouteDefinition
         $this->middlewareGroups = $middlewareGroups;
         $this->name = $name;
         $this->ignoreVersionMiddlewareGroup = $ignoreVersionMiddlewareGroup;
+        $this->permissions = $permissions;
     }
 
 
@@ -109,5 +122,14 @@ class RouteDefinition
     public function shouldIgnoreVersionMiddlewareGroup(): bool
     {
         return $this->ignoreVersionMiddlewareGroup;
+    }
+
+
+    /**
+     * @return string[]|null null when the route does not declare the key, as opposed to an empty list
+     */
+    public function getPermissions(): ?array
+    {
+        return $this->permissions;
     }
 }

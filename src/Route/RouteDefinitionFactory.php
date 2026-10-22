@@ -46,6 +46,7 @@ class RouteDefinitionFactory
             $routeDefinitionData[RouteDefinition::MIDDLEWARE_GROUPS],
             $routeDefinitionData[RouteDefinition::NAME],
             $routeDefinitionData[RouteDefinition::IGNORE_VERSION_MIDDLEWARE_GROUP],
+            $routeDefinitionData[RouteDefinition::PERMISSIONS] ?? null,
         );
     }
 
