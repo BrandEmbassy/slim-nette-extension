@@ -9,7 +9,9 @@ use BrandEmbassyTest\Slim\Sample\GoldenKeyAuthMiddleware;
 use BrandEmbassyTest\Slim\Sample\GroupMiddleware;
 use BrandEmbassyTest\Slim\Sample\InvokeCounterMiddleware;
 use BrandEmbassyTest\Slim\Sample\OnlyApiGroupMiddleware;
+use BrandEmbassyTest\Slim\Sample\RequiredPermissionsHeaderMiddleware;
 use BrandEmbassyTest\Slim\Tools\ResponseAssertions;
+use Nette\DI\InvalidConfigurationException;
 use Nette\Utils\Json;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
@@ -255,12 +257,77 @@ class SlimApplicationFactoryTest extends TestCase
     }
 
 
-    public function testRouteConfigWillFailWhenMisconfigured(): void
+    /**
+     * @dataProvider misconfiguredRouteDataProvider
+     */
+    public function testRouteConfigWillFailWhenMisconfigured(string $expectedExceptionMessage, string $configPath): void
     {
-        $this->expectExceptionMessage(
-            'Unexpected route definition key in "app › /hello-world › get › middleware", did you mean "middlewares"?'
-        );
+        $this->expectExceptionMessage($expectedExceptionMessage);
 
-        SlimAppTester::createSlimApp(__DIR__ . '/typo-in-config.neon');
+        SlimAppTester::createSlimApp($configPath);
+    }
+
+
+    /**
+     * @return string[][]
+     */
+    public static function misconfiguredRouteDataProvider(): array
+    {
+        return [
+            'typo in middlewares' => [
+                'expectedExceptionMessage' => 'Unexpected route definition key in "app › /hello-world › get › middleware", did you mean "middlewares"?',
+                'configPath' => __DIR__ . '/typo-in-config.neon',
+            ],
+            'typo in permissions' => [
+                'expectedExceptionMessage' => 'Unexpected route definition key in "app › /hello-world › get › permission", did you mean "permissions"?',
+                'configPath' => __DIR__ . '/typo-in-permissions-config.neon',
+            ],
+        ];
+    }
+
+
+    /**
+     * @dataProvider requiredPermissionsDataProvider
+     */
+    public function testRequiredPermissionsAreOnRequestBeforeAnyMiddlewareRuns(
+        string $expectedHeaderValue,
+        string $requestUri
+    ): void {
+        $this->prepareEnvironment('GET', $requestUri);
+        $response = SlimAppTester::runSlimApp(__DIR__ . '/permissions-config.neon');
+
+        ResponseAssertions::assertJsonResponseEqualsArray(['Hello World'], $response, 200);
+        ResponseAssertions::assertResponseHeader($expectedHeaderValue, RequiredPermissionsHeaderMiddleware::HEADER_NAME, $response);
+    }
+
+
+    /**
+     * @return string[][]
+     */
+    public static function requiredPermissionsDataProvider(): array
+    {
+        return [
+            'declared' => [
+                'expectedHeaderValue' => '["deChannelsSettings:Edit","Users:View"]',
+                'requestUri' => '/tests/app/permissions-declared',
+            ],
+            'declared empty' => [
+                'expectedHeaderValue' => '[]',
+                'requestUri' => '/tests/app/permissions-empty',
+            ],
+            'not declared' => [
+                'expectedHeaderValue' => 'null',
+                'requestUri' => '/tests/app/hello-world-as-class-name',
+            ],
+        ];
+    }
+
+
+    public function testPermissionsMustBeList(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage("expects to be null or list");
+
+        SlimAppTester::createSlimApp(__DIR__ . '/scalar-permissions-config.neon');
     }
 }

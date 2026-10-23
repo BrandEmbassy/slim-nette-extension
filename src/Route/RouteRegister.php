@@ -5,6 +5,7 @@ namespace BrandEmbassy\Slim\Route;
 use BrandEmbassy\Slim\Middleware\AfterRouteMiddlewares;
 use BrandEmbassy\Slim\Middleware\BeforeRouteMiddlewares;
 use BrandEmbassy\Slim\Middleware\MiddlewareGroups;
+use BrandEmbassy\Slim\Middleware\RequiredPermissionsMiddleware;
 use Psr\Http\Server\MiddlewareInterface;
 use Slim\Interfaces\RouteCollectorProxyInterface;
 use function array_keys;
@@ -101,12 +102,16 @@ class RouteRegister
             $routeDefinition->getMiddlewareGroups(),
         );
 
+        $permissions = $routeDefinition->getPermissions();
+        $requiredPermissionsMiddlewares = $permissions === null ? [] : [new RequiredPermissionsMiddleware($permissions)];
+
         return array_merge(
             $this->afterRouteMiddlewares->getMiddlewares(),
             $routeDefinition->getMiddlewares(),
             $middlewaresFromGroups,
             $versionMiddlewares,
             $this->beforeRouteMiddlewares->getMiddlewares(),
+            $requiredPermissionsMiddlewares,
         );
     }
 
@@ -122,6 +127,7 @@ class RouteRegister
             RouteDefinition::MIDDLEWARE_GROUPS => [],
             RouteDefinition::IGNORE_VERSION_MIDDLEWARE_GROUP => false,
             RouteDefinition::NAME => null,
+            RouteDefinition::PERMISSIONS => null,
         ];
     }
 

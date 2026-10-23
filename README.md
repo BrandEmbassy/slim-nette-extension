@@ -87,6 +87,38 @@ slimApi:
 
 You can also reference the named service by its name.
 
+### Required permissions
+A route can declare the permissions it requires. The extension only carries the list, checking it is up to your application.
+
+```yaml
+slimApi:
+    routes:
+        "2.0":
+            "channels":
+                get:
+                    service: App\ListChannelsAction
+                    permissions: [channels:View, channels:Edit] # all of them are required
+                post:
+                    service: App\CreateChannelAction
+                    permissions: [] # declared, nothing required
+```
+
+When the key is present, the list is set as the `RouteDefinition::REQUIRED_PERMISSIONS_ATTRIBUTE` request attribute
+before any middleware of the route runs (before route, version group, group and route middlewares), so each of them can read it:
+
+```php
+$requiredPermissions = $request->getAttribute(RouteDefinition::REQUIRED_PERMISSIONS_ATTRIBUTE);
+```
+
+A route without the `permissions` key has no such attribute, so `getAttribute()` returns `null`. The three values let an
+application-wide permission middleware deny by default:
+
+| Attribute | Meaning | Suggested handling |
+|---|---|---|
+| `null` | the route declares no permissions | deny (a misconfiguration, e.g. `500` and an error log), so a forgotten key never opens an endpoint |
+| `[]` | the route is explicitly open | allow any authenticated caller |
+| `['a', 'b']` | the route requires these permissions | allow only callers that have all of them |
+
 See `tests/SlimApplicationFactoryTest.php` and `tests/config.neon` for more examples.
 
 ### Execution

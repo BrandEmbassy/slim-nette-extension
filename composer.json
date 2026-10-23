@@ -27,7 +27,7 @@
         "slim/psr7": "^1.6"
     },
     "require-dev": {
-        "brandembassy/coding-standard": "^14.3",
+        "brandembassy/coding-standard": "^14.9.0",
         "marc-mabe/php-enum-phpstan": "^3.0",
         "mockery/mockery": "^1.2",
         "phpunit/phpunit": "^11.5",
@@ -52,6 +52,12 @@
         "check-rector": "vendor/bin/rector process --dry-run --ansi",
         "fix-rector": "vendor/bin/rector process --ansi"
     },
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/BrandEmbassy/coding-standard"
+        }
+    ],
     "minimum-stability": "dev",
     "prefer-stable": true,
     "config": {

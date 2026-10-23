@@ -1,0 +1,67 @@
+parameters:
+	ignoreErrors:
+		-
+			rawMessage: 'Prod dependency used only in dev paths: nette/utils'
+			identifier: composer.prodInDev
+			count: 1
+			path: composer.json
+
+		-
+			rawMessage: 'Unused dependency detected: adbario/php-dot-notation'
+			identifier: composer.unused
+			count: 1
+			path: composer.json
+
+		-
+			rawMessage: 'Unused dependency detected: nette/neon'
+			identifier: composer.unused
+			count: 1
+			path: composer.json
+
+		-
+			rawMessage: 'Unused dependency detected: psr/http-factory'
+			identifier: composer.unused
+			count: 1
+			path: composer.json
+
+		-
+			rawMessage: 'Shadow dependency detected: nette/schema using Nette\Schema\Expect'
+			identifier: composer.shadow
+			count: 20
+			path: src/DI/SlimApiExtension.php
+
+		-
+			rawMessage: 'Shadow dependency detected: nette/schema using Nette\Schema\Schema'
+			identifier: composer.shadow
+			count: 2
+			path: src/DI/SlimApiExtension.php
+
+		-
+			rawMessage: 'Shadow dependency detected: psr/container using Psr\Container\NotFoundExceptionInterface'
+			identifier: composer.shadow
+			count: 1
+			path: src/ServiceNotFoundException.php
+
+		-
+			rawMessage: 'Shadow dependency detected: psr/container using Psr\Container\ContainerInterface'
+			identifier: composer.shadow
+			count: 1
+			path: src/SlimApp.php
+
+		-
+			rawMessage: 'Shadow dependency detected: psr/container using Psr\Container\ContainerInterface'
+			identifier: composer.shadow
+			count: 1
+			path: src/SlimContainer.php
+
+		-
+			rawMessage: 'Parameter #1 $generator of method Nette\DI\ContainerLoader::load() expects callable(Nette\DI\Compiler): (string|null), Closure(Nette\DI\Compiler): void given.'
+			identifier: argument.type
+			count: 1
+			path: tests/SlimAppTester.php
+
+		-
+			rawMessage: 'Cognitive complexity for "BrandEmbassyTest\Slim\Tools\JsonValuesReplacer::getReplacementPairs()" is 10, keep it under 9'
+			identifier: complexity.functionLike
+			count: 1
+			path: tests/Tools/JsonValuesReplacer.php

@@ -32,6 +32,7 @@ class SlimApiExtension extends CompilerExtension
             RouteDefinition::MIDDLEWARE_GROUPS => Expect::listOf('string')->default([]),
             RouteDefinition::IGNORE_VERSION_MIDDLEWARE_GROUP => Expect::bool(false),
             RouteDefinition::NAME => Expect::type('string')->default(null),
+            RouteDefinition::PERMISSIONS => Expect::listOf('string')->nullable()->default(null),
         ];
 
         return Expect::structure(
