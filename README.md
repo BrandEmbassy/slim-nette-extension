@@ -119,6 +119,25 @@ application-wide permission middleware deny by default:
 | `[]` | the route is explicitly open | allow any authenticated caller |
 | `['a', 'b']` | the route requires these permissions | allow only callers that have all of them |
 
+### Allowed authorizations
+A route can also declare which authorization types it accepts (token types, cookies, …). The names are up to your
+application, and so is the check.
+
+```yaml
+slimApi:
+    routes:
+        "2.0":
+            "channels":
+                get:
+                    service: App\ListChannelsAction
+                    authorization: [userToken, serviceToken, sessionCookie]
+```
+
+The list is set as the `RouteDefinition::ALLOWED_AUTHORIZATIONS_ATTRIBUTE` request attribute, at the same point as the
+required permissions. As with permissions, a route without the `authorization` key gets `null`, and `authorization: []`
+gets `[]`. Your application decides what each means; treating `null` as a misconfiguration keeps a forgotten key from
+opening an endpoint.
+
 See `tests/SlimApplicationFactoryTest.php` and `tests/config.neon` for more examples.
 
 ### Execution

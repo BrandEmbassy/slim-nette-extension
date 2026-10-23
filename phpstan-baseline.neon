@@ -27,7 +27,7 @@ parameters:
 		-
 			rawMessage: 'Shadow dependency detected: nette/schema using Nette\Schema\Expect'
 			identifier: composer.shadow
-			count: 20
+			count: 21
 			path: src/DI/SlimApiExtension.php
 
 		-
