@@ -10,7 +10,6 @@ use Nette\Utils\JsonException;
 use stdClass;
 use function assert;
 use function is_array;
-use function is_object;
 
 /**
  * @final
