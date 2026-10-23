@@ -21,7 +21,7 @@ class RouteDefinition
 
     public const PERMISSIONS = 'permissions';
 
-    public const REQUIRED_PERMISSIONS_ATTRIBUTE = 'requiredPermissions';
+    public const REQUIRED_PERMISSIONS_ATTRIBUTE = '_requiredPermissions';
 
     public const ALL_DEFINED_KEYS = [
         self::SERVICE,
