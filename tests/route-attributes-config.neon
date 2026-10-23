@@ -1,0 +1,29 @@
+includes:
+    - config.neon
+
+services:
+    - BrandEmbassyTest\Slim\Sample\RouteAttributesHeaderMiddleware
+
+slimApi:
+    routes:
+        "app":
+            "/permissions-declared":
+                get:
+                    service: BrandEmbassyTest\Slim\Sample\HelloWorldRoute
+                    permissions: [deChannelsSettings:Edit, Users:View]
+            "/permissions-empty":
+                get:
+                    service: BrandEmbassyTest\Slim\Sample\HelloWorldRoute
+                    permissions: []
+            "/authorization-declared":
+                get:
+                    service: BrandEmbassyTest\Slim\Sample\HelloWorldRoute
+                    authorization: [cxoneUserToken, cookie]
+                    permissions: [Users:View]
+            "/authorization-empty":
+                get:
+                    service: BrandEmbassyTest\Slim\Sample\HelloWorldRoute
+                    authorization: []
+
+    beforeRouteMiddlewares:
+        - BrandEmbassyTest\Slim\Sample\RouteAttributesHeaderMiddleware

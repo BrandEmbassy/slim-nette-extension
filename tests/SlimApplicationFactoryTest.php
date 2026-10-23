@@ -9,7 +9,7 @@ use BrandEmbassyTest\Slim\Sample\GoldenKeyAuthMiddleware;
 use BrandEmbassyTest\Slim\Sample\GroupMiddleware;
 use BrandEmbassyTest\Slim\Sample\InvokeCounterMiddleware;
 use BrandEmbassyTest\Slim\Sample\OnlyApiGroupMiddleware;
-use BrandEmbassyTest\Slim\Sample\RequiredPermissionsHeaderMiddleware;
+use BrandEmbassyTest\Slim\Sample\RouteAttributesHeaderMiddleware;
 use BrandEmbassyTest\Slim\Tools\ResponseAssertions;
 use Nette\DI\InvalidConfigurationException;
 use Nette\Utils\Json;
@@ -282,52 +282,95 @@ class SlimApplicationFactoryTest extends TestCase
                 'expectedExceptionMessage' => 'Unexpected route definition key in "app › /hello-world › get › permission", did you mean "permissions"?',
                 'configPath' => __DIR__ . '/typo-in-permissions-config.neon',
             ],
+            'typo in authorization' => [
+                'expectedExceptionMessage' => 'Unexpected route definition key in "app › /hello-world › get › authorizations", did you mean "authorization"?',
+                'configPath' => __DIR__ . '/typo-in-authorization-config.neon',
+            ],
         ];
     }
 
 
     /**
-     * @dataProvider requiredPermissionsDataProvider
+     * @dataProvider routeAttributesDataProvider
      */
-    public function testRequiredPermissionsAreOnRequestBeforeAnyMiddlewareRuns(
+    public function testRouteAttributesAreOnRequestBeforeAnyMiddlewareRuns(
+        string $headerName,
         string $expectedHeaderValue,
         string $requestUri
     ): void {
         $this->prepareEnvironment('GET', $requestUri);
-        $response = SlimAppTester::runSlimApp(__DIR__ . '/permissions-config.neon');
+        $response = SlimAppTester::runSlimApp(__DIR__ . '/route-attributes-config.neon');
 
         ResponseAssertions::assertJsonResponseEqualsArray(['Hello World'], $response, 200);
-        ResponseAssertions::assertResponseHeader($expectedHeaderValue, RequiredPermissionsHeaderMiddleware::HEADER_NAME, $response);
+        ResponseAssertions::assertResponseHeader($expectedHeaderValue, $headerName, $response);
     }
 
 
     /**
      * @return string[][]
      */
-    public static function requiredPermissionsDataProvider(): array
+    public static function routeAttributesDataProvider(): array
     {
         return [
-            'declared' => [
+            'permissions declared' => [
+                'headerName' => RouteAttributesHeaderMiddleware::REQUIRED_PERMISSIONS_HEADER,
                 'expectedHeaderValue' => '["deChannelsSettings:Edit","Users:View"]',
                 'requestUri' => '/tests/app/permissions-declared',
             ],
-            'declared empty' => [
+            'permissions declared empty' => [
+                'headerName' => RouteAttributesHeaderMiddleware::REQUIRED_PERMISSIONS_HEADER,
                 'expectedHeaderValue' => '[]',
                 'requestUri' => '/tests/app/permissions-empty',
             ],
-            'not declared' => [
+            'permissions not declared' => [
+                'headerName' => RouteAttributesHeaderMiddleware::REQUIRED_PERMISSIONS_HEADER,
                 'expectedHeaderValue' => 'null',
                 'requestUri' => '/tests/app/hello-world-as-class-name',
+            ],
+            'authorization declared' => [
+                'headerName' => RouteAttributesHeaderMiddleware::ALLOWED_AUTHORIZATIONS_HEADER,
+                'expectedHeaderValue' => '["cxoneUserToken","cookie"]',
+                'requestUri' => '/tests/app/authorization-declared',
+            ],
+            'permissions declared next to authorization' => [
+                'headerName' => RouteAttributesHeaderMiddleware::REQUIRED_PERMISSIONS_HEADER,
+                'expectedHeaderValue' => '["Users:View"]',
+                'requestUri' => '/tests/app/authorization-declared',
+            ],
+            'authorization declared empty' => [
+                'headerName' => RouteAttributesHeaderMiddleware::ALLOWED_AUTHORIZATIONS_HEADER,
+                'expectedHeaderValue' => '[]',
+                'requestUri' => '/tests/app/authorization-empty',
+            ],
+            'authorization not declared' => [
+                'headerName' => RouteAttributesHeaderMiddleware::ALLOWED_AUTHORIZATIONS_HEADER,
+                'expectedHeaderValue' => 'null',
+                'requestUri' => '/tests/app/permissions-declared',
             ],
         ];
     }
 
 
-    public function testPermissionsMustBeList(): void
+    /**
+     * @dataProvider scalarListConfigDataProvider
+     */
+    public function testListKeysMustBeLists(string $configPath): void
     {
         $this->expectException(InvalidConfigurationException::class);
-        $this->expectExceptionMessage("expects to be null or list");
+        $this->expectExceptionMessage('expects to be null or list');
 
-        SlimAppTester::createSlimApp(__DIR__ . '/scalar-permissions-config.neon');
+        SlimAppTester::createSlimApp($configPath);
+    }
+
+
+    /**
+     * @return string[][]
+     */
+    public static function scalarListConfigDataProvider(): array
+    {
+        return [
+            'permissions' => ['configPath' => __DIR__ . '/scalar-permissions-config.neon'],
+            'authorization' => ['configPath' => __DIR__ . '/scalar-authorization-config.neon'],
+        ];
     }
 }

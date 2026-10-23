@@ -23,6 +23,10 @@ class RouteDefinition
 
     public const REQUIRED_PERMISSIONS_ATTRIBUTE = '_requiredPermissions';
 
+    public const AUTHORIZATION = 'authorization';
+
+    public const ALLOWED_AUTHORIZATIONS_ATTRIBUTE = '_allowedAuthorizations';
+
     public const ALL_DEFINED_KEYS = [
         self::SERVICE,
         self::MIDDLEWARES,
@@ -30,6 +34,7 @@ class RouteDefinition
         self::IGNORE_VERSION_MIDDLEWARE_GROUP,
         self::NAME,
         self::PERMISSIONS,
+        self::AUTHORIZATION,
     ];
 
     private string $method;
@@ -58,11 +63,17 @@ class RouteDefinition
      */
     private ?array $permissions;
 
+    /**
+     * @var string[]|null
+     */
+    private ?array $authorization;
+
 
     /**
      * @param MiddlewareInterface[] $middlewares
      * @param string[] $middlewareGroups
      * @param string[]|null $permissions
+     * @param string[]|null $authorization
      */
     public function __construct(
         string $method,
@@ -71,7 +82,8 @@ class RouteDefinition
         array $middlewareGroups,
         ?string $name,
         bool $ignoreVersionMiddlewareGroup,
-        ?array $permissions = null
+        ?array $permissions = null,
+        ?array $authorization = null
     ) {
         $this->method = $method;
         $this->route = $route;
@@ -80,6 +92,7 @@ class RouteDefinition
         $this->name = $name;
         $this->ignoreVersionMiddlewareGroup = $ignoreVersionMiddlewareGroup;
         $this->permissions = $permissions;
+        $this->authorization = $authorization;
     }
 
 
@@ -131,5 +144,14 @@ class RouteDefinition
     public function getPermissions(): ?array
     {
         return $this->permissions;
+    }
+
+
+    /**
+     * @return string[]|null null when the route does not declare the key, as opposed to an empty list
+     */
+    public function getAuthorization(): ?array
+    {
+        return $this->authorization;
     }
 }
